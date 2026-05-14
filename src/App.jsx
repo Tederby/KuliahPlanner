@@ -39,8 +39,12 @@ const validateTask = (task) => {
 
 const validateConfig = (config) => {
   if (!config.semesterStart) return 'Tanggal mulai semester wajib';
-  if (config.sksMinutes < 30) return 'SKS minutes minimal 30 menit';
-  if (config.totalMeetings < 1) return 'Total pertemuan minimal 1';
+  if (config.sksMinutes !== null && config.sksMinutes !== undefined && config.sksMinutes < 30) return 'SKS minutes minimal 30 menit';
+  if (config.totalMeetings !== null && config.totalMeetings !== undefined && config.totalMeetings < 1) return 'Total pertemuan minimal 1';
+  if (config.meetingsBeforeUTS !== null && config.meetingsBeforeUTS !== undefined && config.meetingsBeforeUTS < 1) return 'Pertemuan sebelum UTS minimal 1';
+  if (config.utsWeeks !== null && config.utsWeeks !== undefined && config.utsWeeks < 1) return 'Minggu UTS minimal 1';
+  if (config.meetingsBeforeUAS !== null && config.meetingsBeforeUAS !== undefined && config.meetingsBeforeUAS < 1) return 'Pertemuan sebelum UAS minimal 1';
+  if (config.uasWeeks !== null && config.uasWeeks !== undefined && config.uasWeeks < 1) return 'Minggu UAS minimal 1';
   return null;
 };
 
@@ -75,8 +79,10 @@ const getInitialState = () => {
       semesterStart: today,
       sksMinutes: 50,
       totalMeetings: 14,
-      utsWeek: 8,
-      uasWeek: 16
+      meetingsBeforeUTS: 7,
+      utsWeeks: 2,
+      meetingsBeforeUAS: 14,
+      uasWeeks: 2
     },
     courses: [],
     stashes: [],
@@ -89,7 +95,15 @@ const getInitialState = () => {
   }
 
   return {
-    config: { ...defaultState.config, ...saved.config },
+    config: {
+      semesterStart: saved.config?.semesterStart || defaultState.config.semesterStart,
+      sksMinutes: saved.config?.sksMinutes ?? defaultState.config.sksMinutes,
+      totalMeetings: saved.config?.totalMeetings ?? defaultState.config.totalMeetings,
+      meetingsBeforeUTS: saved.config?.meetingsBeforeUTS ?? defaultState.config.meetingsBeforeUTS,
+      utsWeeks: saved.config?.utsWeeks ?? defaultState.config.utsWeeks,
+      meetingsBeforeUAS: saved.config?.meetingsBeforeUAS ?? defaultState.config.meetingsBeforeUAS,
+      uasWeeks: saved.config?.uasWeeks ?? defaultState.config.uasWeeks
+    },
     courses: Array.isArray(saved.courses) ? saved.courses : defaultState.courses,
     stashes: Array.isArray(saved.stashes) ? saved.stashes : defaultState.stashes,
     reschedules: Array.isArray(saved.reschedules) ? saved.reschedules : defaultState.reschedules,
@@ -151,12 +165,6 @@ export default function App() {
         let weekCounter = 1;
 
         while (meetingCount <= config.totalMeetings) {
-          if (weekCounter === config.utsWeek || weekCounter === config.uasWeek) {
-            weekCounter++;
-            runningDate = addDays(runningDate, 7);
-            continue;
-          }
-
           const isStashed = stashes.some(s => s.courseId === course.id && s.originalDate === runningDate);
           const isRescheduledOriginal = reschedules.some(r => r.courseId === course.id && (r.originalDate === runningDate || r.newDate === runningDate));
 
@@ -174,8 +182,24 @@ export default function App() {
           }
           
           meetingCount++;
-          weekCounter++;
+          
+          if (meetingCount - 1 === config.meetingsBeforeUTS) {
+            // Skip UTS weeks after meetingsBeforeUTS meetings
+            for (let i = 0; i < config.utsWeeks; i++) {
+              runningDate = addDays(runningDate, 7);
+              weekCounter++;
+            }
+          }
+          if (meetingCount - 1 === config.meetingsBeforeUAS) {
+            // Skip UAS weeks after meetingsBeforeUAS meetings
+            for (let i = 0; i < config.uasWeeks; i++) {
+              runningDate = addDays(runningDate, 7);
+              weekCounter++;
+            }
+          }
+          
           runningDate = addDays(runningDate, 7);
+          weekCounter++;
         }
       });
       return instances;
@@ -282,13 +306,12 @@ export default function App() {
   };
 
   const handleUpdateConfig = (newConfig) => {
-    setError(null);
-    const validationError = validateConfig(newConfig);
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
     setConfig(newConfig);
+  };
+
+  const handleConfigBlur = () => {
+    const validationError = validateConfig(config);
+    setError(validationError);
   };
 
   const removeCourse = (id) => {
@@ -574,8 +597,8 @@ export default function App() {
              <div className="text-[10px] text-slate-500 space-y-1">
                 <p>Semester Mulai: {config.semesterStart}</p>
                 <p>Target Pertemuan: {config.totalMeetings}</p>
-                <p>UTS: Minggu ke-{config.utsWeek} (Kosong)</p>
-                <p>UAS: Minggu ke-{config.uasWeek} (Kosong)</p>
+                <p>UTS: Setelah {config.meetingsBeforeUTS} pertemuan ({config.utsWeeks} minggu)</p>
+                <p>UAS: Setelah {config.meetingsBeforeUAS} pertemuan ({config.uasWeeks} minggu)</p>
              </div>
           </div>
         </div>
@@ -686,19 +709,27 @@ export default function App() {
                   </div>
                   <div>
                     <label className="block text-xs text-slate-400 mb-1">Durasi 1 SKS (Menit)</label>
-                    <input type="number" value={config.sksMinutes} onChange={e => handleUpdateConfig({...config, sksMinutes: Number(e.target.value)})} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white outline-none focus:border-indigo-500" />
+                    <input type="number" value={config.sksMinutes || ''} onChange={e => handleUpdateConfig({...config, sksMinutes: e.target.value === '' ? null : Number(e.target.value)})} onBlur={handleConfigBlur} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white outline-none focus:border-indigo-500" />
                   </div>
                   <div>
                     <label className="block text-xs text-slate-400 mb-1">Target Pertemuan</label>
-                    <input type="number" value={config.totalMeetings} onChange={e => handleUpdateConfig({...config, totalMeetings: Number(e.target.value)})} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white outline-none focus:border-indigo-500" />
+                    <input type="number" value={config.totalMeetings || ''} onChange={e => handleUpdateConfig({...config, totalMeetings: e.target.value === '' ? null : Number(e.target.value)})} onBlur={handleConfigBlur} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white outline-none focus:border-indigo-500" />
                   </div>
                   <div>
-                    <label className="block text-xs text-slate-400 mb-1">Minggu UTS (Kosong)</label>
-                    <input type="number" value={config.utsWeek} onChange={e => handleUpdateConfig({...config, utsWeek: Number(e.target.value)})} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white outline-none focus:border-indigo-500" />
+                    <label className="block text-xs text-slate-400 mb-1">Berapa kali kuliah sampai UTS?</label>
+                    <input type="number" value={config.meetingsBeforeUTS || ''} onChange={e => handleUpdateConfig({...config, meetingsBeforeUTS: e.target.value === '' ? null : Number(e.target.value)})} onBlur={handleConfigBlur} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white outline-none focus:border-indigo-500" />
                   </div>
                   <div>
-                    <label className="block text-xs text-slate-400 mb-1">Minggu UAS (Kosong)</label>
-                    <input type="number" value={config.uasWeek} onChange={e => handleUpdateConfig({...config, uasWeek: Number(e.target.value)})} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white outline-none focus:border-indigo-500" />
+                    <label className="block text-xs text-slate-400 mb-1">Berapa lama minggu UTS?</label>
+                    <input type="number" value={config.utsWeeks || ''} onChange={e => handleUpdateConfig({...config, utsWeeks: e.target.value === '' ? null : Number(e.target.value)})} onBlur={handleConfigBlur} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white outline-none focus:border-indigo-500" />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-slate-400 mb-1">Berapa kali kuliah sampai UAS?</label>
+                    <input type="number" value={config.meetingsBeforeUAS || ''} onChange={e => handleUpdateConfig({...config, meetingsBeforeUAS: e.target.value === '' ? null : Number(e.target.value)})} onBlur={handleConfigBlur} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white outline-none focus:border-indigo-500" />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-slate-400 mb-1">Berapa lama minggu UAS?</label>
+                    <input type="number" value={config.uasWeeks || ''} onChange={e => handleUpdateConfig({...config, uasWeeks: e.target.value === '' ? null : Number(e.target.value)})} onBlur={handleConfigBlur} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white outline-none focus:border-indigo-500" />
                   </div>
                 </div>
               </div>
