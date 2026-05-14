@@ -28,6 +28,8 @@ npm run dev
 
 Aplikasi akan terbuka di `http://localhost:3000/`
 
+Demo online tersedia di: https://kuliah-planner.vercel.app/
+
 ## 📦 Production Build
 
 ```bash
