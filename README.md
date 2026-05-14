@@ -2,6 +2,8 @@
 
 Aplikasi web untuk manage jadwal kuliah, tugas, dan deadline semester dengan UI yang modern dan fitur powerful.
 
+Demo online tersedia di: https://kuliah-planner.vercel.app/
+
 ## ✨ Features
 
 - **📅 Multiple Calendar Views**: Month, Week, Day, dan Agenda view
@@ -27,8 +29,6 @@ npm run dev
 ```
 
 Aplikasi akan terbuka di `http://localhost:3000/`
-
-Demo online tersedia di: https://kuliah-planner.vercel.app/
 
 ## 📦 Production Build
 
