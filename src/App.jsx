@@ -69,12 +69,8 @@ const saveData = (data) => {
 
 const getInitialState = () => {
   const saved = loadData();
-  if (saved) {
-    return saved;
-  }
-
   const today = formatDateStr(new Date());
-  return {
+  const defaultState = {
     config: {
       semesterStart: today,
       sksMinutes: 50,
@@ -82,14 +78,22 @@ const getInitialState = () => {
       utsWeek: 8,
       uasWeek: 16
     },
-    courses: [
-      { id: 1, name: 'Rekayasa Perangkat Lunak', sks: 3, day: 'Rabu', startTime: '08:00', location: 'Ruang E101' },
-      { id: 2, name: 'Sistem Operasi', sks: 3, day: 'Kamis', startTime: '13:00', location: 'Ruang E102' }
-    ],
+    courses: [],
     stashes: [],
-    tasks: [
-      { id: 1, title: 'Makalah RPL', type: 'matkul', courseId: 1, deadline: `${today}T23:59`, urgency: 'high', completed: false }
-    ]
+    reschedules: [],
+    tasks: []
+  };
+
+  if (!saved) {
+    return defaultState;
+  }
+
+  return {
+    config: { ...defaultState.config, ...saved.config },
+    courses: Array.isArray(saved.courses) ? saved.courses : defaultState.courses,
+    stashes: Array.isArray(saved.stashes) ? saved.stashes : defaultState.stashes,
+    reschedules: Array.isArray(saved.reschedules) ? saved.reschedules : defaultState.reschedules,
+    tasks: Array.isArray(saved.tasks) ? saved.tasks : defaultState.tasks
   };
 };
 
@@ -104,22 +108,20 @@ export default function App() {
   const [config, setConfig] = useState(initialState.config);
   const [courses, setCourses] = useState(initialState.courses);
   const [stashes, setStashes] = useState(initialState.stashes);
+  const [reschedules, setReschedules] = useState(initialState.reschedules);
   const [tasks, setTasks] = useState(initialState.tasks);
-
-  // UI States
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [newTask, setNewTask] = useState({ title: '', courseId: '', deadline: '', urgency: 'low', type: 'matkul' });
   const [showCourseForm, setShowCourseForm] = useState(false);
   const [newCourse, setNewCourse] = useState({ name: '', sks: 3, day: 'Senin', startTime: '07:00', location: '' });
-  
-  // Error state
   const [error, setError] = useState(null);
+  const [editingStash, setEditingStash] = useState(null);
+  const [rescheduleForm, setRescheduleForm] = useState({ date: '', time: '' });
 
-  // Save to localStorage whenever data changes
   useEffect(() => {
-    saveData({ config, courses, stashes, tasks });
-  }, [config, courses, stashes, tasks]);
+    saveData({ config, courses, stashes, reschedules, tasks });
+  }, [config, courses, stashes, reschedules, tasks]);
 
   // --- LOGIC ENGINE ---
   const calculateEndTime = (start, sks) => {
@@ -156,8 +158,9 @@ export default function App() {
           }
 
           const isStashed = stashes.some(s => s.courseId === course.id && s.originalDate === runningDate);
+          const isRescheduledOriginal = reschedules.some(r => r.courseId === course.id && (r.originalDate === runningDate || r.newDate === runningDate));
 
-          if (!isStashed) {
+          if (!isStashed && !isRescheduledOriginal) {
             const endTime = calculateEndTime(course.startTime, course.sks);
             instances.push({
               instanceId: `${course.id}-${runningDate}`,
@@ -182,6 +185,26 @@ export default function App() {
     }
   }, [courses, config, stashes]);
 
+  const rescheduledInstances = useMemo(() => {
+    return reschedules.map(rs => {
+      const course = courses.find(c => c.id === rs.courseId);
+      if (!course) return null;
+      return {
+        instanceId: `resched-${rs.id}`,
+        type: 'course',
+        ...course,
+        date: rs.newDate,
+        startTime: rs.newTime,
+        endTime: calculateEndTime(rs.newTime, course.sks),
+        meetingNum: rs.meetingNum ?? '?',
+        weekNum: rs.weekNum ?? '?',
+        isRescheduled: true,
+        originalDate: rs.originalDate,
+        rescheduleId: rs.id
+      };
+    }).filter(Boolean);
+  }, [reschedules, courses]);
+
   const allCalendarEvents = useMemo(() => {
     const taskEvents = tasks.filter(t => !t.completed).map(t => {
       const datePart = t.deadline.split('T')[0];
@@ -196,12 +219,20 @@ export default function App() {
         rawTask: t
       };
     });
-    return [...generatedInstances, ...taskEvents];
-  }, [generatedInstances, tasks]);
+    return [...generatedInstances, ...rescheduledInstances, ...taskEvents];
+  }, [generatedInstances, rescheduledInstances, tasks]);
 
   // --- HANDLERS ---
-  const handleStash = (courseId, date) => {
-    setStashes([...stashes, { id: Date.now(), courseId, originalDate: date, notes: '' }]);
+  const handleStash = (courseId, date, meetingNum, weekNum, originalTime) => {
+    setStashes([...stashes, {
+      id: Date.now(),
+      courseId,
+      originalDate: date,
+      meetingNum,
+      weekNum,
+      originalTime,
+      notes: ''
+    }] );
     setSelectedEvent(null);
   };
 
@@ -278,6 +309,49 @@ export default function App() {
     setStashes(stashes.filter(s => s.id !== id));
   };
 
+  const openRescheduleStash = (stash) => {
+    const course = courses.find(c => c.id === stash.courseId);
+    setEditingStash(stash);
+    setRescheduleForm({ date: stash.originalDate, time: stash.originalTime || course?.startTime || '07:00' });
+  };
+
+  const returnRescheduledToStash = (rescheduleId) => {
+    const reschedule = reschedules.find(r => r.id === rescheduleId);
+    if (!reschedule) return;
+    setReschedules(reschedules.filter(r => r.id !== rescheduleId));
+    setStashes([...stashes, {
+      id: Date.now(),
+      courseId: reschedule.courseId,
+      originalDate: reschedule.originalDate,
+      meetingNum: reschedule.meetingNum,
+      weekNum: reschedule.weekNum,
+      originalTime: reschedule.originalTime,
+      notes: ''
+    }] );
+    setSelectedEvent(null);
+  };
+
+  const cancelReschedule = () => {
+    setEditingStash(null);
+    setRescheduleForm({ date: '', time: '' });
+  };
+
+  const saveReschedule = (e) => {
+    e.preventDefault();
+    if (!editingStash) return;
+    if (!rescheduleForm.date || !rescheduleForm.time) {
+      setError('Tanggal dan jam baru harus diisi');
+      return;
+    }
+    setReschedules([...reschedules, {
+      ...editingStash,
+      newDate: rescheduleForm.date,
+      newTime: rescheduleForm.time
+    }] );
+    setStashes(stashes.filter(s => s.id !== editingStash.id));
+    cancelReschedule();
+  };
+
   // --- RENDERERS ---
   const renderCalendarCell = (dateStr) => {
     const dayEvents = allCalendarEvents.filter(e => e.date === dateStr).sort((a,b) => a.startTime.localeCompare(b.startTime));
@@ -299,7 +373,11 @@ export default function App() {
                   : ev.urgency === 'high' ? 'bg-rose-900/50 text-rose-300 border border-rose-500/30' : 'bg-emerald-900/50 text-emerald-300 border border-emerald-500/30'
               }`}
             >
-              {ev.startTime} - {ev.type === 'course' ? ev.name : `[TGS] ${ev.title}`}
+              <div className="flex items-center gap-1">
+                <span>{ev.startTime}</span>
+                {ev.isRescheduled && <span className="text-[8px] uppercase tracking-[0.2em] px-1 rounded bg-amber-500/20 text-amber-200">reschedule</span>}
+              </div>
+              <div>{ev.type === 'course' ? ev.name : `[TGS] ${ev.title}`}</div>
             </div>
           ))}
         </div>
@@ -375,7 +453,10 @@ export default function App() {
                         }`}
                         style={{ top: `${top}px`, height: `${height}px` }}
                       >
-                        <div className="font-bold leading-tight">{ev.type === 'course' ? ev.name : `[Task] ${ev.title}`}</div>
+                        <div className="font-bold leading-tight flex items-center justify-between gap-2">
+                          <span>{ev.type === 'course' ? ev.name : `[Task] ${ev.title}`}</span>
+                          {ev.isRescheduled && <span className="text-[10px] uppercase tracking-[0.15em] px-1 rounded bg-amber-500/20 text-amber-100">reschedule</span>}
+                        </div>
                         <div className="text-[10px] opacity-80 mt-0.5">{ev.startTime} {ev.type === 'course' && `- ${ev.endTime}`}</div>
                         {ev.type === 'course' && <div className="text-[9px] mt-1 bg-black/20 inline-block px-1 rounded">P-{ev.meetingNum}</div>}
                       </div>
@@ -449,6 +530,7 @@ export default function App() {
                   {ev.type === 'course' && <span className="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded">P-{ev.meetingNum}</span>}
                 </div>
                 <div className="text-sm text-slate-400">{ev.type === 'course' ? `${ev.location} • ${ev.sks} SKS` : 'Tugas / Deadline'}</div>
+            {ev.isRescheduled && <div className="text-xs text-amber-300 mt-2 uppercase tracking-wider">Reschedule</div>}
               </div>
               {ev.type === 'course' && (
                 <button onClick={() => setSelectedEvent(ev)} className="px-3 py-2 bg-slate-800 hover:bg-indigo-900/50 text-indigo-400 rounded-lg transition-colors text-sm">
@@ -475,6 +557,7 @@ export default function App() {
           {[
             { id: 'schedule', icon: Calendar, label: `Full Kalender` },
             { id: 'tasks', icon: List, label: `Tugas (${tasks.filter(t=>!t.completed).length})` },
+            { id: 'stash', icon: Inbox, label: `Stash (${stashes.length})` },
             { id: 'matkul', icon: Settings, label: 'Config & Data' }
           ].map(tab => (
             <button 
@@ -515,6 +598,82 @@ export default function App() {
 
           {activeTab === 'schedule' && renderSchedule()}
           
+          {activeTab === 'stash' && (
+            <div className="space-y-6">
+              <div className="bg-slate-800 p-6 rounded-xl border border-slate-700">
+                <h2 className="text-xl font-bold text-white mb-3 flex items-center gap-2"><Inbox className="w-5 h-5"/> Stash Kelas</h2>
+                <p className="text-sm text-slate-400">List kelas yang di-stash termasuk tanggal/jam asli. Pilih aksi untuk jadwal baru atau batalkan stash agar kembali ke kalender.</p>
+                <div className="space-y-3 mt-4">
+                  {stashes.map(stash => {
+                    const course = courses.find(c => c.id === stash.courseId);
+                    if (!course) return null;
+                    return (
+                      <div key={stash.id} className="bg-slate-900 p-4 rounded-xl border border-rose-900/30 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                        <div>
+                          <h3 className="font-bold text-white text-sm">{course.name}</h3>
+                          <div className="text-xs text-slate-400 mt-1">
+                            <p>Jadwal asli: {stash.originalDate} | {course.startTime}</p>
+                            <p>Lokasi: {course.location || 'Belum diisi'}</p>
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <button onClick={() => openRescheduleStash(stash)} className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm transition-colors">Atur Jadwal Baru</button>
+                          <button onClick={() => restoreStash(stash.id)} className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 rounded-lg text-sm transition-colors">Batalkan Stash</button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {stashes.length === 0 && <p className="text-slate-500 text-sm text-center py-4">Belum ada kelas yang di-stash.</p>}
+                </div>
+              </div>
+
+              {editingStash && (
+                <div className="bg-slate-800 p-6 rounded-xl border border-slate-700">
+                  <div className="flex items-center justify-between gap-3 mb-4">
+                    <div>
+                      <h3 className="text-lg font-bold">Jadwal Baru untuk Kelas</h3>
+                      <p className="text-sm text-slate-400">Atur ulang kelas yang sebelumnya di-stash.</p>
+                    </div>
+                    <button onClick={cancelReschedule} className="text-slate-400 hover:text-slate-200">Batal</button>
+                  </div>
+                  <form onSubmit={saveReschedule} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs text-slate-400 mb-1">Tanggal Baru</label>
+                      <input required type="date" value={rescheduleForm.date} onChange={e => setRescheduleForm({...rescheduleForm, date: e.target.value})} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white outline-none focus:border-indigo-500" />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-slate-400 mb-1">Jam Baru</label>
+                      <input required type="time" value={rescheduleForm.time} onChange={e => setRescheduleForm({...rescheduleForm, time: e.target.value})} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white outline-none focus:border-indigo-500" />
+                    </div>
+                    <div className="flex items-end">
+                      <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-lg font-bold transition-colors">Simpan Jadwal Baru</button>
+                    </div>
+                  </form>
+                </div>
+              )}
+
+              {reschedules.length > 0 && (
+                <div className="bg-slate-900 p-6 rounded-xl border border-slate-700">
+                  <h3 className="text-lg font-bold mb-4">Jadwal Ulang yang Sudah Ditetapkan</h3>
+                  <div className="space-y-3">
+                    {reschedules.map(rs => {
+                      const course = courses.find(c => c.id === rs.courseId);
+                      if (!course) return null;
+                      return (
+                        <div key={rs.id} className="bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-col md:flex-row md:justify-between md:items-center gap-3">
+                          <div>
+                            <div className="font-bold text-white">{course.name}</div>
+                            <div className="text-xs text-slate-400 mt-1">Awal: {rs.originalDate} | Baru: {rs.newDate} {rs.newTime}</div>
+                          </div>
+                          <div className="text-xs text-slate-400">Ditandai sebagai kelas terjadwal ulang.</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
           {activeTab === 'matkul' && (
             <div className="space-y-6">
               {/* Global Settings */}
@@ -601,32 +760,6 @@ export default function App() {
                   {courses.length === 0 && <p className="text-slate-500 text-sm text-center py-4">Belum ada matkul, bebas tugas coy.</p>}
                 </div>
               </div>
-
-              {/* Stashes / Limbo */}
-              <div className="bg-rose-950/20 p-6 rounded-xl border border-rose-900/50">
-                <h2 className="text-xl font-bold text-rose-400 mb-4 flex items-center gap-2"><Inbox className="w-5 h-5"/> Limbo / Kelas Di-Stash</h2>
-                <p className="text-xs text-slate-400 mb-4">Daftar pertemuan spesifik yang dosennya ghosting. Balikin ke kalender kalau jadwal gantinya udah jelas.</p>
-                <div className="space-y-3">
-                  {stashes.map(stash => {
-                    const course = courses.find(c => c.id === stash.courseId);
-                    if (!course) return null;
-                    return (
-                      <div key={stash.id} className="bg-slate-900 p-4 rounded-lg border border-rose-900/30 flex justify-between items-center">
-                        <div>
-                          <h3 className="font-bold text-white text-sm">{course.name}</h3>
-                          <div className="text-xs text-rose-300 mt-1 flex items-center gap-1">
-                            <AlertTriangle className="w-3 h-3"/> Jadwal Asli: {stash.originalDate}
-                          </div>
-                        </div>
-                        <button onClick={() => restoreStash(stash.id)} className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded text-xs transition-colors">
-                          Balikin ke Kalender
-                        </button>
-                      </div>
-                    )
-                  })}
-                  {stashes.length === 0 && <p className="text-slate-500 text-sm text-center py-4">Kosong. Alhamdulillah dosen pada amanah.</p>}
-                </div>
-              </div>
             </div>
           )}
 
@@ -708,9 +841,16 @@ export default function App() {
                 <span className="text-indigo-300 text-xs font-mono">Minggu Sem Ke-{selectedEvent.weekNum}</span>
               </div>
               <h2 className="text-2xl font-bold text-white leading-tight">{selectedEvent.name}</h2>
-              <div className="text-indigo-200 mt-2 text-sm flex items-center gap-2">
+              <div className="flex flex-col gap-2">
+              <div className="text-indigo-200 text-sm flex items-center gap-2">
                 <Clock className="w-4 h-4"/> {selectedEvent.date} | {selectedEvent.startTime} - {selectedEvent.endTime}
               </div>
+              {selectedEvent.isRescheduled && (
+                <div className="inline-flex items-center gap-2 text-amber-200 text-xs font-bold uppercase tracking-wide px-2 py-1 rounded bg-amber-500/15 border border-amber-500/20">
+                  <span>Rescheduled</span>
+                </div>
+              )}
+            </div>
             </div>
             
             <div className="p-6 space-y-4">
@@ -729,12 +869,21 @@ export default function App() {
                 >
                   <Plus className="w-5 h-5" /> Tambah Tugas Untuk Matkul Ini
                 </button>
-                <button 
-                  onClick={() => handleStash(selectedEvent.id, selectedEvent.date)}
-                  className="w-full bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 border border-rose-900 py-3 rounded-xl font-bold transition-colors flex justify-center items-center gap-2"
-                >
-                  <AlertTriangle className="w-5 h-5" /> Dosen Ghosting? Stash Kelas Ini
-                </button>
+                {selectedEvent.isRescheduled ? (
+                  <button 
+                    onClick={() => returnRescheduledToStash(selectedEvent.rescheduleId)}
+                    className="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 py-3 rounded-xl font-bold transition-colors flex justify-center items-center gap-2"
+                  >
+                    <Inbox className="w-5 h-5" /> Kembalikan ke Stash
+                  </button>
+                ) : (
+                  <button 
+                    onClick={() => handleStash(selectedEvent.id, selectedEvent.date, selectedEvent.meetingNum, selectedEvent.weekNum, selectedEvent.startTime)}
+                    className="w-full bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 border border-rose-900 py-3 rounded-xl font-bold transition-colors flex justify-center items-center gap-2"
+                  >
+                    <AlertTriangle className="w-5 h-5" /> Dosen Ghosting? Stash Kelas Ini
+                  </button>
+                )}
               </div>
             </div>
           </div>

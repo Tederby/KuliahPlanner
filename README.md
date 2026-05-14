@@ -9,7 +9,7 @@ Aplikasi web untuk manage jadwal kuliah, tugas, dan deadline semester dengan UI 
 - **✅ Task Management**: Manage tugas dengan deadline, urgency, dan course tracking
 - **💾 Local Storage**: Data tersimpan otomatis di browser, tidak hilang saat refresh
 - **🏗️ Course Management**: Kelola data matkul (nama, SKS, jadwal, lokasi)
-- **📌 Stash System**: "Ghosting" dosen? Stash kelas dan restore kapan saja
+- **📌 Stash System**: "Ghosting" dosen? Stash kelas, restore, atau reschedule ketika jadwal berubah
 - **⚡ Form Validation**: Input validation untuk mencegah data error
 - **🎨 Modern UI**: Dark theme dengan Tailwind CSS dan Lucide icons
 
@@ -96,6 +96,7 @@ Kalau dosen ghosting:
 - Klik event di kalender
 - Klik "Dosen Ghosting? Stash Kelas Ini"
 - Kelas akan masuk ke Limbo
+- Reschedule kelas dengan tanggal/jam baru dari tab **Stash**
 - Restore kapan saja via tab **Config & Data**
 
 ## 💾 Data Persistence
