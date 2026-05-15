@@ -44,7 +44,10 @@ File yang di-build akan berada di folder `dist/`
 ```
 KuliahPlanner/
 ├── src/
-│   ├── App.jsx          # Main component (berikutnya bisa split ke components)
+│   ├── App.jsx          # Main component with modular components/hooks/utils
+│   ├── components/      # Reusable UI components
+│   ├── hooks/           # Custom React hooks
+│   ├── utils/           # Shared utility functions
 │   ├── main.jsx         # React entry point
 │   └── index.css        # Tailwind directives
 ├── index.html           # HTML entry
