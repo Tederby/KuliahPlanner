@@ -12,6 +12,9 @@ Demo online tersedia di: https://kuliah-planner.vercel.app/
 - **💾 Local Storage**: Data tersimpan otomatis di browser, tidak hilang saat refresh
 - **🏗️ Course Management**: Kelola data matkul (nama, SKS, jadwal, lokasi)
 - **📌 Stash System**: "Ghosting" dosen? Stash kelas, restore, atau reschedule ketika jadwal berubah
+- **🛑 Confirm Dialog**: Konfirmasi sebelum hapus course atau tugas
+- **🔔 Toast Notifications**: Pop-up notifikasi aksi di kanan bawah
+- **💾 Backup & Restore**: Export/import data JSON langsung dari UI
 - **⚡ Form Validation**: Input validation untuk mencegah data error
 - **🎨 Modern UI**: Dark theme dengan Tailwind CSS dan Lucide icons
 
@@ -82,7 +85,13 @@ Buka tab **Config & Data** → Klik "Tambah Matkul":
 
 Jadwal akan otomatis di-generate untuk seluruh semester!
 
-### 3. Lihat Kalender
+### 3. Backup & Restore Data
+Buka tab **Config & Data** → cari section **Backup & Restore Data**:
+- Export data untuk simpan di JSON file
+- Import JSON untuk restore data atau pindah browser
+- Aksi akan tampil notifikasi toast di kanan bawah
+
+### 4. Lihat Kalender
 Tab **Full Kalender** dengan beberapa view:
 - **Month**: Lihat sebulan penuh
 - **Week**: Lihat minggu dengan timeline

@@ -1,27 +1,33 @@
 import React, { useState } from 'react';
 import { AlertTriangle, X } from 'lucide-react';
 
-import { useKuliahData } from './hooks/useKuliahData';
+import { useToast }          from './hooks/useToast';
+import { useKuliahData }     from './hooks/useKuliahData';
 import { useCalendarEvents } from './hooks/useCalendarEvents';
 
-import Sidebar from './components/Sidebar';
-import EventModal from './components/EventModal';
-import ScheduleView from './components/ScheduleView';
-import StashView from './components/StashView';
-import MatkulView from './components/MatkulView';
-import TaskView from './components/TaskView';
+import Sidebar          from './components/Sidebar';
+import EventModal       from './components/EventModal';
+import ScheduleView     from './components/ScheduleView';
+import StashView        from './components/StashView';
+import MatkulView       from './components/MatkulView';
+import TaskView         from './components/TaskView';
+import ToastContainer   from './components/ToastContainer';
+import ConfirmDialog    from './components/ConfirmDialog';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('schedule');
+  const [activeTab, setActiveTab]       = useState('schedule');
   const [selectedEvent, setSelectedEvent] = useState(null);
 
-  const data = useKuliahData();
+  const { toasts, showToast, dismissToast } = useToast();
+
+  const data = useKuliahData({ showToast });
+
   const { allCalendarEvents } = useCalendarEvents({
-    courses: data.courses,
-    config: data.config,
-    stashes: data.stashes,
+    courses:    data.courses,
+    config:     data.config,
+    stashes:    data.stashes,
     reschedules: data.reschedules,
-    tasks: data.tasks,
+    tasks:      data.tasks,
   });
 
   const handleStashFromModal = (courseId, date, meetingNum, weekNum, originalTime) => {
@@ -101,6 +107,8 @@ export default function App() {
               onConfigBlur={data.handleConfigBlur}
               onAddCourse={data.handleAddCourse}
               onRemoveCourse={data.removeCourse}
+              onExport={data.handleExport}
+              onImport={data.handleImport}
             />
           )}
 
@@ -127,6 +135,17 @@ export default function App() {
         onReturnToStash={handleReturnToStashFromModal}
         onOpenTask={openTaskForCourse}
       />
+
+      <ConfirmDialog
+        isOpen={data.confirmDialog.isOpen}
+        title={data.confirmDialog.title}
+        message={data.confirmDialog.message}
+        danger={data.confirmDialog.danger}
+        onConfirm={data.handleConfirm}
+        onCancel={data.closeConfirm}
+      />
+
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
     </div>
   );
 }
