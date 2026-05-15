@@ -11,6 +11,19 @@ const calculateEndTime = (start, sks, sksMinutes) => {
 };
 
 export const useCalendarEvents = ({ courses, config, stashes, reschedules, tasks }) => {
+  // Memoize hanya data yang dibutuhkan untuk cek collision, bukan full object array.
+  // Ini cegah generatedInstances recompute kalau field stash yang berubah
+  // tidak relevan (misal: notes).
+  const stashedKeys = useMemo(
+    () => new Set(stashes.map((s) => `${s.courseId}::${s.originalDate}`)),
+    [stashes]
+  );
+
+  const rescheduledOriginalKeys = useMemo(
+    () => new Set(reschedules.flatMap((r) => [`${r.courseId}::${r.originalDate}`, `${r.courseId}::${r.newDate}`])),
+    [reschedules]
+  );
+
   const generatedInstances = useMemo(() => {
     try {
       if (courses.length === 0) return [];
@@ -30,14 +43,8 @@ export const useCalendarEvents = ({ courses, config, stashes, reschedules, tasks
         let weekCounter = 1;
 
         while (meetingCount <= config.totalMeetings) {
-          const isStashed = stashes.some(
-            (s) => s.courseId === course.id && s.originalDate === runningDate
-          );
-          const isRescheduledOriginal = reschedules.some(
-            (r) =>
-              r.courseId === course.id &&
-              (r.originalDate === runningDate || r.newDate === runningDate)
-          );
+          const isStashed = stashedKeys.has(`${course.id}::${runningDate}`);
+          const isRescheduledOriginal = rescheduledOriginalKeys.has(`${course.id}::${runningDate}`);
 
           if (!isStashed && !isRescheduledOriginal) {
             const endTime = calculateEndTime(course.startTime, course.sks, config.sksMinutes);
@@ -77,7 +84,7 @@ export const useCalendarEvents = ({ courses, config, stashes, reschedules, tasks
       console.error('Error generating instances:', e);
       return [];
     }
-  }, [courses, config, stashes]);
+  }, [courses, config, stashedKeys, rescheduledOriginalKeys]);
 
   const rescheduledInstances = useMemo(() => {
     return reschedules

@@ -10,9 +10,9 @@ Aplikasi web untuk manage jadwal kuliah, tugas, dan deadline semester dengan UI 
 - **💾 Local Storage**: Data tersimpan otomatis di browser, tidak hilang saat refresh
 - **🏗️ Course Management**: Kelola data matkul (nama, SKS, jadwal, lokasi)
 - **📌 Stash System**: "Ghosting" dosen? Stash kelas, restore, atau reschedule ketika jadwal berubah
-- **🔔 Toast Notifications**: Notifikasi popup untuk aksi sukses dan pesan error
-- **✅ Confirm Delete**: Konfirmasi sebelum hapus kelas atau tugas untuk keamanan
-- **🧾 Backup & Restore Data**: Export/Import JSON untuk backup lokal
+- **🛑 Confirm Dialog**: Konfirmasi sebelum hapus course atau tugas
+- **🔔 Toast Notifications**: Pop-up notifikasi aksi di kanan bawah
+- **💾 Backup & Restore**: Export/import data JSON langsung dari UI
 - **⚡ Form Validation**: Input validation untuk mencegah data error
 - **🎨 Modern UI**: Dark theme dengan Tailwind CSS dan Lucide icons
 
@@ -83,7 +83,13 @@ Buka tab **Config & Data** → Klik "Tambah Matkul":
 
 Jadwal akan otomatis di-generate untuk seluruh semester!
 
-### 3. Lihat Kalender
+### 3. Backup & Restore Data
+Buka tab **Config & Data** → cari section **Backup & Restore Data**:
+- Export data untuk simpan di JSON file
+- Import JSON untuk restore data atau pindah browser
+- Aksi akan tampil notifikasi toast di kanan bawah
+
+### 4. Lihat Kalender
 Tab **Full Kalender** dengan beberapa view:
 - **Month**: Lihat sebulan penuh
 - **Week**: Lihat minggu dengan timeline
@@ -129,11 +135,6 @@ Data akan bertahan meski:
 - Fixed: Not production-ready → Full Vite project setup
 - Improved: Mobile responsive
 - Added: Task completion toggle
-- Added: Custom confirm dialog before delete
-- Added: Toast notification system
-- Added: Backup & Restore Data (Export/Import JSON)
-- Improved: Storage save/load now returns structured success/error results
-- Improved: Stash collision detection with Set for better calendar stability
 
 ## 🐛 Known Issues / TODO
 
