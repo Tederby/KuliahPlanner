@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AlertTriangle, X } from 'lucide-react';
 
 import { useToast }          from './hooks/useToast';
@@ -13,10 +13,14 @@ import MatkulView       from './components/MatkulView';
 import TaskView         from './components/TaskView';
 import ToastContainer   from './components/ToastContainer';
 import ConfirmDialog    from './components/ConfirmDialog';
+import TaskDetailModal  from './components/TaskDetailModal';
+import OnboardingGuide, { ONBOARDING_KEY } from './components/OnboardingGuide';
 
 export default function App() {
   const [activeTab, setActiveTab]       = useState('schedule');
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [selectedTask, setSelectedTask]   = useState(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   const { toasts, showToast, dismissToast } = useToast();
 
@@ -30,6 +34,13 @@ export default function App() {
     tasks:      data.tasks,
   });
 
+  // Show onboarding on first visit
+  useEffect(() => {
+    if (!localStorage.getItem(ONBOARDING_KEY)) {
+      setShowOnboarding(true);
+    }
+  }, []);
+
   const handleStashFromModal = (courseId, date, meetingNum, weekNum, originalTime) => {
     data.handleStash(courseId, date, meetingNum, weekNum, originalTime);
     setSelectedEvent(null);
@@ -41,10 +52,30 @@ export default function App() {
   };
 
   const openTaskForCourse = (courseId, date) => {
-    data.setNewTask({ title: '', courseId, deadline: `${date}T23:59`, urgency: 'low', type: 'matkul' });
+    data.setNewTask({
+      title: '', courseId, deadlineDate: date, deadlineTime: '',
+      urgency: 'low', type: 'matkul', description: '',
+    });
     data.setShowTaskForm(true);
     setActiveTab('tasks');
     setSelectedEvent(null);
+  };
+
+  const handleQuickAddTask = (dateStr) => {
+    data.setNewTask({
+      title: '', courseId: '', deadlineDate: dateStr, deadlineTime: '',
+      urgency: 'low', type: 'matkul', description: '',
+    });
+    data.setShowTaskForm(true);
+    setActiveTab('tasks');
+  };
+
+  const handleSelectTask = (taskEvent) => {
+    // Find the full task from data.tasks using taskId
+    const fullTask = data.tasks.find((t) => t.id === taskEvent.taskId);
+    if (fullTask) {
+      setSelectedTask(fullTask);
+    }
   };
 
   return (
@@ -56,6 +87,7 @@ export default function App() {
           config={data.config}
           tasks={data.tasks}
           stashes={data.stashes}
+          onShowGuide={() => setShowOnboarding(true)}
         />
 
         <div className="flex-1 min-w-0">
@@ -77,6 +109,8 @@ export default function App() {
             <ScheduleView
               allCalendarEvents={allCalendarEvents}
               onSelectEvent={setSelectedEvent}
+              onSelectTask={handleSelectTask}
+              onQuickAddTask={handleQuickAddTask}
             />
           )}
 
@@ -120,9 +154,12 @@ export default function App() {
               setShowTaskForm={data.setShowTaskForm}
               newTask={data.newTask}
               setNewTask={data.setNewTask}
+              editingTaskId={data.editingTaskId}
               onAddTask={data.handleAddTask}
               onRemoveTask={data.removeTask}
               onToggleComplete={data.toggleTaskComplete}
+              onStartEdit={data.startEditTask}
+              onCancelEdit={data.cancelEditTask}
             />
           )}
         </div>
@@ -134,6 +171,21 @@ export default function App() {
         onStash={handleStashFromModal}
         onReturnToStash={handleReturnToStashFromModal}
         onOpenTask={openTaskForCourse}
+      />
+
+      <TaskDetailModal
+        task={selectedTask}
+        courses={data.courses}
+        onClose={() => setSelectedTask(null)}
+        onToggleComplete={data.toggleTaskComplete}
+      />
+
+      <OnboardingGuide
+        isOpen={showOnboarding}
+        onClose={() => {
+          setShowOnboarding(false);
+          localStorage.setItem(ONBOARDING_KEY, 'true');
+        }}
       />
 
       <ConfirmDialog

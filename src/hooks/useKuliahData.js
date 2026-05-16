@@ -13,7 +13,11 @@ export const useKuliahData = ({ showToast }) => {
   const [error, setError]             = useState(null);
 
   const [showTaskForm, setShowTaskForm]     = useState(false);
-  const [newTask, setNewTask]               = useState({ title: '', courseId: '', deadline: '', urgency: 'low', type: 'matkul' });
+  const [editingTaskId, setEditingTaskId]   = useState(null);
+  const [newTask, setNewTask]               = useState({
+    title: '', courseId: '', deadlineDate: '', deadlineTime: '',
+    urgency: 'low', type: 'matkul', description: '',
+  });
   const [showCourseForm, setShowCourseForm] = useState(false);
   const [newCourse, setNewCourse]           = useState({ name: '', sks: 3, day: 'Senin', startTime: '07:00', location: '' });
   const [editingStash, setEditingStash]     = useState(null);
@@ -71,15 +75,73 @@ export const useKuliahData = ({ showToast }) => {
     });
   };
 
+  const resetTaskForm = () => {
+    setNewTask({
+      title: '', courseId: '', deadlineDate: '', deadlineTime: '',
+      urgency: 'low', type: 'matkul', description: '',
+    });
+    setEditingTaskId(null);
+    setShowTaskForm(false);
+  };
+
   const handleAddTask = (e) => {
     e.preventDefault();
     setError(null);
     const err = validateTask(newTask);
     if (err) { setError(err); return; }
-    setTasks([...tasks, { ...newTask, id: Date.now(), completed: false }]);
-    setShowTaskForm(false);
-    setNewTask({ title: '', courseId: '', deadline: '', urgency: 'low', type: 'matkul' });
-    showToast('Tugas ditambahkan!', 'success');
+
+    // Combine date + optional time into deadline string
+    const deadline = `${newTask.deadlineDate}T${newTask.deadlineTime || '23:59'}`;
+
+    if (editingTaskId) {
+      // Update existing task
+      setTasks(tasks.map((t) => t.id === editingTaskId ? {
+        ...t,
+        title: newTask.title,
+        courseId: newTask.courseId,
+        deadline,
+        urgency: newTask.urgency,
+        type: newTask.type,
+        description: newTask.description || '',
+      } : t));
+      showToast('Tugas diperbarui!', 'success');
+    } else {
+      // Create new task
+      setTasks([...tasks, {
+        title: newTask.title,
+        courseId: newTask.courseId,
+        deadline,
+        urgency: newTask.urgency,
+        type: newTask.type,
+        description: newTask.description || '',
+        id: Date.now(),
+        completed: false,
+      }]);
+      showToast('Tugas ditambahkan!', 'success');
+    }
+    resetTaskForm();
+  };
+
+  const startEditTask = (taskId) => {
+    const task = tasks.find((t) => t.id === taskId);
+    if (!task) return;
+    const datePart = task.deadline?.split('T')[0] || '';
+    const timePart = task.deadline?.split('T')[1] || '';
+    setNewTask({
+      title: task.title,
+      courseId: task.courseId,
+      deadlineDate: datePart,
+      deadlineTime: timePart === '23:59' ? '' : timePart,
+      urgency: task.urgency,
+      type: task.type || 'matkul',
+      description: task.description || '',
+    });
+    setEditingTaskId(taskId);
+    setShowTaskForm(true);
+  };
+
+  const cancelEditTask = () => {
+    resetTaskForm();
   };
 
   const removeTask = (id) => {
@@ -160,12 +222,14 @@ export const useKuliahData = ({ showToast }) => {
   return {
     config, courses, stashes, reschedules, tasks, error, setError,
     showTaskForm, setShowTaskForm, newTask, setNewTask,
+    editingTaskId,
     showCourseForm, setShowCourseForm, newCourse, setNewCourse,
     editingStash, rescheduleForm, setRescheduleForm,
     confirmDialog, handleConfirm, closeConfirm,
     handleUpdateConfig, handleConfigBlur,
     handleAddCourse, removeCourse,
     handleAddTask, removeTask, toggleTaskComplete,
+    startEditTask, cancelEditTask,
     handleStash, restoreStash, openRescheduleStash, cancelReschedule, saveReschedule,
     returnRescheduledToStash,
     handleExport, handleImport,

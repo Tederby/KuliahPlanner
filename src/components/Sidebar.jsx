@@ -1,7 +1,7 @@
 import React from 'react';
-import { Calendar, List, Settings, Inbox } from 'lucide-react';
+import { Calendar, List, Settings, Inbox, HelpCircle } from 'lucide-react';
 
-const Sidebar = ({ activeTab, setActiveTab, config, tasks, stashes }) => {
+const Sidebar = ({ activeTab, setActiveTab, config, tasks, stashes, onShowGuide }) => {
   const tabs = [
     { id: 'schedule', icon: Calendar, label: 'Kalender' },
     { id: 'tasks', icon: List, label: `Tugas (${tasks.filter((t) => !t.completed).length})` },
@@ -41,6 +41,15 @@ const Sidebar = ({ activeTab, setActiveTab, config, tasks, stashes }) => {
           <p>UAS: Setelah {config.meetingsBeforeUAS} pertemuan ({config.uasWeeks} minggu)</p>
         </div>
       </div>
+
+      {/* Guide button */}
+      <button
+        onClick={onShowGuide}
+        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-500 hover:text-indigo-400 hover:bg-slate-900 transition-all text-sm"
+      >
+        <HelpCircle className="w-5 h-5" />
+        Panduan Penggunaan
+      </button>
     </div>
   );
 };

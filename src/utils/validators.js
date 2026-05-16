@@ -8,7 +8,7 @@ export const validateCourse = (course) => {
 
 export const validateTask = (task) => {
   if (!task.title?.trim()) return 'Judul tugas wajib diisi';
-  if (!task.deadline) return 'Deadline wajib diisi';
+  if (!task.deadlineDate) return 'Tanggal deadline wajib diisi';
   if (!task.courseId) return 'Pilih matkul untuk tugas ini';
   return null;
 };

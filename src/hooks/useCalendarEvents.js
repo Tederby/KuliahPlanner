@@ -121,6 +121,9 @@ export const useCalendarEvents = ({ courses, config, stashes, reschedules, tasks
           date: datePart,
           startTime: timePart,
           urgency: t.urgency,
+          description: t.description || '',
+          courseId: t.courseId,
+          taskId: t.id,
           rawTask: t,
         };
       });
