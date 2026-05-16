@@ -14,7 +14,17 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent }) => {
     setCurrentDateObj(d);
   };
 
-  const renderCalendarCell = (dateStr) => {
+  const handleMonthCellClick = (dateObj) => {
+    setCurrentDateObj(dateObj);
+    setViewMode('week');
+  };
+
+  const handleWeekDayClick = (dateObj) => {
+    setCurrentDateObj(dateObj);
+    setViewMode('day');
+  };
+
+  const renderCalendarCell = (dateStr, cellDateObj) => {
     const dayEvents = allCalendarEvents
       .filter((e) => e.date === dateStr)
       .sort((a, b) => a.startTime.localeCompare(b.startTime));
@@ -23,17 +33,24 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent }) => {
     return (
       <div
         key={dateStr}
-        className={`min-h-[100px] p-1 border-r border-b border-slate-700/50 ${isToday ? 'bg-indigo-950/20' : 'bg-slate-800'}`}
+        onClick={() => handleMonthCellClick(cellDateObj)}
+        className={`min-h-[100px] p-1 border-r border-b border-slate-700/50 cursor-pointer transition-colors group ${isToday ? 'bg-indigo-950/20 hover:bg-indigo-950/40' : 'bg-slate-800 hover:bg-slate-700/60'}`}
       >
-        <div className={`text-xs font-bold text-right p-1 ${isToday ? 'text-indigo-400' : 'text-slate-500'}`}>
+        <div className={`text-xs font-bold text-right p-1 flex items-center justify-end gap-1 ${isToday ? 'text-indigo-400' : 'text-slate-500'}`}>
+          <span className="text-[9px] text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity">
+            Lihat minggu →
+          </span>
           {new Date(dateStr).getDate()}
         </div>
         <div className="space-y-1">
           {dayEvents.map((ev) => (
             <div
               key={ev.instanceId}
-              onClick={() => ev.type === 'course' && onSelectEvent(ev)}
-              className={`text-[10px] p-1 rounded cursor-pointer truncate ${
+              onClick={(e) => {
+                e.stopPropagation();
+                if (ev.type === 'course') onSelectEvent(ev);
+              }}
+              className={`text-[10px] p-1 rounded cursor-pointer truncate relative z-10 ${
                 ev.type === 'course'
                   ? 'bg-indigo-900/50 text-indigo-300 hover:bg-indigo-800/80 border border-indigo-500/30'
                   : ev.urgency === 'high'
@@ -58,110 +75,143 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent }) => {
   };
 
   const renderTimelineView = (daysOffsetArray) => {
-    const hours = Array.from({ length: 15 }, (_, i) => i + 6);
+    const HOUR_START = 0;
+    const HOUR_END = 23;
+    const HOUR_COUNT = HOUR_END - HOUR_START + 1; // 24 hours
+    const HOUR_HEIGHT = 60; // px per hour
+    const TOTAL_HEIGHT = HOUR_COUNT * HOUR_HEIGHT;
+
+    const hours = Array.from({ length: HOUR_COUNT }, (_, i) => i + HOUR_START);
+
     const startOfWeek = new Date(currentDateObj);
     const day = startOfWeek.getDay();
     const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1);
     startOfWeek.setDate(diff);
 
+    const isWeekMode = viewMode === 'week';
+
     return (
       <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden flex flex-col h-[600px]">
         {/* Header Days */}
-        <div className="flex border-b border-slate-700 bg-slate-900">
+        <div className="flex border-b border-slate-700 bg-slate-900 shrink-0">
           <div className="w-16 shrink-0 border-r border-slate-700"></div>
           {daysOffsetArray.map((offset) => {
-            const d = new Date(viewMode === 'day' ? currentDateObj : startOfWeek);
-            if (viewMode === 'week') d.setDate(d.getDate() + offset);
+            const d = new Date(isWeekMode ? startOfWeek : currentDateObj);
+            if (isWeekMode) d.setDate(d.getDate() + offset);
             const dateStr = formatDateStr(d);
             const isToday = dateStr === formatDateStr(new Date());
             return (
               <div
                 key={offset}
-                className={`flex-1 text-center py-2 text-sm font-bold border-r border-slate-700 ${
-                  isToday ? 'text-indigo-400 bg-indigo-950/30' : 'text-slate-400'
+                onClick={() => isWeekMode && handleWeekDayClick(d)}
+                className={`flex-1 text-center py-2 text-sm font-bold border-r border-slate-700 transition-colors ${
+                  isWeekMode ? 'cursor-pointer' : ''
+                } ${
+                  isToday
+                    ? `text-indigo-400 bg-indigo-950/30 ${isWeekMode ? 'hover:bg-indigo-950/60' : ''}`
+                    : `text-slate-400 ${isWeekMode ? 'hover:bg-slate-700/50' : ''}`
                 }`}
               >
                 {daysOfWeek[d.getDay() === 0 ? 6 : d.getDay() - 1]} <br />
                 <span className="text-xs font-normal">
                   {d.getDate()}/{d.getMonth() + 1}
                 </span>
+                {isWeekMode && (
+                  <span className="block text-[9px] text-slate-600 mt-0.5 opacity-0 hover:opacity-100 transition-opacity">
+                    Lihat hari
+                  </span>
+                )}
               </div>
             );
           })}
         </div>
 
         {/* Grid Body */}
-        <div
-          className="flex-1 overflow-y-auto relative bg-slate-800"
-          style={{
-            backgroundImage: 'linear-gradient(to bottom, #334155 1px, transparent 1px)',
-            backgroundSize: '100% 60px',
-          }}
-        >
-          {hours.map((h) => (
-            <div
-              key={h}
-              className="absolute left-0 w-16 text-right pr-2 text-xs text-slate-500"
-              style={{ top: `${(h - 6) * 60}px`, transform: 'translateY(-50%)' }}
-            >
-              {h.toString().padStart(2, '0')}:00
-            </div>
-          ))}
+        <div className="flex-1 overflow-y-auto relative">
+          <div className="relative" style={{ height: `${TOTAL_HEIGHT}px` }}>
+            {/* Hour labels + grid lines */}
+            {hours.map((h) => (
+              <React.Fragment key={h}>
+                {/* Grid line */}
+                <div
+                  className="absolute left-0 right-0 border-t border-slate-700/40"
+                  style={{ top: `${(h - HOUR_START) * HOUR_HEIGHT}px` }}
+                />
+                {/* Hour label */}
+                <div
+                  className="absolute left-0 w-16 text-right pr-2 text-xs text-slate-500"
+                  style={{ top: `${(h - HOUR_START) * HOUR_HEIGHT}px`, transform: 'translateY(-50%)' }}
+                >
+                  {h.toString().padStart(2, '0')}:00
+                </div>
+              </React.Fragment>
+            ))}
 
-          <div className="absolute top-0 bottom-0 left-16 right-0 flex">
-            {daysOffsetArray.map((offset) => {
-              const d = new Date(viewMode === 'day' ? currentDateObj : startOfWeek);
-              if (viewMode === 'week') d.setDate(d.getDate() + offset);
-              const dateStr = formatDateStr(d);
-              const dayEvents = allCalendarEvents.filter((e) => e.date === dateStr);
+            {/* Day columns */}
+            <div className="absolute top-0 bottom-0 left-16 right-0 flex">
+              {daysOffsetArray.map((offset) => {
+                const d = new Date(isWeekMode ? startOfWeek : currentDateObj);
+                if (isWeekMode) d.setDate(d.getDate() + offset);
+                const dateStr = formatDateStr(d);
+                const dayEvents = allCalendarEvents.filter((e) => e.date === dateStr);
 
-              return (
-                <div key={offset} className="flex-1 border-r border-slate-700/30 relative">
-                  {dayEvents.map((ev) => {
-                    const [h, m] = ev.startTime.split(':').map(Number);
-                    const top = (h - 6) * 60 + m;
-                    let height = 30;
-                    if (ev.type === 'course') {
-                      const [eh, em] = ev.endTime.split(':').map(Number);
-                      height = (eh - h) * 60 + (em - m);
-                    }
-                    if (top < 0) return null;
+                return (
+                  <div
+                    key={offset}
+                    onClick={() => isWeekMode && handleWeekDayClick(d)}
+                    className={`flex-1 border-r border-slate-700/30 relative ${
+                      isWeekMode ? 'cursor-pointer hover:bg-slate-700/15 transition-colors' : ''
+                    }`}
+                  >
+                    {dayEvents.map((ev) => {
+                      const [h, m] = ev.startTime.split(':').map(Number);
+                      const top = (h - HOUR_START) * HOUR_HEIGHT + m;
+                      let height = 30;
+                      if (ev.type === 'course') {
+                        const [eh, em] = ev.endTime.split(':').map(Number);
+                        height = (eh - h) * HOUR_HEIGHT + (em - m);
+                      }
+                      if (top < 0) return null;
 
-                    return (
-                      <div
-                        key={ev.instanceId}
-                        onClick={() => ev.type === 'course' && onSelectEvent(ev)}
-                        className={`absolute left-1 right-1 rounded-md p-1.5 text-xs overflow-hidden cursor-pointer transition-transform hover:scale-[1.02] hover:z-10 shadow-lg border ${
-                          ev.type === 'course'
-                            ? 'bg-indigo-600/90 text-white border-indigo-400'
-                            : ev.urgency === 'high'
-                            ? 'bg-rose-600/90 text-white border-rose-400'
-                            : 'bg-emerald-600/90 text-white border-emerald-400'
-                        }`}
-                        style={{ top: `${top}px`, height: `${height}px` }}
-                      >
-                        <div className="font-bold leading-tight flex items-center justify-between gap-2">
-                          <span>{ev.type === 'course' ? ev.name : `[Task] ${ev.title}`}</span>
-                          {ev.isRescheduled && (
-                            <span className="text-[10px] uppercase tracking-[0.15em] px-1 rounded bg-amber-500/20 text-amber-100">
-                              reschedule
-                            </span>
+                      return (
+                        <div
+                          key={ev.instanceId}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (ev.type === 'course') onSelectEvent(ev);
+                          }}
+                          className={`absolute left-1 right-1 rounded-md p-1.5 text-xs overflow-hidden cursor-pointer transition-transform hover:scale-[1.02] hover:z-10 shadow-lg border ${
+                            ev.type === 'course'
+                              ? 'bg-indigo-600/90 text-white border-indigo-400'
+                              : ev.urgency === 'high'
+                              ? 'bg-rose-600/90 text-white border-rose-400'
+                              : 'bg-emerald-600/90 text-white border-emerald-400'
+                          }`}
+                          style={{ top: `${top}px`, height: `${height}px`, zIndex: 5 }}
+                        >
+                          <div className="font-bold leading-tight flex items-center justify-between gap-2">
+                            <span>{ev.type === 'course' ? ev.name : `[Task] ${ev.title}`}</span>
+                            {ev.isRescheduled && (
+                              <span className="text-[10px] uppercase tracking-[0.15em] px-1 rounded bg-amber-500/20 text-amber-100">
+                                reschedule
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-[10px] opacity-80 mt-0.5">
+                            {ev.startTime} {ev.type === 'course' && `- ${ev.endTime}`}
+                          </div>
+                          {ev.type === 'course' && (
+                            <div className="text-[9px] mt-1 bg-black/20 inline-block px-1 rounded">
+                              P-{ev.meetingNum}
+                            </div>
                           )}
                         </div>
-                        <div className="text-[10px] opacity-80 mt-0.5">
-                          {ev.startTime} {ev.type === 'course' && `- ${ev.endTime}`}
-                        </div>
-                        {ev.type === 'course' && (
-                          <div className="text-[9px] mt-1 bg-black/20 inline-block px-1 rounded">
-                            P-{ev.meetingNum}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              );
-            })}
+                      );
+                    })}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
@@ -274,7 +324,7 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent }) => {
               const d = new Date(currentDateObj.getFullYear(), currentDateObj.getMonth(), 1);
               const startOffset = d.getDay() === 0 ? 6 : d.getDay() - 1;
               d.setDate(d.getDate() - startOffset + i);
-              return renderCalendarCell(formatDateStr(d));
+              return renderCalendarCell(formatDateStr(d), d);
             })}
           </div>
         </div>

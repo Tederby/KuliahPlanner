@@ -3,7 +3,7 @@ import { Calendar, List, Settings, Inbox } from 'lucide-react';
 
 const Sidebar = ({ activeTab, setActiveTab, config, tasks, stashes }) => {
   const tabs = [
-    { id: 'schedule', icon: Calendar, label: 'Full Kalender' },
+    { id: 'schedule', icon: Calendar, label: 'Kalender' },
     { id: 'tasks', icon: List, label: `Tugas (${tasks.filter((t) => !t.completed).length})` },
     { id: 'stash', icon: Inbox, label: `Stash (${stashes.length})` },
     { id: 'matkul', icon: Settings, label: 'Config & Data' },

@@ -12,7 +12,8 @@ Demo online tersedia di: https://kuliah-planner.vercel.app/
 - **💾 Local Storage**: Data tersimpan otomatis di browser, tidak hilang saat refresh
 - **🏗️ Course Management**: Kelola data matkul (nama, SKS, jadwal, lokasi)
 - **📌 Stash System**: "Ghosting" dosen? Stash kelas, restore, atau reschedule ketika jadwal berubah
-- **🛑 Confirm Dialog**: Konfirmasi sebelum hapus course atau tugas
+- **� Calendar Drill-Down**: Klik area kosong di Month view untuk masuk Week view; klik kolom hari di Week view untuk masuk Day view
+- **�🛑 Confirm Dialog**: Konfirmasi sebelum hapus course atau tugas
 - **🔔 Toast Notifications**: Pop-up notifikasi aksi di kanan bawah
 - **💾 Backup & Restore**: Export/import data JSON langsung dari UI
 - **⚡ Form Validation**: Input validation untuk mencegah data error
@@ -92,11 +93,13 @@ Buka tab **Config & Data** → cari section **Backup & Restore Data**:
 - Aksi akan tampil notifikasi toast di kanan bawah
 
 ### 4. Lihat Kalender
-Tab **Full Kalender** dengan beberapa view:
-- **Month**: Lihat sebulan penuh
-- **Week**: Lihat minggu dengan timeline
-- **Day**: Fokus satu hari dengan timeline detail
-- **Agenda**: List semua event upcoming
+Tab **Kalender** dengan beberapa view:
+- **Month**: Lihat sebulan penuh. Klik area kosong di tanggal untuk masuk ke Week view.
+- **Week**: Lihat minggu dengan timeline. Klik area kosong di kolom hari untuk masuk ke Day view.
+- **Day**: Fokus satu hari dengan timeline detail.
+- **Agenda**: List semua event upcoming.
+
+Di view kalender, klik matkul akan membuka detail event; klik area kosong mengetes drill-down tanpa membuka event.
 
 ### 4. Manage Tugas
 Tab **Tugas (X)** untuk:
