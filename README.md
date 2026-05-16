@@ -9,7 +9,7 @@ Demo online tersedia di: https://kuliah-planner.vercel.app/
 - **📅 Multiple Calendar Views**: Month, Week, Day, dan Agenda view
 - **🔄 Smart Meeting Generation**: Otomatis generate semua jadwal untuk satu semester
 - **✅ Task Management**: Manage tugas dengan deadline, urgency, dan course tracking
-- **✏️ Task Editing**: Edit tugas langsung dari tab Tugas — form re-populate otomatis
+- **✏️ Task Editing**: Edit tugas langsung dari tab Tugas
 - **📝 Task Descriptions**: Deskripsi tugas dengan dukungan format **Markdown** (bold, italic, code, list, heading)
 - **🔍 Task Detail Modal**: Klik tugas di kalender untuk lihat detail lengkap + countdown deadline real-time
 - **⏰ Deadline Countdown**: Badge countdown otomatis (jam/hari tersisa, overdue, dsb.)
