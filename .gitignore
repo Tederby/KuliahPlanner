@@ -6,3 +6,12 @@ dist
 .env.local
 .vscode
 .idea
+
+# Capacitor / Android build artifacts
+android/.gradle
+android/app/build
+android/build
+android/local.properties
+android/.idea
+android/*.iml
+android/app/*.iml
