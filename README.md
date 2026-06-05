@@ -26,6 +26,7 @@ Demo online tersedia di: https://kuliah-planner.vercel.app/
 - **💾 Backup & Restore**: Export/import data JSON langsung dari UI
 - **⚡ Form Validation**: Input validation untuk mencegah data error
 - **🎨 Modern UI**: Dark theme dengan Tailwind CSS dan Lucide icons
+- **📱 Native Android Support**: Build menjadi aplikasi Android native menggunakan Capacitor.js
 
 ## 🚀 Quick Start
 
@@ -50,6 +51,16 @@ npm run preview
 ```
 
 File yang di-build akan berada di folder `dist/`
+
+## 📱 Android Build
+
+Aplikasi ini mendukung build ke mobile (Android) menggunakan Capacitor.js.
+
+```bash
+npm run build
+npx cap sync android
+npx cap open android
+```
 
 ## 📁 Project Structure
 
@@ -187,6 +198,7 @@ Data akan bertahan meski:
 - Added: `startEditTask` / `cancelEditTask` di `useKuliahData`
 - Improved: ScheduleView refactored (all-day task row, breadcrumb, quick-add)
 - Fixed: Known issue "No export/import feature" → Backup & Restore sudah tersedia
+- Added: Setup Capacitor.js for native Android builds
 
 ## 🐛 Known Issues / TODO
 
