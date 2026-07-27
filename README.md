@@ -1,33 +1,33 @@
-# KuliahPlanner 📚
+# KuliahPlanner
 
 Aplikasi web untuk manage jadwal kuliah, tugas, dan deadline semester dengan UI yang modern dan fitur powerful.
 
 Demo online tersedia di: https://kuliah-planner.vercel.app/
 
-## ✨ Features
+## Features
 
-- **📅 Multiple Calendar Views**: Month, Week, Day, dan Agenda view
-- **🔄 Smart Meeting Generation**: Otomatis generate semua jadwal untuk satu semester
-- **✅ Task Management**: Manage tugas dengan deadline, urgency, dan course tracking
-- **✏️ Task Editing**: Edit tugas langsung dari tab Tugas
-- **📝 Task Descriptions**: Deskripsi tugas dengan dukungan format **Markdown** (bold, italic, code, list, heading)
-- **🔍 Task Detail Modal**: Klik tugas di kalender untuk lihat detail lengkap + countdown deadline real-time
-- **⏰ Deadline Countdown**: Badge countdown otomatis (jam/hari tersisa, overdue, dsb.)
-- **💾 Local Storage**: Data tersimpan otomatis di browser, tidak hilang saat refresh
-- **🏗️ Course Management**: Kelola data matkul (nama, SKS, jadwal, lokasi)
-- **📌 Stash System**: "Ghosting" dosen? Stash kelas, restore, atau reschedule ketika jadwal berubah
-- **🗺️ Calendar Drill-Down**: Klik area kosong di Month view untuk masuk Week view; klik kolom hari di Week view untuk masuk Day view
-- **🧭 Breadcrumb Navigation**: History navigasi kalender dengan breadcrumb clickable
-- **⚡ Quick-Add Task**: Tombol `+` di setiap kolom hari di Week/Day view untuk tambah tugas cepat
-- **📋 Task Banners di Kalender**: Tugas dengan deadline muncul sebagai banner di atas grid Week/Day view
-- **🎓 Onboarding Guide**: Panduan interaktif step-by-step untuk user pertama kali
-- **🛑 Confirm Dialog**: Konfirmasi sebelum hapus course atau tugas
-- **🔔 Toast Notifications**: Pop-up notifikasi aksi di kanan bawah
-- **💾 Backup & Restore**: Export/import data JSON langsung dari UI
-- **⚡ Form Validation**: Input validation untuk mencegah data error
-- **🎨 Modern UI**: Dark theme dengan Tailwind CSS dan Lucide icons
+- **Multiple Calendar Views**: Month, Week, Day, dan Agenda view
+- **Smart Meeting Generation**: Otomatis generate semua jadwal untuk satu semester
+- **Task Management**: Manage tugas dengan deadline, urgency, dan course tracking
+- **Task Editing**: Edit tugas langsung dari tab Tugas
+- **Task Descriptions**: Deskripsi tugas dengan dukungan format **Markdown** (bold, italic, code, list, heading)
+- **Task Detail Modal**: Klik tugas di kalender untuk lihat detail lengkap + countdown deadline real-time
+- **Deadline Countdown**: Badge countdown otomatis (jam/hari tersisa, overdue, dsb.)
+- **Local Storage**: Data tersimpan otomatis di browser, tidak hilang saat refresh
+- **Course Management**: Kelola data matkul (nama, SKS, jadwal, lokasi)
+- **Stash System**: "Ghosting" dosen? Stash kelas, restore, atau reschedule ketika jadwal berubah
+- **Calendar Drill-Down**: Klik area kosong di Month view untuk masuk Week view; klik kolom hari di Week view untuk masuk Day view
+- **Breadcrumb Navigation**: History navigasi kalender dengan breadcrumb clickable
+- **Quick-Add Task**: Tombol `+` di setiap kolom hari di Week/Day view untuk tambah tugas cepat
+- **Task Banners di Kalender**: Tugas dengan deadline muncul sebagai banner di atas grid Week/Day view
+- **Onboarding Guide**: Panduan interaktif step-by-step untuk user pertama kali
+- **Confirm Dialog**: Konfirmasi sebelum hapus course atau tugas
+- **Toast Notifications**: Pop-up notifikasi aksi di kanan bawah
+- **Backup & Restore**: Export/import data JSON langsung dari UI
+- **Form Validation**: Input validation untuk mencegah data error
+- **Modern UI**: Dark theme dengan Tailwind CSS dan Lucide icons
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Node.js 16+ dan npm
@@ -42,7 +42,7 @@ npm run dev
 
 Aplikasi akan terbuka di `http://localhost:3000/`
 
-## 📦 Production Build
+## Production Build
 
 ```bash
 npm run build
@@ -51,7 +51,7 @@ npm run preview
 
 File yang di-build akan berada di folder `dist/`
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 KuliahPlanner/
@@ -86,14 +86,14 @@ KuliahPlanner/
 └── postcss.config.js
 ```
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **React 18.2** - UI Framework
 - **Vite 4.3** - Build tool (super fast)
 - **Tailwind CSS 3.3** - Styling
 - **Lucide React** - Icon library
 
-## 📝 How to Use
+## How to Use
 
 ### 1. Setup Semester
 Buka tab **Config & Data** → Konfigurasi semester:
@@ -150,7 +150,7 @@ Kalau dosen ghosting:
 Saat pertama kali membuka aplikasi, panduan interaktif step-by-step akan muncul otomatis.
 Bisa juga dibuka kembali kapan saja lewat tombol **?** di sidebar.
 
-## 💾 Data Persistence
+## Data Persistence
 
 Semua data otomatis tersimpan di **localStorage** browser:
 - Courses
@@ -164,9 +164,9 @@ Data akan bertahan meski:
 
 **Note**: Data tersimpan per-browser, bukan cloud-synced.
 
-## 🔧 Improvements Implemented
+## Improvements Implemented
 
-✅ **From original code:**
+**From original code:**
 - Fixed: No data persistence → Added localStorage
 - Fixed: Incomplete task form → Added course selector + urgency
 - Fixed: No validation → Added form validation
@@ -175,7 +175,7 @@ Data akan bertahan meski:
 - Improved: Mobile responsive
 - Added: Task completion toggle
 
-✅ **Recent updates:**
+**Recent updates:**
 - Added: Task edit mode (inline form re-populate, Perbarui/Simpan)
 - Added: Task description field with Markdown support (`markdown.js` renderer)
 - Added: `TaskDetailModal` — modal detail tugas + countdown deadline real-time
@@ -188,7 +188,7 @@ Data akan bertahan meski:
 - Improved: ScheduleView refactored (all-day task row, breadcrumb, quick-add)
 - Fixed: Known issue "No export/import feature" → Backup & Restore sudah tersedia
 
-## 🐛 Known Issues / TODO
+## Known Issues / TODO
 
 - [ ] No user authentication (semua data public per browser)
 - [ ] No push notification/reminder
@@ -196,14 +196,14 @@ Data akan bertahan meski:
 - [ ] Could optimize with TypeScript
 - [ ] Could add tests
 
-## 📱 Browser Support
+## Browser Support
 
 - Chrome/Edge: ✅ Full support
 - Firefox: ✅ Full support
 - Safari: ✅ Full support (limited localStorage)
 - Mobile browsers: ✅ Responsive
 
-## 📄 License
+## License
 
 Feel free to use, modify, dan share!
 
