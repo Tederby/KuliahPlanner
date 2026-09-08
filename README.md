@@ -1,44 +1,45 @@
-# KuliahPlanner 📚
+# KuliahPlanner
 
 Aplikasi web untuk manage jadwal kuliah, tugas, dan deadline semester dengan UI yang modern dan fitur powerful.
 
 Demo online tersedia di: https://kuliah-planner.vercel.app/
 
-## ✨ Features
+## Features
 
-- **📅 Multiple Calendar Views**: Month, Week, Day, dan Agenda view
-- **🔄 Smart Meeting Generation**: Otomatis generate semua jadwal untuk satu semester
-- **✅ Task & Event Management**: Manage tugas kuliah serta kegiatan/acara non-akademik (seminar, workshop, rapat) dengan deadline/waktu acara
-- **👥 Tagging Tugas Individu & Kelompok**: Opsi penandaan tugas individu atau kelompok (nama/nomor kelompok dan daftar anggota opsional)
-- **🎉 Acara / Kegiatan**: Pencatatan acara dengan opsi waktu mulai-selesai dan lokasi tanpa harus terikat ke mata kuliah
-- **🌟 Highlight "Hari Ini" di Kalender**: Penandaan visual yang kontras untuk hari ini di Month view dan Week view
-- **✏️ Task & Event Editing**: Edit tugas maupun acara langsung dari form re-populate otomatis
-- **✏️ Course Editing**: Edit data matkul induk (nama, hari, jam, SKS, ruangan, warna) tanpa kehilangan relasi tugas atau stash
-- **🎨 Course Color Coding**: Penandaan warna unik per matkul (smart auto-assign + swatch custom) di seluruh kalender dan tugas
-- **🔍 Multi-Filter Tugas & Acara**: Filter instan berdasarkan status (Aktif, Semua, Selesai), tipe (Tugas, Acara), serta dropdown filter per-matkul
-- **⚡ Live End Time & Clash Warning**: Estimasi jam selesai otomatis di form matkul & peringatan visual jika ada jadwal bentrok
-- **📊 Total SKS Summary**: Ringkasan beban SKS semester yang diambil di Sidebar dan header Data Matkul
-- **📝 Task Descriptions**: Deskripsi tugas dengan dukungan format **Markdown** (bold, italic, code, list, heading)
-- **🔍 Task Detail Modal**: Klik tugas di kalender untuk lihat detail lengkap + countdown deadline real-time + shortcut edit tugas
-- **⏰ Deadline Countdown**: Badge countdown otomatis (jam/hari tersisa, overdue, dsb.)
-- **💾 Local Storage**: Data tersimpan otomatis di browser, tidak hilang saat refresh
-- **🏗️ Course Management**: Kelola data matkul (nama, SKS, jadwal, lokasi)
-- **📌 Stash System**: "Ghosting" dosen? Stash kelas, restore, atau reschedule ketika jadwal berubah
-- **🗺️ Calendar Drill-Down**: Klik area kosong di Month view untuk masuk Week view; klik kolom hari di Week view untuk masuk Day view
-- **🧭 Breadcrumb Navigation**: History navigasi kalender dengan breadcrumb clickable
-- **⚡ Quick-Add Task**: Tombol `+` di setiap kolom hari di Week/Day view untuk tambah tugas cepat
-- **📋 Task Banners di Kalender**: Tugas dengan deadline muncul sebagai banner di atas grid Week/Day view
-- **🎓 Onboarding Guide**: Panduan interaktif step-by-step untuk user pertama kali
-- **🛑 Confirm Dialog**: Konfirmasi sebelum hapus course atau tugas
-- **🔔 Toast Notifications**: Pop-up notifikasi aksi di kanan bawah
-- **💾 Backup & Restore**: Export/import data JSON langsung dari UI
-- **⚡ Form Validation**: Input validation untuk mencegah data error
-- **🌓 Light & Dark Theme**: Deteksi otomatis tema sistem OS (`Auto`), opsi paksa mode Terang atau Gelap, serta proteksi anti-FOUC
-- **🎨 Dynamic Full-Color Palette & Presets**: Mengubah seluruh palet warna aplikasi secara dinamis (background, card, border, text, dan tombol) menyesuaikan warna pilihan (Oranye, Hijau, Merah, Indigo, Cyan, Violet, Monochrome) atau warna custom bebas via Color Picker (HEX)
-- **✨ Clean & Functional UI**: Desain minimalis presisi tanpa sudut membulat berlebih ("less AI")
-- **📱 Native Android Support**: Build menjadi aplikasi Android native menggunakan Capacitor.js
+- **Multiple Calendar Views**: Month, Week, Day, dan Agenda view
+- **Smart Meeting Generation**: Otomatis generate semua jadwal untuk satu semester
+- **Task & Event Management**: Manage tugas kuliah serta kegiatan/acara non-akademik (seminar, workshop, rapat) dengan deadline/waktu acara
+- **Tagging Tugas Individu & Kelompok**: Opsi penandaan tugas individu atau kelompok (nama/nomor kelompok dan daftar anggota opsional)
+- **Acara / Kegiatan**: Pencatatan acara dengan opsi waktu mulai-selesai dan lokasi tanpa harus terikat ke mata kuliah
+- **Highlight "Hari Ini" di Kalender**: Penandaan visual yang kontras untuk hari ini di Month view dan Week view
+- **Task & Event Editing**: Edit tugas maupun acara langsung dari form re-populate otomatis
+- **Course Editing**: Edit data matkul induk (nama, hari, jam, SKS, ruangan, warna) tanpa kehilangan relasi tugas atau stash
+- **Course Color Coding**: Penandaan warna unik per matkul (smart auto-assign + swatch custom) di seluruh kalender dan tugas
+- **Multi-Filter Tugas & Acara**: Filter instan berdasarkan status (Aktif, Semua, Selesai), tipe (Tugas, Acara), serta dropdown filter per-matkul
+- **Live End Time & Clash Warning**: Estimasi jam selesai otomatis di form matkul & peringatan visual jika ada jadwal bentrok
+- **Total SKS Summary**: Ringkasan beban SKS semester yang diambil di Sidebar dan header Data Matkul
+- **Task Descriptions**: Deskripsi tugas dengan dukungan format **Markdown** (bold, italic, code, list, heading)
+- **Task Detail Modal**: Klik tugas di kalender untuk lihat detail lengkap + countdown deadline real-time + shortcut edit tugas
+- **Deadline Countdown**: Badge countdown otomatis (jam/hari tersisa, overdue, dsb.)
+- **Local Storage**: Data tersimpan otomatis di browser, tidak hilang saat refresh
+- **Course Management**: Kelola data matkul (nama, SKS, jadwal, lokasi)
+- **Stash System**: "Ghosting" dosen? Stash kelas, restore, atau reschedule ketika jadwal berubah
+- **Calendar Drill-Down**: Klik area kosong di Month view untuk masuk Week view; klik kolom hari di Week view untuk masuk Day view
+- **Breadcrumb Navigation**: History navigasi kalender dengan breadcrumb clickable
+- **Quick-Add Task**: Tombol `+` di setiap kolom hari di Week/Day view untuk tambah tugas cepat
+- **Task Banners di Kalender**: Tugas dengan deadline muncul sebagai banner di atas grid Week/Day view
+- **Onboarding Guide**: Panduan interaktif step-by-step untuk user pertama kali
+- **Confirm Dialog**: Konfirmasi sebelum hapus course atau tugas
+- **Toast Notifications**: Pop-up notifikasi aksi di kanan bawah
+- **Backup & Restore**: Export/import data JSON langsung dari UI
+- **Form Validation**: Input validation untuk mencegah data error
+- **Light & Dark Theme**: Deteksi otomatis tema sistem OS (`Auto`), opsi paksa mode Terang atau Gelap, serta proteksi anti-FOUC
+- **Dynamic Full-Color Palette & Presets**: Mengubah seluruh palet warna aplikasi secara dinamis (background, card, border, text, dan tombol) menyesuaikan warna pilihan (Oranye, Hijau, Merah, Indigo, Cyan, Violet, Monochrome) atau warna custom bebas via Color Picker (HEX)
+- **Clean & Functional UI**: Desain minimalis presisi tanpa sudut membulat berlebih ("less AI")
+- **Native Android Support**: Build menjadi aplikasi Android native menggunakan Capacitor.js
 
-## 🚀 Quick Start
+
+## Quick Start
 
 ### Prerequisites
 - Node.js 16+ dan npm
@@ -53,7 +54,7 @@ npm run dev
 
 Aplikasi akan terbuka di `http://localhost:3000/`
 
-## 📦 Production Build
+## Production Build
 
 ```bash
 npm run build
@@ -62,7 +63,7 @@ npm run preview
 
 File yang di-build akan berada di folder `dist/`
 
-## 📱 Android Build
+## Android Build
 
 Aplikasi ini mendukung build ke mobile (Android) menggunakan Capacitor.js.
 
@@ -72,7 +73,7 @@ npx cap sync android
 npx cap open android
 ```
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 KuliahPlanner/
@@ -110,14 +111,14 @@ KuliahPlanner/
 └── postcss.config.js
 ```
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **React 18.2** - UI Framework
 - **Vite 4.3** - Build tool (super fast)
 - **Tailwind CSS 3.3** - Styling
 - **Lucide React** - Icon library
 
-## 📝 How to Use
+## How to Use
 
 ### 1. Setup Semester
 Buka tab **Config & Data** → Konfigurasi semester:
@@ -176,7 +177,7 @@ Kalau dosen ghosting:
 Saat pertama kali membuka aplikasi, panduan interaktif step-by-step akan muncul otomatis.
 Bisa juga dibuka kembali kapan saja lewat tombol **?** di sidebar.
 
-## 💾 Data Persistence
+## Data Persistence
 
 Semua data otomatis tersimpan di **localStorage** browser:
 - Courses
@@ -190,9 +191,9 @@ Data akan bertahan meski:
 
 **Note**: Data tersimpan per-browser, bukan cloud-synced.
 
-## 🔧 Improvements Implemented
+## Improvements Implemented
 
-✅ **From original code:**
+**From original code:**
 - Fixed: No data persistence → Added localStorage
 - Fixed: Incomplete task form → Added course selector + urgency
 - Fixed: No validation → Added form validation
@@ -201,7 +202,7 @@ Data akan bertahan meski:
 - Improved: Mobile responsive
 - Added: Task completion toggle
 
-✅ **Recent updates:**
+**Recent updates:**
 - Added: Task edit mode (inline form re-populate, Perbarui/Simpan)
 - Added: Task description field with Markdown support (`markdown.js` renderer)
 - Added: `TaskDetailModal` — modal detail tugas + countdown deadline real-time
@@ -223,21 +224,21 @@ Data akan bertahan meski:
 - Added: Integrasi visual Acara di Kalender (chips bulan, grid timeline jam mulai/selesai, agenda view)
 - Added: Filter tipe kegiatan (Tugas / Acara / Semua) di tab Tugas & Acara
 
-## 🐛 Known Issues / TODO
+## Known Issues / TODO
 
 - [ ] No user authentication (semua data public per browser)
 - [ ] No push notification/reminder
 - [ ] Could optimize with TypeScript
 - [ ] Could add tests
 
-## 📱 Browser Support
+## Browser Support
 
 - Chrome/Edge: ✅ Full support
 - Firefox: ✅ Full support
 - Safari: ✅ Full support (limited localStorage)
 - Mobile browsers: ✅ Responsive
 
-## 📄 License
+## License
 
 Feel free to use, modify, dan share!
 
