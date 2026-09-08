@@ -1,3 +1,84 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --theme-bg: hsl(222, 25%, 96%);
+  --theme-surface: hsl(222, 20%, 99%);
+  --theme-surface-subtle: hsl(222, 22%, 92%);
+  --theme-border: hsl(222, 18%, 84%);
+  --theme-border-subtle: hsl(222, 15%, 89%);
+  --theme-text: hsl(222, 30%, 12%);
+  --theme-muted: hsl(222, 15%, 45%);
+
+  --accent-primary: #6366f1;
+  --accent-hover: #4f46e5;
+  --accent-text: #4f46e5;
+  --accent-subtle: rgba(99, 102, 241, 0.12);
+  --accent-border: rgba(99, 102, 241, 0.35);
+  --accent-contrast: #ffffff;
+}
+
+.dark {
+  --theme-bg: hsl(222, 35%, 6.5%);
+  --theme-surface: hsl(222, 28%, 11.5%);
+  --theme-surface-subtle: hsl(222, 24%, 17%);
+  --theme-border: hsl(222, 18%, 26%);
+  --theme-border-subtle: hsl(222, 20%, 18%);
+  --theme-text: hsl(222, 15%, 95%);
+  --theme-muted: hsl(222, 15%, 65%);
+
+  --accent-primary: #6366f1;
+  --accent-hover: #4f46e5;
+  --accent-text: #818cf8;
+  --accent-subtle: rgba(99, 102, 241, 0.15);
+  --accent-border: rgba(99, 102, 241, 0.35);
+  --accent-contrast: #ffffff;
+}
+
+html, body, #root {
+  background-color: var(--theme-bg);
+  color: var(--theme-text);
+  min-height: 100%;
+}
+
+.border-theme {
+  border-color: var(--theme-border) !important;
+}
+
+.border-theme-subtle {
+  border-color: var(--theme-border-subtle) !important;
+}
+
+.border-t-theme { border-top-color: var(--theme-border) !important; }
+.border-b-theme { border-bottom-color: var(--theme-border) !important; }
+.border-l-theme { border-left-color: var(--theme-border) !important; }
+.border-r-theme { border-right-color: var(--theme-border) !important; }
+
+/* Sleek subtle scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+

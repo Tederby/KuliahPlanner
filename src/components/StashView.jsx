@@ -14,41 +14,40 @@ const StashView = ({
   onSaveReschedule,
 }) => {
   return (
-    <div className="space-y-6">
-      <div className="bg-slate-800 p-6 rounded-xl border border-slate-700">
-        <h2 className="text-xl font-bold text-white mb-3 flex items-center gap-2">
-          <Inbox className="w-5 h-5" /> Stash Kelas
+    <div className="space-y-5">
+      <div className="bg-theme-surface p-5 rounded-lg border border-theme shadow-sm">
+        <h2 className="text-lg font-bold text-theme-text mb-2 flex items-center gap-2">
+          <Inbox className="w-5 h-5 text-accent" /> Stash Kelas
         </h2>
-        <p className="text-sm text-slate-400">
-          List kelas yang di-stash termasuk tanggal/jam asli. Pilih aksi untuk jadwal baru atau
-          batalkan stash agar kembali ke kalender.
+        <p className="text-xs text-theme-muted">
+          List kelas yang di-stash dari kalender. Atur jadwal baru atau batalkan stash agar kembali ke slot semula.
         </p>
-        <div className="space-y-3 mt-4">
+        <div className="space-y-2 mt-4">
           {stashes.map((stash) => {
             const course = courses.find((c) => c.id === stash.courseId);
             if (!course) return null;
             return (
               <div
                 key={stash.id}
-                className="bg-slate-900 p-4 rounded-xl border border-rose-900/30 flex flex-col gap-3 md:flex-row md:items-center md:justify-between"
+                className="bg-theme-surface-subtle p-3.5 rounded-md border border-rose-200 dark:border-rose-950/50 flex flex-col gap-3 md:flex-row md:items-center md:justify-between"
               >
                 <div>
-                  <h3 className="font-bold text-white text-sm">{course.name}</h3>
-                  <div className="text-xs text-slate-400 mt-1">
+                  <h3 className="font-semibold text-sm text-theme-text">{course.name}</h3>
+                  <div className="text-xs text-theme-muted mt-1 font-mono">
                     <p>Jadwal asli: {stash.originalDate} | {course.startTime}</p>
-                    <p>Lokasi: {course.location || 'Belum diisi'}</p>
+                    <p className="font-sans">Lokasi: {course.location || 'Belum diisi'}</p>
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => onOpenReschedule(stash)}
-                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm transition-colors"
+                    className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md text-xs font-medium transition-colors shadow-sm"
                   >
                     Atur Jadwal Baru
                   </button>
                   <button
                     onClick={() => onRestoreStash(stash.id)}
-                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 rounded-lg text-sm transition-colors"
+                    className="px-3 py-1.5 bg-theme-surface-subtle hover:bg-theme-surface text-theme-text border border-theme rounded-md text-xs font-medium transition-colors"
                   >
                     Batalkan Stash
                   </button>
@@ -57,47 +56,47 @@ const StashView = ({
             );
           })}
           {stashes.length === 0 && (
-            <p className="text-slate-500 text-sm text-center py-4">Belum ada kelas yang di-stash.</p>
+            <p className="text-theme-muted text-xs text-center py-4">Belum ada kelas yang di-stash.</p>
           )}
         </div>
       </div>
 
       {editingStash && (
-        <div className="bg-slate-800 p-6 rounded-xl border border-slate-700">
+        <div className="bg-theme-surface p-5 rounded-lg border border-theme shadow-sm">
           <div className="flex items-center justify-between gap-3 mb-4">
             <div>
-              <h3 className="text-lg font-bold">Jadwal Baru untuk Kelas</h3>
-              <p className="text-sm text-slate-400">Atur ulang kelas yang sebelumnya di-stash.</p>
+              <h3 className="text-sm font-semibold text-theme-text">Jadwal Baru untuk Kelas</h3>
+              <p className="text-xs text-theme-muted">Atur ulang kelas yang sebelumnya di-stash.</p>
             </div>
-            <button onClick={onCancelReschedule} className="text-slate-400 hover:text-slate-200">
+            <button onClick={onCancelReschedule} className="text-xs text-theme-muted hover:text-theme-text">
               Batal
             </button>
           </div>
-          <form onSubmit={onSaveReschedule} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <form onSubmit={onSaveReschedule} className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
             <div>
-              <label className="block text-xs text-slate-400 mb-1">Tanggal Baru</label>
+              <label className="block text-xs text-theme-muted mb-1">Tanggal Baru</label>
               <input
                 required
                 type="date"
                 value={rescheduleForm.date}
                 onChange={(e) => setRescheduleForm({ ...rescheduleForm, date: e.target.value })}
-                className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white outline-none focus:border-indigo-500"
+                className="w-full bg-theme-surface-subtle border border-theme rounded-md p-2 text-xs text-theme-text outline-none focus:border-accent transition-colors"
               />
             </div>
             <div>
-              <label className="block text-xs text-slate-400 mb-1">Jam Baru</label>
+              <label className="block text-xs text-theme-muted mb-1">Jam Baru</label>
               <input
                 required
                 type="time"
                 value={rescheduleForm.time}
                 onChange={(e) => setRescheduleForm({ ...rescheduleForm, time: e.target.value })}
-                className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white outline-none focus:border-indigo-500"
+                className="w-full bg-theme-surface-subtle border border-theme rounded-md p-2 text-xs text-theme-text outline-none focus:border-accent transition-colors"
               />
             </div>
             <div className="flex items-end">
               <button
                 type="submit"
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-lg font-bold transition-colors"
+                className="w-full bg-accent hover:bg-accent-hover text-accent-contrast px-3.5 py-2 rounded-md font-medium text-xs transition-colors shadow-sm"
               >
                 Simpan Jadwal Baru
               </button>
@@ -107,24 +106,24 @@ const StashView = ({
       )}
 
       {reschedules.length > 0 && (
-        <div className="bg-slate-900 p-6 rounded-xl border border-slate-700">
-          <h3 className="text-lg font-bold mb-4">Jadwal Ulang yang Sudah Ditetapkan</h3>
-          <div className="space-y-3">
+        <div className="bg-theme-surface p-5 rounded-lg border border-theme shadow-sm">
+          <h3 className="text-sm font-semibold text-theme-text mb-3">Jadwal Ulang yang Sudah Ditetapkan</h3>
+          <div className="space-y-2">
             {reschedules.map((rs) => {
               const course = courses.find((c) => c.id === rs.courseId);
               if (!course) return null;
               return (
                 <div
                   key={rs.id}
-                  className="bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-col md:flex-row md:justify-between md:items-center gap-3"
+                  className="bg-theme-surface-subtle p-3.5 rounded-md border border-theme flex flex-col md:flex-row md:justify-between md:items-center gap-2"
                 >
                   <div>
-                    <div className="font-bold text-white">{course.name}</div>
-                    <div className="text-xs text-slate-400 mt-1">
+                    <div className="font-semibold text-sm text-theme-text">{course.name}</div>
+                    <div className="text-xs text-theme-muted mt-0.5 font-mono">
                       Awal: {rs.originalDate} | Baru: {rs.newDate} {rs.newTime}
                     </div>
                   </div>
-                  <div className="text-xs text-slate-400">Ditandai sebagai kelas terjadwal ulang.</div>
+                  <div className="text-[11px] text-theme-muted bg-theme-surface px-2 py-0.5 rounded border border-theme self-start md:self-auto">Terjadwal ulang</div>
                 </div>
               );
             })}

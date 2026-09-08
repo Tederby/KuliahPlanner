@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getInitialState, saveData, exportDataAsJSON, importDataFromJSON } from '../utils/storage';
 import { validateCourse, validateTask, validateConfig } from '../utils/validators';
+import { getCourseColor, getNextAvailableColor } from '../utils/courseColors';
 
 export const useKuliahData = ({ showToast }) => {
   const initialState = getInitialState();
@@ -15,11 +16,25 @@ export const useKuliahData = ({ showToast }) => {
   const [showTaskForm, setShowTaskForm]     = useState(false);
   const [editingTaskId, setEditingTaskId]   = useState(null);
   const [newTask, setNewTask]               = useState({
-    title: '', courseId: '', deadlineDate: '', deadlineTime: '',
-    urgency: 'low', type: 'matkul', description: '',
+    type: 'task', // 'task' | 'event'
+    title: '',
+    courseId: '',
+    deadlineDate: '',
+    deadlineTime: '',
+    startTime: '',
+    endTime: '',
+    location: '',
+    urgency: 'low',
+    taskCategory: 'individual', // 'individual' | 'group'
+    groupName: '',
+    groupMembers: '',
+    description: '',
   });
   const [showCourseForm, setShowCourseForm] = useState(false);
-  const [newCourse, setNewCourse]           = useState({ name: '', sks: 3, day: 'Senin', startTime: '07:00', location: '' });
+  const [editingCourseId, setEditingCourseId] = useState(null);
+  const [newCourse, setNewCourse]           = useState({
+    name: '', sks: 3, day: 'Senin', startTime: '07:00', location: '', color: '',
+  });
   const [editingStash, setEditingStash]     = useState(null);
   const [rescheduleForm, setRescheduleForm] = useState({ date: '', time: '' });
 
@@ -46,15 +61,67 @@ export const useKuliahData = ({ showToast }) => {
   const handleUpdateConfig = (newConfig) => setConfig(newConfig);
   const handleConfigBlur = () => setError(validateConfig(config));
 
+  const resetCourseForm = () => {
+    setNewCourse({
+      name: '',
+      sks: 3,
+      day: 'Senin',
+      startTime: '07:00',
+      location: '',
+      color: '',
+    });
+    setEditingCourseId(null);
+    setShowCourseForm(false);
+  };
+
+  const startEditCourse = (courseId) => {
+    const course = courses.find((c) => c.id === courseId);
+    if (!course) return;
+    setNewCourse({
+      name: course.name,
+      sks: course.sks,
+      day: course.day,
+      startTime: course.startTime,
+      location: course.location || '',
+      color: getCourseColor(course),
+    });
+    setEditingCourseId(courseId);
+    setShowCourseForm(true);
+  };
+
+  const cancelEditCourse = () => {
+    resetCourseForm();
+  };
+
   const handleAddCourse = (e) => {
     e.preventDefault();
     setError(null);
     const err = validateCourse(newCourse);
     if (err) { setError(err); return; }
-    setCourses([...courses, { ...newCourse, id: Date.now() }]);
-    setShowCourseForm(false);
-    setNewCourse({ name: '', sks: 3, day: 'Senin', startTime: '07:00', location: '' });
-    showToast('Matkul berhasil ditambahkan!', 'success');
+
+    const courseColor = newCourse.color || getNextAvailableColor(courses);
+
+    if (editingCourseId) {
+      setCourses(courses.map((c) => (c.id === editingCourseId ? {
+        ...c,
+        name: newCourse.name,
+        sks: Number(newCourse.sks),
+        day: newCourse.day,
+        startTime: newCourse.startTime,
+        location: newCourse.location,
+        color: courseColor,
+      } : c)));
+      showToast('Mata kuliah berhasil diperbarui!', 'success');
+    } else {
+      setCourses([...courses, {
+        ...newCourse,
+        sks: Number(newCourse.sks),
+        color: courseColor,
+        id: Date.now(),
+      }]);
+      showToast('Matkul berhasil ditambahkan!', 'success');
+    }
+    resetCourseForm();
   };
 
   const removeCourse = (id) => {
@@ -77,8 +144,19 @@ export const useKuliahData = ({ showToast }) => {
 
   const resetTaskForm = () => {
     setNewTask({
-      title: '', courseId: '', deadlineDate: '', deadlineTime: '',
-      urgency: 'low', type: 'matkul', description: '',
+      type: 'task',
+      title: '',
+      courseId: '',
+      deadlineDate: '',
+      deadlineTime: '',
+      startTime: '',
+      endTime: '',
+      location: '',
+      urgency: 'low',
+      taskCategory: 'individual',
+      groupName: '',
+      groupMembers: '',
+      description: '',
     });
     setEditingTaskId(null);
     setShowTaskForm(false);
@@ -90,34 +168,33 @@ export const useKuliahData = ({ showToast }) => {
     const err = validateTask(newTask);
     if (err) { setError(err); return; }
 
-    // Combine date + optional time into deadline string
-    const deadline = `${newTask.deadlineDate}T${newTask.deadlineTime || '23:59'}`;
+    const isEvent = newTask.type === 'event';
+    const deadline = isEvent
+      ? `${newTask.deadlineDate}T${newTask.startTime || '00:00'}`
+      : `${newTask.deadlineDate}T${newTask.deadlineTime || '23:59'}`;
+    const courseId = isEvent ? null : (newTask.courseId ? Number(newTask.courseId) : null);
+
+    const taskData = {
+      title: newTask.title.trim(),
+      courseId,
+      deadline,
+      urgency: newTask.urgency || 'low',
+      type: newTask.type || 'task',
+      startTime: newTask.startTime || '',
+      endTime: newTask.endTime || '',
+      location: newTask.location?.trim() || '',
+      taskCategory: newTask.taskCategory || 'individual',
+      groupName: newTask.groupName?.trim() || '',
+      groupMembers: newTask.groupMembers?.trim() || '',
+      description: newTask.description || '',
+    };
 
     if (editingTaskId) {
-      // Update existing task
-      setTasks(tasks.map((t) => t.id === editingTaskId ? {
-        ...t,
-        title: newTask.title,
-        courseId: newTask.courseId,
-        deadline,
-        urgency: newTask.urgency,
-        type: newTask.type,
-        description: newTask.description || '',
-      } : t));
-      showToast('Tugas diperbarui!', 'success');
+      setTasks(tasks.map((t) => (t.id === editingTaskId ? { ...t, ...taskData } : t)));
+      showToast(isEvent ? 'Acara diperbarui!' : 'Tugas diperbarui!', 'success');
     } else {
-      // Create new task
-      setTasks([...tasks, {
-        title: newTask.title,
-        courseId: newTask.courseId,
-        deadline,
-        urgency: newTask.urgency,
-        type: newTask.type,
-        description: newTask.description || '',
-        id: Date.now(),
-        completed: false,
-      }]);
-      showToast('Tugas ditambahkan!', 'success');
+      setTasks([...tasks, { ...taskData, id: Date.now(), completed: false }]);
+      showToast(isEvent ? 'Acara ditambahkan!' : 'Tugas ditambahkan!', 'success');
     }
     resetTaskForm();
   };
@@ -127,13 +204,21 @@ export const useKuliahData = ({ showToast }) => {
     if (!task) return;
     const datePart = task.deadline?.split('T')[0] || '';
     const timePart = task.deadline?.split('T')[1] || '';
+    const isEvent = task.type === 'event';
+
     setNewTask({
+      type: task.type || 'task',
       title: task.title,
-      courseId: task.courseId,
+      courseId: task.courseId || '',
       deadlineDate: datePart,
-      deadlineTime: timePart === '23:59' ? '' : timePart,
-      urgency: task.urgency,
-      type: task.type || 'matkul',
+      deadlineTime: !isEvent && timePart !== '23:59' ? timePart : '',
+      startTime: task.startTime || (isEvent && timePart !== '00:00' ? timePart : ''),
+      endTime: task.endTime || '',
+      location: task.location || '',
+      urgency: task.urgency || 'low',
+      taskCategory: task.taskCategory || 'individual',
+      groupName: task.groupName || '',
+      groupMembers: task.groupMembers || '',
       description: task.description || '',
     });
     setEditingTaskId(taskId);
@@ -146,12 +231,13 @@ export const useKuliahData = ({ showToast }) => {
 
   const removeTask = (id) => {
     const task = tasks.find((t) => t.id === id);
+    const label = task?.type === 'event' ? 'Acara' : 'Tugas';
     openConfirm({
-      title: 'Hapus Tugas?',
-      message: `Yakin hapus tugas "${task?.title}"?`,
+      title: `Hapus ${label}?`,
+      message: `Yakin hapus ${label.toLowerCase()} "${task?.title}"?`,
       onConfirm: () => {
         setTasks(tasks.filter((t) => t.id !== id));
-        showToast('Tugas dihapus.', 'warning');
+        showToast(`${label} dihapus.`, 'warning');
       },
     });
   };
@@ -224,6 +310,7 @@ export const useKuliahData = ({ showToast }) => {
     showTaskForm, setShowTaskForm, newTask, setNewTask,
     editingTaskId,
     showCourseForm, setShowCourseForm, newCourse, setNewCourse,
+    editingCourseId, startEditCourse, cancelEditCourse,
     editingStash, rescheduleForm, setRescheduleForm,
     confirmDialog, handleConfirm, closeConfirm,
     handleUpdateConfig, handleConfigBlur,

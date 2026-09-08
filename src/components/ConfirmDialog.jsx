@@ -16,35 +16,35 @@ const ConfirmDialog = ({ isOpen, title, message, onConfirm, onCancel, danger = t
 
   return (
     <div
-      className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[60] p-4"
+      className="fixed inset-0 bg-black/60 flex items-center justify-center z-[60] p-4"
       onClick={onCancel}
     >
       <div
-        className="bg-slate-900 rounded-2xl border border-slate-700 shadow-2xl w-full max-w-sm p-6"
+        className="bg-theme-surface rounded-lg border border-theme shadow-xl w-full max-w-sm p-5"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center gap-3 mb-3">
-          <div className={`p-2 rounded-xl ${danger ? 'bg-rose-950/50' : 'bg-indigo-950/50'}`}>
-            <AlertTriangle className={`w-5 h-5 ${danger ? 'text-rose-400' : 'text-indigo-400'}`} />
+          <div className={`p-2 rounded-md border ${danger ? 'bg-rose-50 dark:bg-rose-950/70 border-rose-200 dark:border-rose-800/60 text-rose-600 dark:text-rose-400' : 'bg-theme-surface-subtle border-theme text-accent'}`}>
+            <AlertTriangle className="w-4 h-4" />
           </div>
-          <h3 className="font-bold text-white text-lg">{title}</h3>
+          <h3 className="font-semibold text-theme-text text-base">{title}</h3>
         </div>
 
-        <p className="text-slate-400 text-sm mb-6 leading-relaxed">{message}</p>
+        <p className="text-theme-muted text-xs mb-5 leading-relaxed">{message}</p>
 
-        <div className="flex gap-3">
+        <div className="flex gap-2.5">
           <button
             onClick={onCancel}
-            className="flex-1 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 rounded-xl font-bold transition-colors"
+            className="flex-1 px-3.5 py-2 bg-theme-surface-subtle hover:bg-theme-surface text-theme-text border border-theme rounded-md font-medium text-xs transition-colors"
           >
             Batal
           </button>
           <button
             onClick={onConfirm}
-            className={`flex-1 px-4 py-2.5 rounded-xl font-bold transition-colors ${
+            className={`flex-1 px-3.5 py-2 rounded-md font-medium text-xs transition-colors shadow-sm ${
               danger
                 ? 'bg-rose-600 hover:bg-rose-700 text-white'
-                : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                : 'bg-accent hover:bg-accent-hover text-accent-contrast'
             }`}
           >
             Ya, Lanjut

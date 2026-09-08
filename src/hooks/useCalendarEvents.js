@@ -112,15 +112,23 @@ export const useCalendarEvents = ({ courses, config, stashes, reschedules, tasks
     const taskEvents = tasks
       .filter((t) => !t.completed)
       .map((t) => {
+        const isEvent = t.type === 'event';
         const datePart = t.deadline.split('T')[0];
-        const timePart = t.deadline.split('T')[1] || '23:59';
+        const timePart = t.deadline.split('T')[1] || (isEvent ? '' : '23:59');
+        const effectiveStartTime = isEvent ? (t.startTime || (timePart !== '00:00' ? timePart : '')) : timePart;
+
         return {
           instanceId: `task-${t.id}`,
-          type: 'task',
+          type: isEvent ? 'event' : 'task',
           title: t.title,
           date: datePart,
-          startTime: timePart,
+          startTime: effectiveStartTime,
+          endTime: t.endTime || '',
+          location: t.location || '',
           urgency: t.urgency,
+          taskCategory: t.taskCategory || 'individual',
+          groupName: t.groupName || '',
+          groupMembers: t.groupMembers || '',
           description: t.description || '',
           courseId: t.courseId,
           taskId: t.id,
