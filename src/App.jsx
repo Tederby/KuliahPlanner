@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { AlertTriangle, X } from 'lucide-react';
 
 import { useToast }          from './hooks/useToast';
+import { useTheme }          from './hooks/useTheme';
 import { useKuliahData }     from './hooks/useKuliahData';
 import { useCalendarEvents } from './hooks/useCalendarEvents';
 
@@ -22,6 +23,7 @@ export default function App() {
   const [selectedTask, setSelectedTask]   = useState(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
+  const theme = useTheme();
   const { toasts, showToast, dismissToast } = useToast();
 
   const data = useKuliahData({ showToast });
@@ -79,8 +81,8 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-200 p-4 md:p-8 font-sans">
-      <div className="max-w-[1400px] mx-auto flex flex-col md:flex-row gap-8">
+    <div className="min-h-screen bg-theme-bg text-theme-text p-4 md:p-6 lg:p-8 font-sans antialiased transition-colors duration-200">
+      <div className="max-w-[1400px] mx-auto flex flex-col md:flex-row gap-6 lg:gap-8">
         <Sidebar
           activeTab={activeTab}
           setActiveTab={setActiveTab}
@@ -88,18 +90,19 @@ export default function App() {
           tasks={data.tasks}
           stashes={data.stashes}
           onShowGuide={() => setShowOnboarding(true)}
+          theme={theme}
         />
 
         <div className="flex-1 min-w-0">
           {/* Error Alert */}
           {data.error && (
-            <div className="mb-4 p-4 bg-rose-900/20 border border-rose-900/50 rounded-lg flex items-start gap-3">
-              <AlertTriangle className="w-5 h-5 text-rose-400 mt-0.5 shrink-0" />
+            <div className="mb-4 p-3.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 rounded-md flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-rose-500 dark:text-rose-400 mt-0.5 shrink-0" />
               <div>
-                <p className="font-bold text-rose-400">Error</p>
-                <p className="text-sm text-rose-300">{data.error}</p>
+                <p className="font-semibold text-sm text-rose-700 dark:text-rose-300">Error</p>
+                <p className="text-xs text-rose-600 dark:text-rose-400/90">{data.error}</p>
               </div>
-              <button onClick={() => data.setError(null)} className="ml-auto text-rose-400 hover:text-rose-300">
+              <button onClick={() => data.setError(null)} className="ml-auto text-rose-500 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-200">
                 <X className="w-4 h-4" />
               </button>
             </div>

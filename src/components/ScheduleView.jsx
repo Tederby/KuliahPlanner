@@ -88,19 +88,19 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
       <div
         key={dateStr}
         onClick={() => handleMonthCellClick(cellDateObj)}
-        className={`min-h-[100px] p-1 border-r border-b border-slate-700/50 cursor-pointer transition-colors group ${
+        className={`min-h-[100px] p-1 border-r border-b border-theme cursor-pointer transition-colors group ${
           !isCurrentMonth
-            ? 'bg-slate-900/50 hover:bg-slate-800/60'
+            ? 'bg-theme-surface-subtle/50 hover:bg-theme-surface-subtle/80'
             : isToday
-            ? 'bg-indigo-950/20 hover:bg-indigo-950/40'
-            : 'bg-slate-800 hover:bg-slate-700/60'
+            ? 'bg-accent/15 hover:bg-accent/20'
+            : 'bg-theme-surface hover:bg-theme-surface-subtle/60'
         }`}
       >
-        <div className={`text-xs font-bold text-right p-1 flex items-center justify-end gap-1 ${
-          !isCurrentMonth ? 'text-slate-600' : isToday ? 'text-indigo-400' : 'text-slate-500'
+        <div className={`text-xs font-medium text-right p-1 flex items-center justify-end gap-1 ${
+          !isCurrentMonth ? 'text-theme-muted/60' : isToday ? 'text-accent font-bold' : 'text-theme-muted'
         }`}>
-          <span className="text-[9px] text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity">
-            Lihat minggu →
+          <span className="text-[9px] text-theme-muted opacity-0 group-hover:opacity-100 transition-opacity">
+            Minggu →
           </span>
           {cellDateObj.getDate()}
         </div>
@@ -113,23 +113,23 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
                 if (ev.type === 'course') onSelectEvent(ev);
                 else if (ev.type === 'task') onSelectTask(ev);
               }}
-              className={`text-[10px] p-1 rounded cursor-pointer truncate relative z-10 ${
+              className={`text-[11px] px-1.5 py-0.5 rounded cursor-pointer truncate relative z-10 font-medium ${
                 ev.type === 'course'
-                  ? 'bg-indigo-900/50 text-indigo-300 hover:bg-indigo-800/80 border border-indigo-500/30'
+                  ? 'bg-accent/20 text-accent border border-accent/40 hover:bg-accent/30'
                   : ev.urgency === 'high'
-                  ? 'bg-rose-900/50 text-rose-300 border border-rose-500/30'
-                  : 'bg-emerald-900/50 text-emerald-300 border border-emerald-500/30'
+                  ? 'bg-rose-50 dark:bg-rose-950/70 text-rose-700 dark:text-rose-200 border border-rose-200 dark:border-rose-700/50'
+                  : 'bg-emerald-50 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-200 border border-emerald-200 dark:border-emerald-700/50'
               }`}
             >
               <div className="flex items-center gap-1">
-                <span>{ev.type === 'course' ? ev.startTime : '📌'}</span>
+                <span className="text-[10px] opacity-75">{ev.type === 'course' ? ev.startTime : '📌'}</span>
                 {ev.isRescheduled && (
-                  <span className="text-[8px] uppercase tracking-[0.2em] px-1 rounded bg-amber-500/20 text-amber-200">
-                    reschedule
+                  <span className="text-[8px] uppercase tracking-wider px-1 rounded bg-amber-500/20 text-amber-700 dark:text-amber-200">
+                    resched
                   </span>
                 )}
               </div>
-              <div>{ev.type === 'course' ? ev.name : `[TGS] ${ev.title}`}</div>
+              <div className="truncate">{ev.type === 'course' ? ev.name : `[TGS] ${ev.title}`}</div>
             </div>
           ))}
         </div>
@@ -164,10 +164,10 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
     const todayStr = formatDateStr(now);
 
     return (
-      <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden flex flex-col h-[600px]">
+      <div className="bg-theme-surface rounded-lg border border-theme overflow-hidden flex flex-col h-[600px] shadow-sm">
         {/* Header Days */}
-        <div className="flex border-b border-slate-700 bg-slate-900 shrink-0">
-          <div className="w-16 shrink-0 border-r border-slate-700"></div>
+        <div className="flex border-b border-theme bg-theme-surface-subtle shrink-0">
+          <div className="w-16 shrink-0 border-r border-theme"></div>
           {daysOffsetArray.map((offset) => {
             const d = getDayDate(offset);
             const dateStr = formatDateStr(d);
@@ -176,20 +176,20 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
               <div
                 key={offset}
                 onClick={() => isWeekMode && handleWeekDayClick(d)}
-                className={`flex-1 text-center py-2 text-sm font-bold border-r border-slate-700 transition-colors ${
+                className={`flex-1 text-center py-2 text-xs font-semibold border-r border-theme transition-colors ${
                   isWeekMode ? 'cursor-pointer' : ''
                 } ${
                   isToday
-                    ? `text-indigo-400 bg-indigo-950/30 ${isWeekMode ? 'hover:bg-indigo-950/60' : ''}`
-                    : `text-slate-400 ${isWeekMode ? 'hover:bg-slate-700/50' : ''}`
+                    ? `text-accent bg-accent/10 ${isWeekMode ? 'hover:bg-accent/15' : ''}`
+                    : `text-theme-muted ${isWeekMode ? 'hover:bg-theme-surface' : ''}`
                 }`}
               >
                 {displayDaysOfWeek[d.getDay()]} <br />
-                <span className="text-xs font-normal">
+                <span className="text-[11px] font-normal text-theme-muted opacity-80">
                   {d.getDate()}/{d.getMonth() + 1}
                 </span>
                 {isWeekMode && (
-                  <span className="block text-[9px] text-slate-600 mt-0.5 opacity-0 hover:opacity-100 transition-opacity">
+                  <span className="block text-[9px] text-theme-muted opacity-0 hover:opacity-100 transition-opacity">
                     Lihat hari
                   </span>
                 )}
@@ -200,9 +200,9 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
 
         {/* All-day task banners */}
         {hasTasks && (
-          <div className="flex border-b border-slate-700 shrink-0">
-            <div className="w-16 shrink-0 border-r border-slate-700 flex items-center justify-end pr-2">
-              <span className="text-[10px] text-slate-500 uppercase tracking-wider">Tugas</span>
+          <div className="flex border-b border-theme shrink-0 bg-theme-surface-subtle/70">
+            <div className="w-16 shrink-0 border-r border-theme flex items-center justify-end pr-2">
+              <span className="text-[10px] text-theme-muted uppercase tracking-wider font-mono">Tugas</span>
             </div>
             {daysOffsetArray.map((offset) => {
               const d = getDayDate(offset);
@@ -213,8 +213,8 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
               return (
                 <div
                   key={`task-${offset}`}
-                  className={`flex-1 border-r border-slate-700/30 p-1 space-y-0.5 min-h-[8px] ${
-                    isWeekMode ? 'cursor-pointer hover:bg-slate-700/15 transition-colors' : ''
+                  className={`flex-1 border-r border-theme-subtle p-1 space-y-0.5 min-h-[8px] ${
+                    isWeekMode ? 'cursor-pointer hover:bg-theme-surface/50 transition-colors' : ''
                   }`}
                   onClick={() => isWeekMode && handleWeekDayClick(d)}
                 >
@@ -225,14 +225,14 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
                         e.stopPropagation();
                         onSelectTask(task);
                       }}
-                      className={`text-[10px] px-1.5 py-0.5 rounded truncate font-medium cursor-pointer hover:brightness-125 transition-all ${
+                      className={`text-[10px] px-1.5 py-0.5 rounded truncate font-medium cursor-pointer transition-colors ${
                         task.urgency === 'high'
-                          ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
-                          : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                          ? 'bg-rose-50 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/60 hover:bg-rose-100 dark:hover:bg-rose-900/60'
+                          : 'bg-emerald-50 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60'
                       }`}
                       title={`${task.title} — DL: ${task.startTime}`}
                     >
-                      <span className="opacity-70 mr-1">⏰{task.startTime}</span>
+                      <span className="opacity-70 mr-1 font-mono">{task.startTime}</span>
                       {task.title}
                     </div>
                   ))}
@@ -249,11 +249,11 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
             {hours.map((h) => (
               <React.Fragment key={h}>
                 <div
-                  className="absolute left-0 right-0 border-t border-slate-700/40"
+                  className="absolute left-0 right-0 border-t border-theme-subtle"
                   style={{ top: `${(h - HOUR_START) * HOUR_HEIGHT}px` }}
                 />
                 <div
-                  className="absolute left-0 w-16 text-right pr-2 text-xs text-slate-500"
+                  className="absolute left-0 w-16 text-right pr-2 text-[11px] font-mono text-theme-muted"
                   style={{ top: `${(h - HOUR_START) * HOUR_HEIGHT}px`, transform: 'translateY(-50%)' }}
                 >
                   {h.toString().padStart(2, '0')}:00
@@ -267,8 +267,8 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
                 className="absolute left-16 right-0 z-20 pointer-events-none flex items-center"
                 style={{ top: `${nowMinutes}px` }}
               >
-                <div className="w-2.5 h-2.5 rounded-full bg-red-500 -ml-1.5 shrink-0 shadow-lg shadow-red-500/40"></div>
-                <div className="flex-1 h-[2px] bg-red-500/80 shadow-sm shadow-red-500/30"></div>
+                <div className="w-2 h-2 rounded-full bg-rose-500 -ml-1 shrink-0"></div>
+                <div className="flex-1 h-[1.5px] bg-rose-500/80"></div>
               </div>
             )}
 
@@ -285,8 +285,8 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
                   <div
                     key={offset}
                     onClick={() => isWeekMode && handleWeekDayClick(d)}
-                    className={`flex-1 border-r border-slate-700/30 relative group ${
-                      isWeekMode ? 'cursor-pointer hover:bg-slate-700/15 transition-colors' : ''
+                    className={`flex-1 border-r border-theme-subtle relative group ${
+                      isWeekMode ? 'cursor-pointer hover:bg-theme-surface-subtle/30 transition-colors' : ''
                     }`}
                   >
                     {/* Quick-add task button */}
@@ -296,7 +296,7 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
                           e.stopPropagation();
                           onQuickAddTask(dateStr);
                         }}
-                        className="absolute top-1 right-1 z-30 w-5 h-5 rounded bg-indigo-600/80 hover:bg-indigo-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute top-1 right-1 z-30 w-5 h-5 rounded bg-theme-surface-subtle hover:bg-accent text-theme-muted hover:text-accent-contrast flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity border border-theme shadow-sm"
                         title="Tambah tugas di hari ini"
                       >
                         <Plus className="w-3 h-3" />
@@ -317,21 +317,21 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
                             e.stopPropagation();
                             onSelectEvent(ev);
                           }}
-                          className="absolute left-1 right-1 rounded-md p-1.5 text-xs overflow-hidden cursor-pointer transition-transform hover:scale-[1.02] hover:z-10 shadow-lg border bg-indigo-600/90 text-white border-indigo-400"
+                          className="absolute left-1 right-1 rounded p-1.5 text-xs overflow-hidden cursor-pointer border bg-accent text-accent-contrast border-accent-hover/80 hover:opacity-95 transition-all shadow-sm"
                           style={{ top: `${top}px`, height: `${height}px`, zIndex: 5 }}
                         >
-                          <div className="font-bold leading-tight flex items-center justify-between gap-2">
-                            <span>{ev.name}</span>
+                          <div className="font-semibold leading-tight flex items-center justify-between gap-1">
+                            <span className="truncate">{ev.name}</span>
                             {ev.isRescheduled && (
-                              <span className="text-[10px] uppercase tracking-[0.15em] px-1 rounded bg-amber-500/20 text-amber-100">
-                                reschedule
+                              <span className="text-[9px] uppercase tracking-wider px-1 rounded bg-black/30 text-white border border-white/20 shrink-0">
+                                resched
                               </span>
                             )}
                           </div>
-                          <div className="text-[10px] opacity-80 mt-0.5">
+                          <div className="text-[10px] opacity-80 mt-0.5 font-mono">
                             {ev.startTime} - {ev.endTime}
                           </div>
-                          <div className="text-[9px] mt-1 bg-black/20 inline-block px-1 rounded">
+                          <div className="text-[9px] mt-1 bg-black/20 inline-block px-1 rounded font-mono">
                             P-{ev.meetingNum}
                           </div>
                         </div>
@@ -367,7 +367,7 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
     });
 
     return (
-      <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 space-y-2">
+      <div className="bg-theme-surface p-4 rounded-lg border border-theme space-y-2 shadow-sm">
         {grouped.map((item, idx) => {
           if (item.type === 'header') {
             const d = new Date(item.date);
@@ -376,22 +376,22 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
             return (
               <div
                 key={`header-${item.date}`}
-                className={`flex items-center gap-3 pt-4 pb-2 ${idx > 0 ? 'mt-2 border-t border-slate-700/60' : ''}`}
+                className={`flex items-center gap-3 pt-4 pb-2 ${idx > 0 ? 'mt-2 border-t border-theme' : ''}`}
               >
-                <div className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center shrink-0 ${
-                  isToday ? 'bg-indigo-600 text-white' : 'bg-slate-900 text-slate-300'
+                <div className={`w-10 h-10 rounded-md flex flex-col items-center justify-center shrink-0 ${
+                  isToday ? 'bg-accent text-accent-contrast shadow-sm' : 'bg-theme-surface-subtle text-theme-text border border-theme'
                 }`}>
-                  <span className="text-lg font-black leading-none">{d.getDate()}</span>
-                  <span className="text-[9px] uppercase tracking-wider opacity-70">
+                  <span className="text-base font-bold leading-none">{d.getDate()}</span>
+                  <span className="text-[9px] uppercase tracking-wider opacity-80">
                     {monthNames[d.getMonth()].substring(0, 3)}
                   </span>
                 </div>
                 <div>
-                  <div className={`text-sm font-bold ${isToday ? 'text-indigo-400' : 'text-slate-300'}`}>
+                  <div className={`text-sm font-semibold ${isToday ? 'text-accent' : 'text-theme-text'}`}>
                     {dayName}
-                    {isToday && <span className="ml-2 text-[10px] uppercase tracking-wider bg-indigo-500/20 px-2 py-0.5 rounded-full">Hari ini</span>}
+                    {isToday && <span className="ml-2 text-[10px] font-medium bg-accent/15 text-accent px-1.5 py-0.5 rounded border border-accent/30">Hari ini</span>}
                   </div>
-                  <div className="text-[11px] text-slate-500">
+                  <div className="text-[11px] text-theme-muted">
                     {d.getDate()} {monthNames[d.getMonth()]} {d.getFullYear()}
                   </div>
                 </div>
@@ -406,58 +406,56 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
               onClick={() => {
                 if (ev.type === 'task') onSelectTask(ev);
               }}
-              className={`flex items-center gap-4 p-3 rounded-lg border-l-4 ml-2 ${
+              className={`flex items-center gap-3 p-3 rounded-md border ${
                 ev.type === 'course'
-                  ? 'border-indigo-500 bg-slate-900 hover:bg-slate-700/50'
+                  ? 'border-theme bg-theme-surface-subtle/50 hover:bg-theme-surface-subtle'
                   : ev.urgency === 'high'
-                  ? 'border-rose-500 bg-rose-950/20 hover:bg-rose-950/30 cursor-pointer'
-                  : 'border-emerald-500 bg-emerald-950/20 hover:bg-emerald-950/30 cursor-pointer'
+                  ? 'border-rose-200 dark:border-rose-800/40 bg-rose-50/80 dark:bg-rose-950/20 hover:bg-rose-100/80 dark:hover:bg-rose-950/30 cursor-pointer'
+                  : 'border-emerald-200 dark:border-emerald-800/40 bg-emerald-50/80 dark:bg-emerald-950/20 hover:bg-emerald-100/80 dark:hover:bg-emerald-950/30 cursor-pointer'
               } transition-colors`}
             >
-              <div className={`w-24 text-sm font-mono text-center p-2 rounded shrink-0 ${
-                ev.type === 'course' ? 'bg-slate-950/50 text-slate-400' : 'bg-slate-950/30 text-slate-400'
-              }`}>
-                <span className="block text-xs font-bold mb-0.5">
+              <div className="w-20 text-xs font-mono text-center p-1.5 rounded bg-theme-surface border border-theme text-theme-muted shrink-0">
+                <span className="block font-semibold text-theme-text">
                   {ev.startTime}
                 </span>
                 {ev.type === 'course' && ev.endTime && (
-                  <span className="block text-[11px] opacity-60">
+                  <span className="block text-[10px] opacity-70">
                     — {ev.endTime}
                   </span>
                 )}
                 {ev.type === 'task' && (
-                  <span className="block text-[10px] text-slate-500">deadline</span>
+                  <span className="block text-[9px] text-theme-muted">deadline</span>
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="font-bold text-white text-lg flex items-center gap-2">
+                <div className="font-semibold text-theme-text text-sm flex items-center gap-2">
                   <span className="truncate">{ev.type === 'course' ? ev.name : ev.title}</span>
                   {ev.type === 'course' && (
-                    <span className="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded shrink-0">
+                    <span className="text-[10px] font-mono bg-theme-surface text-theme-muted px-1.5 py-0.5 rounded border border-theme shrink-0">
                       P-{ev.meetingNum}
                     </span>
                   )}
                   {ev.type === 'task' && (
-                    <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded shrink-0 ${
+                    <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded border shrink-0 ${
                       ev.urgency === 'high'
-                        ? 'bg-rose-500/20 text-rose-300'
-                        : 'bg-emerald-500/20 text-emerald-300'
+                        ? 'bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800/60'
+                        : 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/60'
                     }`}>
                       {ev.urgency === 'high' ? 'Urgent' : 'Normal'}
                     </span>
                   )}
                 </div>
-                <div className="text-sm text-slate-400">
+                <div className="text-xs text-theme-muted mt-0.5">
                   {ev.type === 'course' ? `${ev.location} • ${ev.sks} SKS` : 'Tugas / Deadline'}
                 </div>
                 {ev.isRescheduled && (
-                  <div className="text-xs text-amber-300 mt-2 uppercase tracking-wider">Reschedule</div>
+                  <div className="text-[10px] font-medium text-amber-600 dark:text-amber-300 mt-1 uppercase tracking-wider">Reschedule</div>
                 )}
               </div>
               {ev.type === 'course' && (
                 <button
                   onClick={() => onSelectEvent(ev)}
-                  className="px-3 py-2 bg-slate-800 hover:bg-indigo-900/50 text-indigo-400 rounded-lg transition-colors text-sm shrink-0"
+                  className="px-2.5 py-1.5 bg-theme-surface-subtle hover:bg-theme-surface text-theme-text rounded-md transition-colors text-xs font-medium border border-theme shrink-0"
                 >
                   Detail & Aksi
                 </button>
@@ -467,7 +465,7 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
         })}
 
         {upcomingEvents.length === 0 && (
-          <div className="text-center text-slate-500 py-12">
+          <div className="text-center text-theme-muted py-12 text-sm">
             Tidak ada event mendatang.
           </div>
         )}
@@ -478,7 +476,7 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
   return (
     <div className="space-y-4">
       {/* View Controls */}
-      <div className="flex flex-col gap-3 bg-slate-800 p-4 rounded-xl border border-slate-700">
+      <div className="flex flex-col gap-2.5 bg-theme-surface p-3 rounded-lg border border-theme shadow-sm">
         {/* Breadcrumb */}
         {viewHistory.length > 0 && (
           <div className="flex items-center gap-1.5 text-xs">
@@ -491,7 +489,7 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
                     setViewMode(h.viewMode);
                     setCurrentDateObj(h.date);
                   }}
-                  className="text-slate-500 hover:text-indigo-400 transition-colors capitalize"
+                  className="text-theme-muted hover:text-accent transition-colors capitalize"
                 >
                   {h.viewMode === 'month'
                     ? `${monthNames[h.date.getMonth()]} ${h.date.getFullYear()}`
@@ -505,10 +503,10 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
                       })()
                     : `${h.date.getDate()} ${monthNames[h.date.getMonth()]}`}
                 </button>
-                <span className="text-slate-600">›</span>
+                <span className="text-theme-muted">›</span>
               </React.Fragment>
             ))}
-            <span className="text-indigo-400 font-bold capitalize">
+            <span className="text-accent font-semibold capitalize">
               {viewMode === 'month'
                 ? `${monthNames[currentDateObj.getMonth()]} ${currentDateObj.getFullYear()}`
                 : viewMode === 'week'
@@ -518,20 +516,20 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
           </div>
         )}
 
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <div className="flex bg-slate-900 rounded-lg p-1">
-              <button onClick={() => navDate(-1)} className="p-2 hover:bg-slate-700 rounded text-slate-400">
+        <div className="flex flex-wrap justify-between items-center gap-3">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center bg-theme-surface-subtle border border-theme rounded-md p-0.5">
+              <button onClick={() => navDate(-1)} className="p-1.5 hover:bg-theme-surface rounded text-theme-muted hover:text-theme-text transition-colors">
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              <div className="px-4 py-2 font-bold text-white min-w-[200px] text-center">
+              <div className="px-3 py-1 font-semibold text-xs text-theme-text min-w-[180px] text-center">
                 {viewMode === 'month'
                   ? `${monthNames[currentDateObj.getMonth()]} ${currentDateObj.getFullYear()}`
                   : viewMode === 'week'
                   ? getWeekHeaderText()
                   : `${currentDateObj.getDate()} ${monthNames[currentDateObj.getMonth()]}`}
               </div>
-              <button onClick={() => navDate(1)} className="p-2 hover:bg-slate-700 rounded text-slate-400">
+              <button onClick={() => navDate(1)} className="p-1.5 hover:bg-theme-surface rounded text-theme-muted hover:text-theme-text transition-colors">
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
@@ -539,9 +537,9 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
             {/* Today button */}
             <button
               onClick={goToToday}
-              className="px-3 py-2 bg-slate-900 hover:bg-indigo-900/40 text-slate-400 hover:text-indigo-400 rounded-lg text-sm transition-colors flex items-center gap-1.5 border border-slate-700 hover:border-indigo-500/30"
+              className="px-2.5 py-1.5 bg-theme-surface-subtle hover:bg-theme-surface text-theme-text rounded-md text-xs font-medium transition-colors flex items-center gap-1.5 border border-theme"
             >
-              <CalendarDays className="w-4 h-4" />
+              <CalendarDays className="w-3.5 h-3.5 text-theme-muted" />
               Hari Ini
             </button>
 
@@ -549,14 +547,14 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
             {viewHistory.length > 0 && (
               <button
                 onClick={goBack}
-                className="px-3 py-2 bg-slate-900 hover:bg-slate-700 text-slate-400 hover:text-white rounded-lg text-sm transition-colors border border-slate-700"
+                className="px-2.5 py-1.5 bg-theme-surface-subtle hover:bg-theme-surface text-theme-text rounded-md text-xs font-medium transition-colors border border-theme"
               >
                 ← Kembali
               </button>
             )}
           </div>
 
-          <div className="flex bg-slate-900 rounded-lg p-1">
+          <div className="flex bg-theme-surface-subtle border border-theme rounded-md p-0.5">
             {['month', 'week', 'day', 'agenda'].map((mode) => (
               <button
                 key={mode}
@@ -564,8 +562,8 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
                   setViewHistory([]);
                   setViewMode(mode);
                 }}
-                className={`px-4 py-2 rounded-md text-sm transition-colors capitalize ${
-                  viewMode === mode ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
+                className={`px-3 py-1 rounded text-xs font-medium transition-colors capitalize ${
+                  viewMode === mode ? 'bg-accent text-accent-contrast shadow-sm' : 'text-theme-muted hover:text-theme-text'
                 }`}
               >
                 {mode}
@@ -577,10 +575,10 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
 
       {/* Calendar Renderers */}
       {viewMode === 'month' && (
-        <div className="bg-slate-900 rounded-xl border border-slate-700 overflow-hidden">
-          <div className="grid grid-cols-7 bg-slate-800 border-b border-slate-700">
+        <div className="bg-theme-surface rounded-lg border border-theme overflow-hidden shadow-sm">
+          <div className="grid grid-cols-7 bg-theme-surface-subtle border-b border-theme">
             {displayDaysOfWeek.map((d) => (
-              <div key={d} className="py-2 text-center text-xs font-bold text-slate-400">
+              <div key={d} className="py-2 text-center text-xs font-semibold text-theme-muted">
                 {d}
               </div>
             ))}

@@ -25,7 +25,9 @@ Demo online tersedia di: https://kuliah-planner.vercel.app/
 - **🔔 Toast Notifications**: Pop-up notifikasi aksi di kanan bawah
 - **💾 Backup & Restore**: Export/import data JSON langsung dari UI
 - **⚡ Form Validation**: Input validation untuk mencegah data error
-- **🎨 Modern UI**: Dark theme dengan Tailwind CSS dan Lucide icons
+- **🌓 Light & Dark Theme**: Deteksi otomatis tema sistem OS (`Auto`), opsi paksa mode Terang atau Gelap, serta proteksi anti-FOUC
+- **🎨 Dynamic Full-Color Palette & Presets**: Mengubah seluruh palet warna aplikasi secara dinamis (background, card, border, text, dan tombol) menyesuaikan warna pilihan (Oranye, Hijau, Merah, Indigo, Cyan, Violet, Monochrome) atau warna custom bebas via Color Picker (HEX)
+- **✨ Clean & Functional UI**: Desain minimalis presisi tanpa sudut membulat berlebih ("less AI")
 - **📱 Native Android Support**: Build menjadi aplikasi Android native menggunakan Capacitor.js
 
 ## 🚀 Quick Start
@@ -78,10 +80,12 @@ KuliahPlanner/
 │   │   ├── StashView.jsx         # Tab Stash (reschedule kelas)
 │   │   ├── TaskDetailModal.jsx   # Modal detail tugas + countdown deadline
 │   │   ├── TaskView.jsx          # Tab Tugas + form tambah/edit tugas
+│   │   ├── ThemeSwitcher.jsx     # Kontrol tema (Light/Dark/Auto) dan custom color picker/preset
 │   │   └── ToastContainer.jsx    # Toast notification
 │   ├── hooks/
 │   │   ├── useCalendarEvents.js  # Derive calendar events dari data
 │   │   ├── useKuliahData.js      # State & logic utama (CRUD matkul, tugas, stash)
+│   │   ├── useTheme.js           # Pengelola tema sistem, mode light/dark, dan kalkulator palet warna dinamis
 │   │   └── useToast.js           # Toast state management
 │   ├── utils/
 │   │   ├── dateUtils.js          # Helper format tanggal
