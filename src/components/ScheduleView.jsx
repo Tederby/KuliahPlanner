@@ -82,7 +82,7 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
   const renderCalendarCell = (dateStr, cellDateObj) => {
     const dayEvents = allCalendarEvents
       .filter((e) => e.date === dateStr)
-      .sort((a, b) => a.startTime.localeCompare(b.startTime));
+      .sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
     const isToday = dateStr === formatDateStr(new Date());
     const isCurrentMonth = cellDateObj.getMonth() === currentDateObj.getMonth();
 
@@ -94,29 +94,64 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
           !isCurrentMonth
             ? 'bg-theme-surface-subtle/50 hover:bg-theme-surface-subtle/80'
             : isToday
-            ? 'bg-accent/15 hover:bg-accent/20'
+            ? 'bg-accent/[0.08] ring-1 ring-inset ring-accent/60'
             : 'bg-theme-surface hover:bg-theme-surface-subtle/60'
         }`}
       >
-        <div className={`text-xs font-medium text-right p-1 flex items-center justify-end gap-1 ${
-          !isCurrentMonth ? 'text-theme-muted/60' : isToday ? 'text-accent font-bold' : 'text-theme-muted'
-        }`}>
-          <span className="text-[9px] text-theme-muted opacity-0 group-hover:opacity-100 transition-opacity">
-            Minggu →
-          </span>
-          {cellDateObj.getDate()}
+        <div className="text-xs font-medium p-1 flex items-center justify-between gap-1">
+          {isToday ? (
+            <span className="text-[9px] font-bold text-accent px-1.5 py-0.2 bg-accent/15 rounded border border-accent/30">
+              Hari ini
+            </span>
+          ) : (
+            <span className="text-[9px] text-theme-muted opacity-0 group-hover:opacity-100 transition-opacity">
+              Minggu →
+            </span>
+          )}
+
+          {isToday ? (
+            <span className="w-5 h-5 rounded-full bg-accent text-accent-contrast flex items-center justify-center font-bold text-xs shadow-xs">
+              {cellDateObj.getDate()}
+            </span>
+          ) : (
+            <span className={!isCurrentMonth ? 'text-theme-muted/60' : 'text-theme-muted'}>
+              {cellDateObj.getDate()}
+            </span>
+          )}
         </div>
+
         <div className="space-y-1">
           {dayEvents.map((ev) => {
             const isCourse = ev.type === 'course';
+            const isEvent = ev.type === 'event';
             const courseColor = isCourse ? getCourseColor(ev) : null;
+
+            if (isEvent) {
+              return (
+                <div
+                  key={ev.instanceId}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSelectTask(ev);
+                  }}
+                  className="text-[11px] px-1.5 py-0.5 rounded cursor-pointer truncate relative z-10 font-medium border bg-purple-50 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800/60 hover:opacity-90"
+                >
+                  <div className="flex items-center gap-1">
+                    <span className="text-[10px]">🎉</span>
+                    {ev.startTime && <span className="text-[10px] opacity-75 font-mono">{ev.startTime}</span>}
+                  </div>
+                  <div className="truncate">{ev.title}</div>
+                </div>
+              );
+            }
+
             return (
               <div
                 key={ev.instanceId}
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (ev.type === 'course') onSelectEvent(ev);
-                  else if (ev.type === 'task') onSelectTask(ev);
+                  if (isCourse) onSelectEvent(ev);
+                  else onSelectTask(ev);
                 }}
                 style={isCourse ? {
                   backgroundColor: `${courseColor}18`,
@@ -167,9 +202,11 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
       return d;
     };
 
-    const hasTasks = daysOffsetArray.some((offset) => {
+    const hasBanners = daysOffsetArray.some((offset) => {
       const dateStr = formatDateStr(getDayDate(offset));
-      return allCalendarEvents.some((e) => e.date === dateStr && e.type === 'task');
+      return allCalendarEvents.some(
+        (e) => e.date === dateStr && (e.type === 'task' || (e.type === 'event' && (!e.startTime || !e.endTime)))
+      );
     });
 
     // Current time line position
@@ -194,15 +231,30 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
                   isWeekMode ? 'cursor-pointer' : ''
                 } ${
                   isToday
-                    ? `text-accent bg-accent/10 ${isWeekMode ? 'hover:bg-accent/15' : ''}`
-                    : `text-theme-muted ${isWeekMode ? 'hover:bg-theme-surface' : ''}`
+                    ? 'bg-accent/10'
+                    : isWeekMode ? 'hover:bg-theme-surface' : ''
                 }`}
               >
-                {displayDaysOfWeek[d.getDay()]} <br />
-                <span className="text-[11px] font-normal text-theme-muted opacity-80">
-                  {d.getDate()}/{d.getMonth() + 1}
-                </span>
-                {isWeekMode && (
+                <div className={`leading-tight ${isToday ? 'text-accent font-bold' : 'text-theme-muted'}`}>
+                  {displayDaysOfWeek[d.getDay()]}
+                </div>
+                <div className="mt-0.5 flex items-center justify-center">
+                  {isToday ? (
+                    <span className="px-1.5 py-0.5 rounded-full bg-accent text-accent-contrast font-bold text-[10px] shadow-xs">
+                      {d.getDate()}/{d.getMonth() + 1}
+                    </span>
+                  ) : (
+                    <span className="text-[11px] font-normal text-theme-muted opacity-80">
+                      {d.getDate()}/{d.getMonth() + 1}
+                    </span>
+                  )}
+                </div>
+                {isToday && (
+                  <span className="inline-block text-[9px] font-bold text-accent bg-accent/15 px-1.5 py-0.2 rounded mt-0.5 border border-accent/30">
+                    Hari ini
+                  </span>
+                )}
+                {isWeekMode && !isToday && (
                   <span className="block text-[9px] text-theme-muted opacity-0 hover:opacity-100 transition-opacity">
                     Lihat hari
                   </span>
@@ -212,44 +264,64 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
           })}
         </div>
 
-        {/* All-day task banners */}
-        {hasTasks && (
+        {/* All-day task & event banners */}
+        {hasBanners && (
           <div className="flex border-b border-theme shrink-0 bg-theme-surface-subtle/70">
             <div className="w-16 shrink-0 border-r border-theme flex items-center justify-end pr-2">
-              <span className="text-[10px] text-theme-muted uppercase tracking-wider font-mono">Tugas</span>
+              <span className="text-[10px] text-theme-muted uppercase tracking-wider font-mono">Agenda</span>
             </div>
             {daysOffsetArray.map((offset) => {
               const d = getDayDate(offset);
               const dateStr = formatDateStr(d);
-              const dayTasks = allCalendarEvents.filter(
-                (e) => e.date === dateStr && e.type === 'task'
+              const dayBanners = allCalendarEvents.filter(
+                (e) => e.date === dateStr && (e.type === 'task' || (e.type === 'event' && (!e.startTime || !e.endTime)))
               );
               return (
                 <div
-                  key={`task-${offset}`}
+                  key={`banner-${offset}`}
                   className={`flex-1 border-r border-theme-subtle p-1 space-y-0.5 min-h-[8px] ${
                     isWeekMode ? 'cursor-pointer hover:bg-theme-surface/50 transition-colors' : ''
                   }`}
                   onClick={() => isWeekMode && handleWeekDayClick(d)}
                 >
-                  {dayTasks.map((task) => (
-                    <div
-                      key={task.instanceId}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onSelectTask(task);
-                      }}
-                      className={`text-[10px] px-1.5 py-0.5 rounded truncate font-medium cursor-pointer transition-colors ${
-                        task.urgency === 'high'
-                          ? 'bg-rose-50 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/60 hover:bg-rose-100 dark:hover:bg-rose-900/60'
-                          : 'bg-emerald-50 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60'
-                      }`}
-                      title={`${task.title} — DL: ${task.startTime}`}
-                    >
-                      <span className="opacity-70 mr-1 font-mono">{task.startTime}</span>
-                      {task.title}
-                    </div>
-                  ))}
+                  {dayBanners.map((item) => {
+                    const itemIsEvent = item.type === 'event';
+                    if (itemIsEvent) {
+                      return (
+                        <div
+                          key={item.instanceId}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onSelectTask(item);
+                          }}
+                          className="text-[10px] px-1.5 py-0.5 rounded truncate font-medium cursor-pointer transition-colors bg-purple-50 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800/60 hover:bg-purple-100 dark:hover:bg-purple-900/60"
+                          title={`[Acara] ${item.title}`}
+                        >
+                          <span className="mr-1">🎉</span>
+                          {item.title}
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div
+                        key={item.instanceId}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSelectTask(item);
+                        }}
+                        className={`text-[10px] px-1.5 py-0.5 rounded truncate font-medium cursor-pointer transition-colors ${
+                          item.urgency === 'high'
+                            ? 'bg-rose-50 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/60 hover:bg-rose-100 dark:hover:bg-rose-900/60'
+                            : 'bg-emerald-50 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60'
+                        }`}
+                        title={`${item.title} — DL: ${item.startTime}`}
+                      >
+                        <span className="opacity-70 mr-1 font-mono">{item.startTime}</span>
+                        {item.title}
+                      </div>
+                    );
+                  })}
                 </div>
               );
             })}
@@ -291,8 +363,11 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
               {daysOffsetArray.map((offset) => {
                 const d = getDayDate(offset);
                 const dateStr = formatDateStr(d);
-                const dayEvents = allCalendarEvents.filter(
-                  (e) => e.date === dateStr && e.type === 'course'
+                const isToday = dateStr === todayStr;
+                const dayGridEvents = allCalendarEvents.filter(
+                  (e) =>
+                    e.date === dateStr &&
+                    (e.type === 'course' || (e.type === 'event' && e.startTime && e.endTime))
                 );
 
                 return (
@@ -300,6 +375,8 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
                     key={offset}
                     onClick={() => isWeekMode && handleWeekDayClick(d)}
                     className={`flex-1 border-r border-theme-subtle relative group ${
+                      isToday ? 'bg-accent/[0.04]' : ''
+                    } ${
                       isWeekMode ? 'cursor-pointer hover:bg-theme-surface-subtle/30 transition-colors' : ''
                     }`}
                   >
@@ -311,18 +388,53 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
                           onQuickAddTask(dateStr);
                         }}
                         className="absolute top-1 right-1 z-30 w-5 h-5 rounded bg-theme-surface-subtle hover:bg-accent text-theme-muted hover:text-accent-contrast flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity border border-theme shadow-sm"
-                        title="Tambah tugas di hari ini"
+                        title="Tambah tugas / acara di hari ini"
                       >
                         <Plus className="w-3 h-3" />
                       </button>
                     )}
 
-                    {dayEvents.map((ev) => {
+                    {dayGridEvents.map((ev) => {
+                      const isCourse = ev.type === 'course';
                       const [h, m] = ev.startTime.split(':').map(Number);
                       const top = (h - HOUR_START) * HOUR_HEIGHT + m;
                       const [eh, em] = ev.endTime.split(':').map(Number);
                       const height = (eh - h) * HOUR_HEIGHT + (em - m);
                       if (top < 0) return null;
+
+                      if (!isCourse) {
+                        // Acara on grid
+                        return (
+                          <div
+                            key={ev.instanceId}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onSelectTask(ev);
+                            }}
+                            className="absolute left-1 right-1 rounded p-1.5 text-xs overflow-hidden cursor-pointer border bg-purple-600 hover:bg-purple-700 text-white border-purple-500 hover:opacity-95 transition-all shadow-sm"
+                            style={{
+                              top: `${top}px`,
+                              height: `${height}px`,
+                              zIndex: 6,
+                            }}
+                          >
+                            <div className="font-semibold leading-tight flex items-center justify-between gap-1">
+                              <span className="truncate">{ev.title}</span>
+                              <span className="text-[9px] uppercase tracking-wider px-1 rounded bg-black/30 text-white border border-white/20 shrink-0">
+                                Acara
+                              </span>
+                            </div>
+                            <div className="text-[10px] opacity-85 mt-0.5 font-mono">
+                              {ev.startTime} - {ev.endTime}
+                            </div>
+                            {ev.location && (
+                              <div className="text-[9px] opacity-90 truncate mt-0.5">
+                                📍 {ev.location}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      }
 
                       const evColor = getCourseColor(ev);
                       const contrastColor = getContrastColor(evColor);
@@ -428,11 +540,13 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
             <div
               key={ev.instanceId}
               onClick={() => {
-                if (ev.type === 'task') onSelectTask(ev);
+                if (ev.type === 'task' || ev.type === 'event') onSelectTask(ev);
               }}
               className={`flex items-center gap-3 p-3 rounded-md border ${
                 ev.type === 'course'
                   ? 'border-theme bg-theme-surface-subtle/50 hover:bg-theme-surface-subtle'
+                  : ev.type === 'event'
+                  ? 'border-purple-200 dark:border-purple-800/40 bg-purple-50/80 dark:bg-purple-950/20 hover:bg-purple-100/80 dark:hover:bg-purple-950/30 cursor-pointer'
                   : ev.urgency === 'high'
                   ? 'border-rose-200 dark:border-rose-800/40 bg-rose-50/80 dark:bg-rose-950/20 hover:bg-rose-100/80 dark:hover:bg-rose-950/30 cursor-pointer'
                   : 'border-emerald-200 dark:border-emerald-800/40 bg-emerald-50/80 dark:bg-emerald-950/20 hover:bg-emerald-100/80 dark:hover:bg-emerald-950/30 cursor-pointer'
@@ -440,15 +554,18 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
             >
               <div className="w-20 text-xs font-mono text-center p-1.5 rounded bg-theme-surface border border-theme text-theme-muted shrink-0">
                 <span className="block font-semibold text-theme-text">
-                  {ev.startTime}
+                  {ev.startTime || '--:--'}
                 </span>
-                {ev.type === 'course' && ev.endTime && (
+                {ev.endTime && (
                   <span className="block text-[10px] opacity-70">
                     — {ev.endTime}
                   </span>
                 )}
-                {ev.type === 'task' && (
+                {ev.type === 'task' && !ev.endTime && (
                   <span className="block text-[9px] text-theme-muted">deadline</span>
+                )}
+                {ev.type === 'event' && !ev.endTime && (
+                  <span className="block text-[9px] text-purple-600 dark:text-purple-400">acara</span>
                 )}
               </div>
               <div className="flex-1 min-w-0">
@@ -465,6 +582,11 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
                       P-{ev.meetingNum}
                     </span>
                   )}
+                  {ev.type === 'event' && (
+                    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded border shrink-0 bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800/60">
+                      🎉 Acara
+                    </span>
+                  )}
                   {ev.type === 'task' && (
                     <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded border shrink-0 ${
                       ev.urgency === 'high'
@@ -476,7 +598,11 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
                   )}
                 </div>
                 <div className="text-xs text-theme-muted mt-0.5">
-                  {ev.type === 'course' ? `${ev.location} • ${ev.sks} SKS` : 'Tugas / Deadline'}
+                  {ev.type === 'course'
+                    ? `${ev.location} • ${ev.sks} SKS`
+                    : ev.type === 'event'
+                    ? (ev.location ? `📍 ${ev.location}` : 'Acara / Kegiatan')
+                    : 'Tugas Kuliah'}
                 </div>
                 {ev.isRescheduled && (
                   <div className="text-[10px] font-medium text-amber-600 dark:text-amber-300 mt-1 uppercase tracking-wider">Reschedule</div>

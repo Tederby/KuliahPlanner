@@ -1,5 +1,16 @@
 import React from 'react';
-import { X, CheckCircle2, Clock, AlertTriangle, BookOpen, Pencil } from 'lucide-react';
+import {
+  X,
+  CheckCircle2,
+  Clock,
+  AlertTriangle,
+  BookOpen,
+  Pencil,
+  Calendar,
+  MapPin,
+  Users,
+  User,
+} from 'lucide-react';
 import { renderMarkdownToHTML } from '../utils/markdown';
 import { monthNames } from '../utils/dateUtils';
 import { getCourseColor } from '../utils/courseColors';
@@ -13,11 +24,11 @@ const getDeadlineInfo = (deadline) => {
 
   if (diffMs < 0) {
     const overdueDays = Math.abs(diffDays);
-    if (overdueDays === 0) return { text: 'Terlambat beberapa jam', color: 'text-rose-700 dark:text-rose-300', bg: 'bg-rose-50 dark:bg-rose-950/80 border-rose-200 dark:border-rose-800/60', icon: '•' };
-    if (overdueDays === 1) return { text: 'Terlambat 1 hari', color: 'text-rose-700 dark:text-rose-300', bg: 'bg-rose-50 dark:bg-rose-950/80 border-rose-200 dark:border-rose-800/60', icon: '•' };
-    return { text: `Terlambat ${overdueDays} hari`, color: 'text-rose-700 dark:text-rose-300', bg: 'bg-rose-50 dark:bg-rose-950/80 border-rose-200 dark:border-rose-800/60', icon: '•' };
+    if (overdueDays === 0) return { text: 'Sudah lewat beberapa jam', color: 'text-rose-700 dark:text-rose-300', bg: 'bg-rose-50 dark:bg-rose-950/80 border-rose-200 dark:border-rose-800/60', icon: '•' };
+    if (overdueDays === 1) return { text: 'Sudah lewat 1 hari', color: 'text-rose-700 dark:text-rose-300', bg: 'bg-rose-50 dark:bg-rose-950/80 border-rose-200 dark:border-rose-800/60', icon: '•' };
+    return { text: `Sudah lewat ${overdueDays} hari`, color: 'text-rose-700 dark:text-rose-300', bg: 'bg-rose-50 dark:bg-rose-950/80 border-rose-200 dark:border-rose-800/60', icon: '•' };
   }
-  if (diffHours <= 0) return { text: 'Deadline sekarang', color: 'text-rose-700 dark:text-rose-300', bg: 'bg-rose-50 dark:bg-rose-950/80 border-rose-200 dark:border-rose-800/60', icon: '•' };
+  if (diffHours <= 0) return { text: 'Hari ini', color: 'text-rose-700 dark:text-rose-300', bg: 'bg-rose-50 dark:bg-rose-950/80 border-rose-200 dark:border-rose-800/60', icon: '•' };
   if (diffHours <= 3) return { text: `${diffHours} jam lagi`, color: 'text-rose-700 dark:text-rose-300', bg: 'bg-rose-50 dark:bg-rose-950/80 border-rose-200 dark:border-rose-800/60', icon: '•' };
   if (diffHours <= 24) return { text: `${diffHours} jam lagi (Hari ini)`, color: 'text-amber-700 dark:text-amber-300', bg: 'bg-amber-50 dark:bg-amber-950/80 border-amber-200 dark:border-amber-800/60', icon: '•' };
   if (diffDays === 1) return { text: 'Besok', color: 'text-amber-700 dark:text-amber-300', bg: 'bg-amber-50 dark:bg-amber-950/80 border-amber-200 dark:border-amber-800/60', icon: '•' };
@@ -30,10 +41,10 @@ const getDeadlineInfo = (deadline) => {
 const TaskDetailModal = ({ task, courses, onClose, onToggleComplete, onEdit }) => {
   if (!task) return null;
 
-  const course = courses.find((c) => c.id === task.courseId);
-  const deadlineInfo = getDeadlineInfo(task.deadline);
-  const datePart = task.deadline.split('T')[0];
-  const timePart = task.deadline.split('T')[1] || '23:59';
+  const isEvent = task.type === 'event';
+  const course = !isEvent ? courses.find((c) => c.id === task.courseId) : null;
+  const deadlineInfo = task.deadline ? getDeadlineInfo(task.deadline) : null;
+  const datePart = task.deadline?.split('T')[0] || '';
   const dlDate = new Date(datePart);
 
   return (
@@ -48,19 +59,46 @@ const TaskDetailModal = ({ task, courses, onClose, onToggleComplete, onEdit }) =
         {/* Header */}
         <div className="bg-theme-surface-subtle border-b border-theme p-5">
           <div className="flex justify-between items-center mb-2">
-            <span className={`text-[10px] font-mono font-medium px-2 py-0.5 rounded border ${
-              task.urgency === 'high'
-                ? 'bg-rose-50 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800/60'
-                : 'bg-theme-surface text-theme-muted border border-theme'
-            }`}>
-              {task.urgency === 'high' ? 'Urgent' : 'Normal'}
-            </span>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {isEvent ? (
+                <span className="text-[10px] font-medium px-2 py-0.5 rounded border bg-purple-50 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800/60 flex items-center gap-1">
+                  <Calendar className="w-3 h-3" /> Acara / Kegiatan
+                </span>
+              ) : (
+                <span className="text-[10px] font-medium px-2 py-0.5 rounded border bg-theme-surface text-theme-muted border border-theme flex items-center gap-1">
+                  <BookOpen className="w-3 h-3" /> Tugas Kuliah
+                </span>
+              )}
+
+              {task.urgency === 'high' && (
+                <span className="text-[10px] font-medium px-2 py-0.5 rounded border bg-rose-50 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800/60">
+                  {isEvent ? 'Penting' : 'Urgent'}
+                </span>
+              )}
+
+              {!isEvent && (
+                <span className="text-[10px] font-medium px-2 py-0.5 rounded border bg-theme-surface text-theme-muted border border-theme flex items-center gap-1">
+                  {task.taskCategory === 'group' ? (
+                    <>
+                      <Users className="w-3 h-3 text-sky-500" /> Kelompok
+                    </>
+                  ) : (
+                    <>
+                      <User className="w-3 h-3" /> Individu
+                    </>
+                  )}
+                </span>
+              )}
+            </div>
+
             <button onClick={onClose} className="text-theme-muted hover:text-theme-text transition-colors">
               <X className="w-4 h-4" />
             </button>
           </div>
+
           <h2 className="text-lg font-bold text-theme-text leading-tight mt-2">{task.title}</h2>
-          {course && (
+
+          {!isEvent && course && (
             <div className="text-xs text-theme-muted mt-1.5 flex items-center gap-1.5 font-medium">
               <span
                 className="w-2 h-2 rounded-full shrink-0 shadow-xs"
@@ -74,25 +112,66 @@ const TaskDetailModal = ({ task, courses, onClose, onToggleComplete, onEdit }) =
 
         {/* Body */}
         <div className="p-5 space-y-3.5">
-          {/* Deadline + Countdown */}
+          {/* Time & Countdown */}
           <div className="flex items-start gap-3 bg-theme-surface-subtle p-3.5 rounded-md border border-theme">
             <Clock className="w-4 h-4 text-theme-muted shrink-0 mt-0.5" />
             <div className="flex-1 min-w-0">
-              <div className="text-[11px] text-theme-muted mb-0.5">Deadline</div>
+              <div className="text-[11px] text-theme-muted mb-0.5">
+                {isEvent ? 'Waktu Pelaksanaan' : 'Batas Deadline'}
+              </div>
               <div className="text-xs text-theme-text font-mono font-medium">
-                {dlDate.getDate()} {monthNames[dlDate.getMonth()]} {dlDate.getFullYear()}, {timePart}
+                {dlDate.getDate()} {monthNames[dlDate.getMonth()]} {dlDate.getFullYear()}
+                {isEvent ? (
+                  task.startTime ? ` • ${task.startTime}${task.endTime ? ` - ${task.endTime}` : ''}` : ''
+                ) : (
+                  task.deadline?.includes('T') ? `, ${task.deadline.split('T')[1]}` : ''
+                )}
               </div>
-              <div className={`mt-2 inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded border ${deadlineInfo.bg} ${deadlineInfo.color}`}>
-                <span className="font-bold leading-none">{deadlineInfo.icon}</span>
-                <span>{deadlineInfo.text}</span>
-              </div>
+              {deadlineInfo && !task.completed && (
+                <div
+                  className={`mt-2 inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded border ${deadlineInfo.bg} ${deadlineInfo.color}`}
+                >
+                  <span className="font-bold leading-none">{deadlineInfo.icon}</span>
+                  <span>{deadlineInfo.text}</span>
+                </div>
+              )}
             </div>
           </div>
+
+          {/* Location if Event */}
+          {isEvent && task.location && (
+            <div className="flex items-start gap-3 bg-theme-surface-subtle p-3 rounded-md border border-theme">
+              <MapPin className="w-4 h-4 text-theme-muted shrink-0 mt-0.5" />
+              <div className="text-xs text-theme-text">
+                <span className="block text-[11px] text-theme-muted mb-0.5">Lokasi / Ruang</span>
+                {task.location}
+              </div>
+            </div>
+          )}
+
+          {/* Group details if Task */}
+          {!isEvent && task.taskCategory === 'group' && (task.groupName || task.groupMembers) && (
+            <div className="bg-theme-surface-subtle p-3 rounded-md border border-theme space-y-1.5">
+              <div className="text-[11px] text-theme-muted font-medium flex items-center gap-1.5">
+                <Users className="w-3.5 h-3.5 text-accent" /> Informasi Kelompok
+              </div>
+              {task.groupName && (
+                <div className="text-xs text-theme-text">
+                  <span className="text-theme-muted">Nama/No:</span> {task.groupName}
+                </div>
+              )}
+              {task.groupMembers && (
+                <div className="text-xs text-theme-text">
+                  <span className="text-theme-muted">Anggota:</span> {task.groupMembers}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Description */}
           {task.description && (
             <div className="bg-theme-surface-subtle p-3.5 rounded-md border border-theme">
-              <div className="text-[11px] text-theme-muted mb-1.5">Deskripsi</div>
+              <div className="text-[11px] text-theme-muted mb-1.5">Catatan / Deskripsi</div>
               <div
                 className="text-xs text-theme-text leading-relaxed max-h-[150px] overflow-y-auto"
                 dangerouslySetInnerHTML={{ __html: renderMarkdownToHTML(task.description) }}
@@ -110,7 +189,7 @@ const TaskDetailModal = ({ task, courses, onClose, onToggleComplete, onEdit }) =
                 }}
                 className="w-full bg-theme-surface-subtle hover:bg-theme-surface text-theme-text border border-theme py-2 px-4 rounded-md font-medium text-xs transition-colors flex justify-center items-center gap-1.5"
               >
-                <Pencil className="w-3.5 h-3.5 text-theme-muted" /> Edit Tugas Ini
+                <Pencil className="w-3.5 h-3.5 text-theme-muted" /> Edit {isEvent ? 'Acara' : 'Tugas'} Ini
               </button>
             )}
             <button

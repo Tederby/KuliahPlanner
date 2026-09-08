@@ -5,7 +5,7 @@ import ThemeSwitcher from './ThemeSwitcher';
 const Sidebar = ({ activeTab, setActiveTab, config, tasks, stashes, courses = [], onShowGuide, theme }) => {
   const tabs = [
     { id: 'schedule', icon: Calendar, label: 'Kalender' },
-    { id: 'tasks', icon: List, label: `Tugas (${tasks.filter((t) => !t.completed).length})` },
+    { id: 'tasks', icon: List, label: `Tugas & Acara (${tasks.filter((t) => !t.completed).length})` },
     { id: 'stash', icon: Inbox, label: `Stash (${stashes.length})` },
     { id: 'matkul', icon: Settings, label: 'Config & Data' },
   ];

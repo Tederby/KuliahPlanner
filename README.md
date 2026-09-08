@@ -8,11 +8,14 @@ Demo online tersedia di: https://kuliah-planner.vercel.app/
 
 - **📅 Multiple Calendar Views**: Month, Week, Day, dan Agenda view
 - **🔄 Smart Meeting Generation**: Otomatis generate semua jadwal untuk satu semester
-- **✅ Task Management**: Manage tugas dengan deadline, urgency, dan course tracking
-- **✏️ Task Editing**: Edit tugas langsung dari tab Tugas — form re-populate otomatis
+- **✅ Task & Event Management**: Manage tugas kuliah serta kegiatan/acara non-akademik (seminar, workshop, rapat) dengan deadline/waktu acara
+- **👥 Tagging Tugas Individu & Kelompok**: Opsi penandaan tugas individu atau kelompok (nama/nomor kelompok dan daftar anggota opsional)
+- **🎉 Acara / Kegiatan**: Pencatatan acara dengan opsi waktu mulai-selesai dan lokasi tanpa harus terikat ke mata kuliah
+- **🌟 Highlight "Hari Ini" di Kalender**: Penandaan visual yang kontras untuk hari ini di Month view dan Week view
+- **✏️ Task & Event Editing**: Edit tugas maupun acara langsung dari form re-populate otomatis
 - **✏️ Course Editing**: Edit data matkul induk (nama, hari, jam, SKS, ruangan, warna) tanpa kehilangan relasi tugas atau stash
 - **🎨 Course Color Coding**: Penandaan warna unik per matkul (smart auto-assign + swatch custom) di seluruh kalender dan tugas
-- **🔍 Task Filtering**: Filter tugas instan berdasarkan status (Aktif, Semua, Selesai) serta dropdown filter per-matkul
+- **🔍 Multi-Filter Tugas & Acara**: Filter instan berdasarkan status (Aktif, Semua, Selesai), tipe (Tugas, Acara), serta dropdown filter per-matkul
 - **⚡ Live End Time & Clash Warning**: Estimasi jam selesai otomatis di form matkul & peringatan visual jika ada jadwal bentrok
 - **📊 Total SKS Summary**: Ringkasan beban SKS semester yang diambil di Sidebar dan header Data Matkul
 - **📝 Task Descriptions**: Deskripsi tugas dengan dukungan format **Markdown** (bold, italic, code, list, heading)
@@ -151,13 +154,15 @@ Fitur tambahan di kalender:
 - Hover kolom hari di Week/Day view → muncul tombol `+` untuk quick-add tugas di hari itu.
 - Breadcrumb navigasi muncul saat drill-down; klik untuk jump ke level sebelumnya.
 
-### 5. Manage Tugas
-Tab **Tugas** untuk:
-- Tambah tugas baru dengan judul, matkul, deadline (tanggal + jam opsional), urgency, dan deskripsi Markdown
-- **Edit tugas**: Klik ikon pensil di kartu tugas — form akan ter-isi otomatis, tombol berubah jadi "Perbarui Tugas"
-- Mark complete/incomplete
-- Delete tugas (dengan konfirmasi)
-- Tugas juga muncul di kalender sebagai banner deadline!
+### 5. Manage Tugas & Acara
+Tab **Tugas & Acara** untuk:
+- Toggle tipe: **📋 Tugas Kuliah** atau **🎉 Acara / Kegiatan**
+- **Tugas**: judul, matkul, deadline, urgency, kategori (Individu vs Kelompok), nomor kelompok, anggota, dan deskripsi Markdown
+- **Acara**: judul agenda/kegiatan, tanggal, jam mulai & selesai (opsional), lokasi (opsional), dan catatan detail
+- **Edit tugas & acara**: Klik ikon pensil di kartu — form akan ter-isi otomatis, tombol berubah jadi "Perbarui"
+- Mark complete/incomplete & hapus (dengan konfirmasi)
+- Filter terpadu: Status (Aktif/Semua/Selesai), Tipe (Semua Tipe/Tugas/Acara), dan Filter per Matkul
+- Tugas & Acara otomatis terintegrasi ke kalender (tampil sebagai banner, chips, atau slot waktu di timeline)
 
 ### 6. Stash Kelas
 Kalau dosen ghosting:
@@ -212,6 +217,11 @@ Data akan bertahan meski:
 - Added: Live end-time calculation & schedule clash warning di form matkul
 - Added: Shortcut edit tugas langsung dari TaskDetailModal di kalender
 - Added: Total SKS counter di Sidebar dan header Data Matkul
+- Added: Support tipe "Acara / Kegiatan" (seminar, rapat, workshop) tanpa matkul, dengan waktu & lokasi
+- Added: Tagging tugas "Kelompok" vs "Individu" (dengan nomor kelompok & daftar anggota kelompok)
+- Added: Highlight visual tegas untuk "Hari Ini" di Kalender (Month view & Week view)
+- Added: Integrasi visual Acara di Kalender (chips bulan, grid timeline jam mulai/selesai, agenda view)
+- Added: Filter tipe kegiatan (Tugas / Acara / Semua) di tab Tugas & Acara
 
 ## 🐛 Known Issues / TODO
 
