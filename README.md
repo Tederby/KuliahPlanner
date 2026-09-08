@@ -79,6 +79,9 @@ npx cap open android
 
 ```
 KuliahPlanner/
+├── public/
+│   ├── privacy.html              # Kebijakan Privasi (Google OAuth Limited Use compliance)
+│   └── terms.html                # Syarat & Ketentuan Layanan
 ├── src/
 │   ├── App.jsx                   # Main component
 │   ├── components/

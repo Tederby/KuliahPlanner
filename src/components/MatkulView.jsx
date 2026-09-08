@@ -135,21 +135,34 @@ const MatkulView = ({
         </div>
 
         {!driveSync?.userProfile ? (
-          <div className="p-5 bg-theme-surface-subtle border border-theme rounded-lg flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="space-y-1 text-center sm:text-left">
-              <h3 className="text-sm font-semibold text-theme-text">Belum Terhubung ke Google Drive</h3>
-              <p className="text-xs text-theme-muted max-w-md">
-                Masuk dengan akun Google untuk mengaktifkan sinkronisasi otomatis antar perangkat secara gratis.
-              </p>
+          <div className="p-5 bg-theme-surface-subtle border border-theme rounded-lg space-y-3">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="space-y-1 text-center sm:text-left">
+                <h3 className="text-sm font-semibold text-theme-text">Belum Terhubung ke Google Drive</h3>
+                <p className="text-xs text-theme-muted max-w-md">
+                  Masuk dengan akun Google untuk mengaktifkan sinkronisasi otomatis antar perangkat secara gratis.
+                </p>
+              </div>
+              <button
+                onClick={driveSync?.onLogin}
+                disabled={driveSync?.isSyncing}
+                className="flex items-center gap-2.5 px-4 py-2.5 rounded-lg bg-theme-surface hover:bg-theme-surface-subtle text-theme-text border border-theme font-medium text-xs shadow-sm hover:border-accent/40 active:scale-[0.99] transition-all shrink-0"
+              >
+                <GoogleIcon className="w-4 h-4" />
+                <span>{driveSync?.isSyncing ? 'Menghubungkan...' : 'Masuk dengan Google'}</span>
+              </button>
             </div>
-            <button
-              onClick={driveSync?.onLogin}
-              disabled={driveSync?.isSyncing}
-              className="flex items-center gap-2.5 px-4 py-2.5 rounded-lg bg-theme-surface hover:bg-theme-surface-subtle text-theme-text border border-theme font-medium text-xs shadow-sm hover:border-accent/40 active:scale-[0.99] transition-all shrink-0"
-            >
-              <GoogleIcon className="w-4 h-4" />
-              <span>{driveSync?.isSyncing ? 'Menghubungkan...' : 'Masuk dengan Google'}</span>
-            </button>
+            <p className="text-[11px] text-theme-muted text-center sm:text-left pt-2 border-t border-theme-subtle">
+              Dengan menghubungkan akun Google, Anda menyetujui{' '}
+              <a href="privacy.html" target="_blank" rel="noopener noreferrer" className="underline hover:text-theme-text">
+                Kebijakan Privasi
+              </a>{' '}
+              dan{' '}
+              <a href="terms.html" target="_blank" rel="noopener noreferrer" className="underline hover:text-theme-text">
+                Syarat & Ketentuan
+              </a>{' '}
+              KuliahPlanner.
+            </p>
           </div>
         ) : (
           <div className="space-y-3">

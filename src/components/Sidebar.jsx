@@ -172,6 +172,27 @@ const Sidebar = ({ activeTab, setActiveTab, config, tasks, stashes, courses = []
         <HelpCircle className="w-4 h-4 text-theme-muted" />
         Panduan Penggunaan
       </button>
+
+      {/* Legal Links */}
+      <div className="pt-2 px-2 flex items-center justify-center gap-2.5 text-[11px] text-theme-muted border-t border-theme">
+        <a
+          href="privacy.html"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:text-theme-text transition-colors"
+        >
+          Kebijakan Privasi
+        </a>
+        <span>•</span>
+        <a
+          href="terms.html"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:text-theme-text transition-colors"
+        >
+          Syarat & Ketentuan
+        </a>
+      </div>
     </div>
   );
 };

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Terms of Service - KuliahPlanner</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --accent-subtle: #eef2ff;
+      --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #09090b;
+        --surface: #121215;
+        --text: #f4f4f5;
+        --muted: #a1a1aa;
+        --border: #27272a;
+        --primary: #6366f1;
+        --primary-hover: #818cf8;
+        --accent-subtle: rgba(99, 102, 241, 0.12);
+        --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2.5rem;
+      box-shadow: var(--card-shadow);
+    }
+
+    @media (max-width: 640px) {
+      .container {
+        padding: 1.5rem;
+      }
+    }
+
+    .header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background-color: var(--accent-subtle);
+      color: var(--primary);
+      margin-bottom: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    h1 {
+      font-size: 1.875rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      margin-bottom: 0.5rem;
+    }
+
+    .meta {
+      font-size: 0.875rem;
+      color: var(--muted);
+    }
+
+    h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-top: 2rem;
+      margin-bottom: 0.75rem;
+      color: var(--text);
+    }
+
+    p {
+      margin-bottom: 1rem;
+      color: var(--text);
+    }
+
+    ul {
+      margin-bottom: 1.25rem;
+      padding-left: 1.5rem;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    a {
+      color: var(--primary);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    a:hover {
+      color: var(--primary-hover);
+    }
+
+    .footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      font-size: 0.875rem;
+      color: var(--muted);
+    }
+
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      background-color: var(--primary);
+      color: #ffffff !important;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.875rem;
+      transition: background-color 0.15s ease;
+    }
+
+    .btn-back:hover {
+      background-color: var(--primary-hover);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="badge">Legal Agreement</div>
+      <h1>Terms of Service</h1>
+      <div class="meta">Last Updated: September 8, 2026</div>
+    </div>
+
+    <p>
+      Welcome to <strong>KuliahPlanner</strong> ("the Service", "the Application").
+      By accessing or using KuliahPlanner, you agree to be bound by these Terms of Service ("Terms").
+      If you do not agree with any part of these Terms, you may discontinue use of the application.
+    </p>
+
+    <h2>1. Description of Service</h2>
+    <p>
+      KuliahPlanner is an open and client-side academic schedule and task management tool.
+      It helps university students and educators organize courses, plan semester timelines, manage task deadlines,
+      and optionally synchronize backup data to their personal Google Drive storage.
+    </p>
+
+    <h2>2. User Responsibilities</h2>
+    <ul>
+      <li>You are responsible for the accuracy of any academic data, course details, and deadlines entered into the application.</li>
+      <li>You are responsible for maintaining your own data backups (either via the JSON export utility or via the optional Google Drive sync).</li>
+      <li>You agree not to attempt reverse engineering, abuse, or unauthorized exploitation of the APIs connected to the application.</li>
+    </ul>
+
+    <h2>3. Third-Party Integrations</h2>
+    <p>
+      KuliahPlanner integrates with Google Identity Services and Google Drive APIs. When you connect your Google Account:
+    </p>
+    <ul>
+      <li>Your use of Google services is subject to the <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer">Google Terms of Service</a> and <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Google Privacy Policy</a>.</li>
+      <li>KuliahPlanner only accesses the application's dedicated backup file and does not modify any of your other Google Drive files.</li>
+    </ul>
+
+    <h2>4. Disclaimer of Warranties</h2>
+    <p>
+      The application is provided on an <strong>"AS IS"</strong> and <strong>"AS AVAILABLE"</strong> basis without warranties of any kind, whether express or implied.
+      While we strive to provide reliable and accurate scheduling features, we do not guarantee that the application will always be error-free, uninterrupted, or that schedule calculations will perfectly match every specific university system policy.
+    </p>
+
+    <h2>5. Limitation of Liability</h2>
+    <p>
+      In no event shall KuliahPlanner, its developers, or contributors be held liable for any missed academic deadlines, lost data, hardware damage, or incidental or consequential damages arising out of the use or inability to use this application.
+    </p>
+
+    <h2>6. Modifications to Terms</h2>
+    <p>
+      We reserve the right to modify these Terms at any time. Continued use of the application following the posting of updated Terms constitutes your acceptance of the revised Terms.
+    </p>
+
+    <div class="footer">
+      <div>&copy; 2026 KuliahPlanner. All rights reserved.</div>
+      <a href="./" class="btn-back">&larr; Back to App</a>
+    </div>
+  </div>
+</body>
+</html>
