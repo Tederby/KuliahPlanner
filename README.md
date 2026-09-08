@@ -22,6 +22,8 @@ Demo online tersedia di: https://kuliah-planner.vercel.app/
 - **Task Detail Modal**: Klik tugas di kalender untuk lihat detail lengkap + countdown deadline real-time + shortcut edit tugas
 - **Deadline Countdown**: Badge countdown otomatis (jam/hari tersisa, overdue, dsb.)
 - **Local Storage**: Data tersimpan otomatis di browser, tidak hilang saat refresh
+- **Local Undo System**: Ring buffer snapshot lokal (hingga 10 riwayat) dengan tombol "Urungkan" interaktif pada toast saat hapus matkul/tugas dan menu riwayat snapshot
+- **Google Drive Cloud Sync**: Sinkronisasi data multi-device (laptop & HP) gratis ke Google Drive pribadi tanpa backend server, dilengkapi deteksi & penyelesaian konflik
 - **Course Management**: Kelola data matkul (nama, SKS, jadwal, lokasi)
 - **Stash System**: "Ghosting" dosen? Stash kelas, restore, atau reschedule ketika jadwal berubah
 - **Calendar Drill-Down**: Klik area kosong di Month view untuk masuk Week view; klik kolom hari di Week view untuk masuk Day view
@@ -82,25 +84,29 @@ KuliahPlanner/
 │   ├── components/
 │   │   ├── ConfirmDialog.jsx     # Reusable confirm dialog
 │   │   ├── EventModal.jsx        # Detail & aksi event matkul di kalender
-│   │   ├── MatkulView.jsx        # Tab Config & Data (matkul, config, backup)
+│   │   ├── MatkulView.jsx        # Tab Config & Data (matkul, config, backup, sync, undo)
 │   │   ├── OnboardingGuide.jsx   # Panduan interaktif untuk user baru
 │   │   ├── ScheduleView.jsx      # Kalender (Month/Week/Day/Agenda) + drill-down
-│   │   ├── Sidebar.jsx           # Navigasi tab sidebar
+│   │   ├── Sidebar.jsx           # Navigasi tab sidebar & indikator cloud sync
 │   │   ├── StashView.jsx         # Tab Stash (reschedule kelas)
+│   │   ├── SyncConflictModal.jsx # Modal perbandingan & resolusi konflik versi sync
 │   │   ├── TaskDetailModal.jsx   # Modal detail tugas + countdown deadline
 │   │   ├── TaskView.jsx          # Tab Tugas + form tambah/edit tugas
 │   │   ├── ThemeSwitcher.jsx     # Kontrol tema (Light/Dark/Auto) dan custom color picker/preset
-│   │   └── ToastContainer.jsx    # Toast notification
+│   │   └── ToastContainer.jsx    # Toast notification dengan dukungan action button
 │   ├── hooks/
 │   │   ├── useCalendarEvents.js  # Derive calendar events dari data
-│   │   ├── useKuliahData.js      # State & logic utama (CRUD matkul, tugas, stash)
+│   │   ├── useGoogleDriveSync.js # OAuth2 GIS & siklus hidup sinkronisasi Google Drive
+│   │   ├── useKuliahData.js      # State & logic utama (CRUD matkul, tugas, stash, undo)
 │   │   ├── useTheme.js           # Pengelola tema sistem, mode light/dark, dan kalkulator palet warna dinamis
-│   │   └── useToast.js           # Toast state management
+│   │   └── useToast.js           # Toast state management dengan dukungan tombol aksi
 │   ├── utils/
 │   │   ├── courseColors.js       # Palet warna matkul, auto-assign, dan deteksi bentrok jadwal
 │   │   ├── dateUtils.js          # Helper format tanggal
+│   │   ├── googleDrive.js        # Google Drive v3 REST API & GIS integration
 │   │   ├── markdown.js           # Simple Markdown-to-HTML renderer
-│   │   ├── storage.js            # localStorage read/write/export/import
+│   │   ├── storage.js            # localStorage read/write/export/import & metadata
+│   │   ├── undoHistory.js        # Ring buffer snapshot undo lokal
 │   │   └── validators.js         # Form validation
 │   ├── main.jsx                  # React entry point
 │   └── index.css                 # Tailwind directives

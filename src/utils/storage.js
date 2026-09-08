@@ -1,6 +1,26 @@
 import { formatDateStr } from './dateUtils';
 
 export const STORAGE_KEY = 'kuliahplanner_data';
+export const DEVICE_ID_KEY = 'kuliahplanner_device_id';
+
+/**
+ * getDeviceId
+ * Returns unique device identifier stored in localStorage, generating one if needed.
+ */
+export const getDeviceId = () => {
+  try {
+    let deviceId = localStorage.getItem(DEVICE_ID_KEY);
+    if (!deviceId) {
+      deviceId = (typeof crypto !== 'undefined' && crypto.randomUUID)
+        ? crypto.randomUUID()
+        : `dev_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+      localStorage.setItem(DEVICE_ID_KEY, deviceId);
+    }
+    return deviceId;
+  } catch {
+    return 'browser-unknown';
+  }
+};
 
 /**
  * loadData
@@ -19,12 +39,21 @@ export const loadData = () => {
 
 /**
  * saveData
- * Returns { success: bool, error: string | null }
+ * Returns { success: bool, error: string | null, savedAt: string }
  */
 export const saveData = (data) => {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    return { success: true, error: null };
+    const updatedAt = data._updatedAt || new Date().toISOString();
+    const payload = {
+      _version: 1,
+      _updatedAt: updatedAt,
+      _deviceId: data._deviceId || getDeviceId(),
+      ...data,
+    };
+    // Ensure _updatedAt reflects the latest change
+    payload._updatedAt = updatedAt;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    return { success: true, error: null, savedAt: updatedAt };
   } catch (e) {
     console.error('Error saving data:', e);
     // QuotaExceededError = localStorage penuh
@@ -34,6 +63,7 @@ export const saveData = (data) => {
       error: isQuota
         ? 'Storage penuh! Data tidak tersimpan. Coba export dulu terus hapus data lama.'
         : `Gagal menyimpan data: ${e.message}`,
+      savedAt: null,
     };
   }
 };
@@ -48,6 +78,8 @@ export const exportDataAsJSON = (data) => {
   const payload = {
     _version: 1,
     _exportedAt: new Date().toISOString(),
+    _updatedAt: data._updatedAt || new Date().toISOString(),
+    _deviceId: data._deviceId || getDeviceId(),
     ...data,
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
@@ -92,6 +124,9 @@ export const getInitialState = () => {
   const { data: saved } = loadData();
   const today = formatDateStr(new Date());
   const defaultState = {
+    _version: 1,
+    _updatedAt: null,
+    _deviceId: getDeviceId(),
     config: {
       semesterStart: today,
       sksMinutes: 50,
@@ -110,6 +145,9 @@ export const getInitialState = () => {
   if (!saved) return defaultState;
 
   return {
+    _version: saved._version || 1,
+    _updatedAt: saved._updatedAt || null,
+    _deviceId: saved._deviceId || getDeviceId(),
     config: {
       semesterStart: saved.config?.semesterStart || defaultState.config.semesterStart,
       sksMinutes: saved.config?.sksMinutes ?? defaultState.config.sksMinutes,

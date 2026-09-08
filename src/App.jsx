@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { AlertTriangle, X } from 'lucide-react';
 
 import { useToast }          from './hooks/useToast';
 import { useTheme }          from './hooks/useTheme';
 import { useKuliahData }     from './hooks/useKuliahData';
 import { useCalendarEvents } from './hooks/useCalendarEvents';
+import { useGoogleDriveSync } from './hooks/useGoogleDriveSync';
 
 import Sidebar          from './components/Sidebar';
 import EventModal       from './components/EventModal';
@@ -16,6 +17,7 @@ import ToastContainer   from './components/ToastContainer';
 import ConfirmDialog    from './components/ConfirmDialog';
 import TaskDetailModal  from './components/TaskDetailModal';
 import OnboardingGuide, { ONBOARDING_KEY } from './components/OnboardingGuide';
+import SyncConflictModal from './components/SyncConflictModal';
 
 export default function App() {
   const [activeTab, setActiveTab]       = useState('schedule');
@@ -27,6 +29,72 @@ export default function App() {
   const { toasts, showToast, dismissToast } = useToast();
 
   const data = useKuliahData({ showToast });
+  const driveSync = useGoogleDriveSync({ showToast });
+
+  const handleDriveSync = (silent = false) => {
+    driveSync.syncData({
+      localData: {
+        config: data.config,
+        courses: data.courses,
+        stashes: data.stashes,
+        reschedules: data.reschedules,
+        tasks: data.tasks,
+      },
+      onApplyCloudData: data.applyFullData,
+      silent,
+    });
+  };
+
+  const handleDriveLogin = () => {
+    driveSync.login({
+      localData: {
+        config: data.config,
+        courses: data.courses,
+        stashes: data.stashes,
+        reschedules: data.reschedules,
+        tasks: data.tasks,
+      },
+      onApplyCloudData: data.applyFullData,
+    });
+  };
+
+  const driveSyncProps = {
+    clientId: driveSync.clientId,
+    userProfile: driveSync.userProfile,
+    isSyncing: driveSync.isSyncing,
+    lastSyncTime: driveSync.lastSyncTime,
+    autoSyncEnabled: driveSync.autoSyncEnabled,
+    onSaveClientId: driveSync.saveClientId,
+    onSync: () => handleDriveSync(false),
+    onLogin: handleDriveLogin,
+    onLogout: driveSync.logout,
+    onToggleAutoSync: driveSync.setAutoSyncEnabled,
+  };
+
+  // Background auto-sync with debounce (3s) when data changes and user is authenticated
+  const isInitialMount = useRef(true);
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
+    if (!driveSync.userProfile || !driveSync.autoSyncEnabled) return;
+
+    const timer = setTimeout(() => {
+      handleDriveSync(true);
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [
+    data.config,
+    data.courses,
+    data.stashes,
+    data.reschedules,
+    data.tasks,
+    driveSync.userProfile,
+    driveSync.autoSyncEnabled,
+  ]);
 
   const { allCalendarEvents } = useCalendarEvents({
     courses:    data.courses,
@@ -92,6 +160,7 @@ export default function App() {
           courses={data.courses}
           onShowGuide={() => setShowOnboarding(true)}
           theme={theme}
+          driveSync={driveSyncProps}
         />
 
         <div className="flex-1 min-w-0">
@@ -150,6 +219,11 @@ export default function App() {
               onRemoveCourse={data.removeCourse}
               onExport={data.handleExport}
               onImport={data.handleImport}
+              undoCount={data.undoCount}
+              onUndo={data.handleUndo}
+              undoHistory={data.getUndoHistory()}
+              onClearUndo={data.clearUndoHistory}
+              driveSync={driveSyncProps}
             />
           )}
 
@@ -207,6 +281,11 @@ export default function App() {
         danger={data.confirmDialog.danger}
         onConfirm={data.handleConfirm}
         onCancel={data.closeConfirm}
+      />
+
+      <SyncConflictModal
+        conflictData={driveSync.conflictData}
+        onResolve={driveSync.resolveConflict}
       />
 
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />

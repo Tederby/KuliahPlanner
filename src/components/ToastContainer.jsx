@@ -27,7 +27,21 @@ const ToastContainer = ({ toasts, onDismiss }) => {
             animate-[slideIn_0.15s_ease-out] ${BG[toast.type] ?? BG.info}`}
         >
           {ICONS[toast.type] ?? ICONS.info}
-          <p className="flex-1 text-xs text-theme-text leading-snug">{toast.message}</p>
+          <div className="flex-1 text-xs text-theme-text leading-snug">
+            <p>{toast.message}</p>
+            {toast.action && (
+              <button
+                type="button"
+                onClick={() => {
+                  toast.action.onClick?.();
+                  onDismiss(toast.id);
+                }}
+                className="mt-1.5 inline-flex items-center text-xs font-bold text-accent hover:underline focus:outline-none"
+              >
+                {toast.action.label}
+              </button>
+            )}
+          </div>
           <button
             onClick={() => onDismiss(toast.id)}
             className="text-theme-muted hover:text-theme-text transition-colors mt-0.5"

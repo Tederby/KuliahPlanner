@@ -1,5 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getInitialState, saveData, exportDataAsJSON, importDataFromJSON } from '../utils/storage';
+import {
+  pushSnapshot,
+  popSnapshot,
+  getUndoCount,
+  getUndoHistory,
+  clearUndoHistory,
+} from '../utils/undoHistory';
 import { validateCourse, validateTask, validateConfig } from '../utils/validators';
 import { getCourseColor, getNextAvailableColor } from '../utils/courseColors';
 
@@ -12,6 +19,7 @@ export const useKuliahData = ({ showToast }) => {
   const [reschedules, setReschedules] = useState(initialState.reschedules);
   const [tasks, setTasks]             = useState(initialState.tasks);
   const [error, setError]             = useState(null);
+  const [undoCount, setUndoCount]     = useState(getUndoCount());
 
   const [showTaskForm, setShowTaskForm]     = useState(false);
   const [editingTaskId, setEditingTaskId]   = useState(null);
@@ -56,6 +64,40 @@ export const useKuliahData = ({ showToast }) => {
   useEffect(() => {
     const { error: saveError } = saveData({ config, courses, stashes, reschedules, tasks });
     if (saveError) showToast(saveError, 'error', 0);
+  }, [config, courses, stashes, reschedules, tasks]);
+
+  const saveSnapshot = useCallback((label) => {
+    pushSnapshot(label, { config, courses, stashes, reschedules, tasks });
+    setUndoCount(getUndoCount());
+  }, [config, courses, stashes, reschedules, tasks]);
+
+  const handleUndo = useCallback(() => {
+    const snapshot = popSnapshot();
+    if (!snapshot || !snapshot.data) {
+      showToast('Tidak ada riwayat untuk diurungkan.', 'info');
+      return false;
+    }
+    const d = snapshot.data;
+    if (d.config) setConfig(d.config);
+    if (Array.isArray(d.courses)) setCourses(d.courses);
+    if (Array.isArray(d.stashes)) setStashes(d.stashes);
+    if (Array.isArray(d.reschedules)) setReschedules(d.reschedules);
+    if (Array.isArray(d.tasks)) setTasks(d.tasks);
+    setUndoCount(getUndoCount());
+    showToast(`Diurungkan: ${snapshot.label}`, 'success');
+    return true;
+  }, [showToast]);
+
+  const applyFullData = useCallback((newData, snapshotLabel = null) => {
+    if (snapshotLabel) {
+      pushSnapshot(snapshotLabel, { config, courses, stashes, reschedules, tasks });
+      setUndoCount(getUndoCount());
+    }
+    if (newData.config) setConfig(newData.config);
+    if (Array.isArray(newData.courses)) setCourses(newData.courses);
+    if (Array.isArray(newData.stashes)) setStashes(newData.stashes);
+    if (Array.isArray(newData.reschedules)) setReschedules(newData.reschedules);
+    if (Array.isArray(newData.tasks)) setTasks(newData.tasks);
   }, [config, courses, stashes, reschedules, tasks]);
 
   const handleUpdateConfig = (newConfig) => setConfig(newConfig);
@@ -132,12 +174,16 @@ export const useKuliahData = ({ showToast }) => {
     const extraMsg    = extras.length ? ` Ini juga hapus ${extras.join(' dan ')} terkait.` : '';
     openConfirm({
       title: 'Hapus Matkul?',
-      message: `Yakin hapus "${course?.name}"?${extraMsg} Aksi ini gak bisa dibatalin.`,
+      message: `Yakin hapus "${course?.name}"?${extraMsg} Aksi ini dapat diurungkan via tombol Undo.`,
       onConfirm: () => {
+        saveSnapshot(`Hapus Matkul "${course?.name}"`);
         setCourses(courses.filter((c) => c.id !== id));
         setStashes(stashes.filter((s) => s.courseId !== id));
         setTasks(tasks.filter((t) => t.courseId !== id));
-        showToast(`"${course?.name}" dihapus.`, 'warning');
+        showToast(`"${course?.name}" dihapus.`, 'warning', 6000, {
+          label: 'Urungkan',
+          onClick: handleUndo,
+        });
       },
     });
   };
@@ -234,10 +280,14 @@ export const useKuliahData = ({ showToast }) => {
     const label = task?.type === 'event' ? 'Acara' : 'Tugas';
     openConfirm({
       title: `Hapus ${label}?`,
-      message: `Yakin hapus ${label.toLowerCase()} "${task?.title}"?`,
+      message: `Yakin hapus ${label.toLowerCase()} "${task?.title}"? Aksi ini dapat diurungkan via tombol Undo.`,
       onConfirm: () => {
+        saveSnapshot(`Hapus ${label} "${task?.title}"`);
         setTasks(tasks.filter((t) => t.id !== id));
-        showToast(`${label} dihapus.`, 'warning');
+        showToast(`${label} "${task?.title}" dihapus.`, 'warning', 6000, {
+          label: 'Urungkan',
+          onClick: handleUndo,
+        });
       },
     });
   };
@@ -292,15 +342,14 @@ export const useKuliahData = ({ showToast }) => {
     if (importError) { showToast(importError, 'error'); return; }
     openConfirm({
       title: 'Import Data?',
-      message: 'Ini akan MENGGANTI semua data yang ada sekarang dengan data dari file. Lanjut?',
+      message: 'Ini akan MENGGANTI semua data yang ada sekarang dengan data dari file. Data saat ini akan disimpan ke riwayat Undo. Lanjut?',
       danger: true,
       onConfirm: () => {
-        setConfig(data.config);
-        setCourses(data.courses);
-        setStashes(data.stashes);
-        setReschedules(data.reschedules);
-        setTasks(data.tasks);
-        showToast('Data berhasil di-import!', 'success');
+        applyFullData(data, 'Sebelum Import File');
+        showToast('Data berhasil di-import!', 'success', 6000, {
+          label: 'Urungkan',
+          onClick: handleUndo,
+        });
       },
     });
   };
@@ -320,5 +369,6 @@ export const useKuliahData = ({ showToast }) => {
     handleStash, restoreStash, openRescheduleStash, cancelReschedule, saveReschedule,
     returnRescheduledToStash,
     handleExport, handleImport,
+    undoCount, handleUndo, saveSnapshot, applyFullData, getUndoHistory, clearUndoHistory,
   };
 };
