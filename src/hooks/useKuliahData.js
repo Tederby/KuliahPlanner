@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getInitialState, saveData, exportDataAsJSON, importDataFromJSON } from '../utils/storage';
 import { validateCourse, validateTask, validateConfig } from '../utils/validators';
+import { getCourseColor, getNextAvailableColor } from '../utils/courseColors';
 
 export const useKuliahData = ({ showToast }) => {
   const initialState = getInitialState();
@@ -19,7 +20,10 @@ export const useKuliahData = ({ showToast }) => {
     urgency: 'low', type: 'matkul', description: '',
   });
   const [showCourseForm, setShowCourseForm] = useState(false);
-  const [newCourse, setNewCourse]           = useState({ name: '', sks: 3, day: 'Senin', startTime: '07:00', location: '' });
+  const [editingCourseId, setEditingCourseId] = useState(null);
+  const [newCourse, setNewCourse]           = useState({
+    name: '', sks: 3, day: 'Senin', startTime: '07:00', location: '', color: '',
+  });
   const [editingStash, setEditingStash]     = useState(null);
   const [rescheduleForm, setRescheduleForm] = useState({ date: '', time: '' });
 
@@ -46,15 +50,67 @@ export const useKuliahData = ({ showToast }) => {
   const handleUpdateConfig = (newConfig) => setConfig(newConfig);
   const handleConfigBlur = () => setError(validateConfig(config));
 
+  const resetCourseForm = () => {
+    setNewCourse({
+      name: '',
+      sks: 3,
+      day: 'Senin',
+      startTime: '07:00',
+      location: '',
+      color: '',
+    });
+    setEditingCourseId(null);
+    setShowCourseForm(false);
+  };
+
+  const startEditCourse = (courseId) => {
+    const course = courses.find((c) => c.id === courseId);
+    if (!course) return;
+    setNewCourse({
+      name: course.name,
+      sks: course.sks,
+      day: course.day,
+      startTime: course.startTime,
+      location: course.location || '',
+      color: getCourseColor(course),
+    });
+    setEditingCourseId(courseId);
+    setShowCourseForm(true);
+  };
+
+  const cancelEditCourse = () => {
+    resetCourseForm();
+  };
+
   const handleAddCourse = (e) => {
     e.preventDefault();
     setError(null);
     const err = validateCourse(newCourse);
     if (err) { setError(err); return; }
-    setCourses([...courses, { ...newCourse, id: Date.now() }]);
-    setShowCourseForm(false);
-    setNewCourse({ name: '', sks: 3, day: 'Senin', startTime: '07:00', location: '' });
-    showToast('Matkul berhasil ditambahkan!', 'success');
+
+    const courseColor = newCourse.color || getNextAvailableColor(courses);
+
+    if (editingCourseId) {
+      setCourses(courses.map((c) => (c.id === editingCourseId ? {
+        ...c,
+        name: newCourse.name,
+        sks: Number(newCourse.sks),
+        day: newCourse.day,
+        startTime: newCourse.startTime,
+        location: newCourse.location,
+        color: courseColor,
+      } : c)));
+      showToast('Mata kuliah berhasil diperbarui!', 'success');
+    } else {
+      setCourses([...courses, {
+        ...newCourse,
+        sks: Number(newCourse.sks),
+        color: courseColor,
+        id: Date.now(),
+      }]);
+      showToast('Matkul berhasil ditambahkan!', 'success');
+    }
+    resetCourseForm();
   };
 
   const removeCourse = (id) => {
@@ -224,6 +280,7 @@ export const useKuliahData = ({ showToast }) => {
     showTaskForm, setShowTaskForm, newTask, setNewTask,
     editingTaskId,
     showCourseForm, setShowCourseForm, newCourse, setNewCourse,
+    editingCourseId, startEditCourse, cancelEditCourse,
     editingStash, rescheduleForm, setRescheduleForm,
     confirmDialog, handleConfirm, closeConfirm,
     handleUpdateConfig, handleConfigBlur,

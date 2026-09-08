@@ -1,7 +1,8 @@
 import React from 'react';
-import { X, CheckCircle2, Clock, AlertTriangle, BookOpen } from 'lucide-react';
+import { X, CheckCircle2, Clock, AlertTriangle, BookOpen, Pencil } from 'lucide-react';
 import { renderMarkdownToHTML } from '../utils/markdown';
 import { monthNames } from '../utils/dateUtils';
+import { getCourseColor } from '../utils/courseColors';
 
 const getDeadlineInfo = (deadline) => {
   const now = new Date();
@@ -26,7 +27,7 @@ const getDeadlineInfo = (deadline) => {
   return { text: `${diffDays} hari lagi`, color: 'text-theme-muted', bg: 'bg-theme-surface-subtle border border-theme', icon: '•' };
 };
 
-const TaskDetailModal = ({ task, courses, onClose, onToggleComplete }) => {
+const TaskDetailModal = ({ task, courses, onClose, onToggleComplete, onEdit }) => {
   if (!task) return null;
 
   const course = courses.find((c) => c.id === task.courseId);
@@ -60,7 +61,11 @@ const TaskDetailModal = ({ task, courses, onClose, onToggleComplete }) => {
           </div>
           <h2 className="text-lg font-bold text-theme-text leading-tight mt-2">{task.title}</h2>
           {course && (
-            <div className="text-xs text-theme-muted mt-1 flex items-center gap-1.5">
+            <div className="text-xs text-theme-muted mt-1.5 flex items-center gap-1.5 font-medium">
+              <span
+                className="w-2 h-2 rounded-full shrink-0 shadow-xs"
+                style={{ backgroundColor: getCourseColor(course) }}
+              />
               <BookOpen className="w-3.5 h-3.5 text-theme-muted" />
               {course.name}
             </div>
@@ -95,8 +100,19 @@ const TaskDetailModal = ({ task, courses, onClose, onToggleComplete }) => {
             </div>
           )}
 
-          {/* Done button */}
-          <div className="pt-2 border-t border-theme">
+          {/* Action buttons */}
+          <div className="pt-2 border-t border-theme space-y-2">
+            {onEdit && (
+              <button
+                onClick={() => {
+                  onClose();
+                  onEdit(task.id);
+                }}
+                className="w-full bg-theme-surface-subtle hover:bg-theme-surface text-theme-text border border-theme py-2 px-4 rounded-md font-medium text-xs transition-colors flex justify-center items-center gap-1.5"
+              >
+                <Pencil className="w-3.5 h-3.5 text-theme-muted" /> Edit Tugas Ini
+              </button>
+            )}
             <button
               onClick={() => {
                 onToggleComplete(task.id);

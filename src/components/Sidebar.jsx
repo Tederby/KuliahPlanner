@@ -2,13 +2,15 @@ import React from 'react';
 import { Calendar, List, Settings, Inbox, HelpCircle } from 'lucide-react';
 import ThemeSwitcher from './ThemeSwitcher';
 
-const Sidebar = ({ activeTab, setActiveTab, config, tasks, stashes, onShowGuide, theme }) => {
+const Sidebar = ({ activeTab, setActiveTab, config, tasks, stashes, courses = [], onShowGuide, theme }) => {
   const tabs = [
     { id: 'schedule', icon: Calendar, label: 'Kalender' },
     { id: 'tasks', icon: List, label: `Tugas (${tasks.filter((t) => !t.completed).length})` },
     { id: 'stash', icon: Inbox, label: `Stash (${stashes.length})` },
     { id: 'matkul', icon: Settings, label: 'Config & Data' },
   ];
+
+  const totalSks = (courses || []).reduce((sum, c) => sum + (Number(c.sks) || 0), 0);
 
   return (
     <div className="md:w-60 shrink-0 space-y-2">
@@ -61,6 +63,7 @@ const Sidebar = ({ activeTab, setActiveTab, config, tasks, stashes, onShowGuide,
         <div className="p-3 bg-theme-surface rounded-md border border-theme">
           <div className="text-[11px] font-semibold text-theme-muted uppercase tracking-wider mb-2">Engine Info</div>
           <div className="text-[11px] text-theme-text space-y-1">
+            <p className="flex justify-between"><span className="text-theme-muted">Total SKS:</span> <span className="font-semibold text-accent">{totalSks} SKS</span></p>
             <p className="flex justify-between"><span className="text-theme-muted">Mulai:</span> <span>{config.semesterStart}</span></p>
             <p className="flex justify-between"><span className="text-theme-muted">Pertemuan:</span> <span>{config.totalMeetings}</span></p>
             <p className="flex justify-between"><span className="text-theme-muted">UTS:</span> <span>P-{config.meetingsBeforeUTS} ({config.utsWeeks}m)</span></p>

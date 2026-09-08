@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight, Plus, CalendarDays } from 'lucide-react';
 import { formatDateStr, daysOfWeek, monthNames } from '../utils/dateUtils';
+import { getCourseColor } from '../utils/courseColors';
+import { getContrastColor } from '../hooks/useTheme';
 
 // Display order: Sunday first
 const displayDaysOfWeek = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
@@ -105,33 +107,45 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
           {cellDateObj.getDate()}
         </div>
         <div className="space-y-1">
-          {dayEvents.map((ev) => (
-            <div
-              key={ev.instanceId}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (ev.type === 'course') onSelectEvent(ev);
-                else if (ev.type === 'task') onSelectTask(ev);
-              }}
-              className={`text-[11px] px-1.5 py-0.5 rounded cursor-pointer truncate relative z-10 font-medium ${
-                ev.type === 'course'
-                  ? 'bg-accent/20 text-accent border border-accent/40 hover:bg-accent/30'
-                  : ev.urgency === 'high'
-                  ? 'bg-rose-50 dark:bg-rose-950/70 text-rose-700 dark:text-rose-200 border border-rose-200 dark:border-rose-700/50'
-                  : 'bg-emerald-50 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-200 border border-emerald-200 dark:border-emerald-700/50'
-              }`}
-            >
-              <div className="flex items-center gap-1">
-                <span className="text-[10px] opacity-75">{ev.type === 'course' ? ev.startTime : '📌'}</span>
-                {ev.isRescheduled && (
-                  <span className="text-[8px] uppercase tracking-wider px-1 rounded bg-amber-500/20 text-amber-700 dark:text-amber-200">
-                    resched
-                  </span>
-                )}
+          {dayEvents.map((ev) => {
+            const isCourse = ev.type === 'course';
+            const courseColor = isCourse ? getCourseColor(ev) : null;
+            return (
+              <div
+                key={ev.instanceId}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (ev.type === 'course') onSelectEvent(ev);
+                  else if (ev.type === 'task') onSelectTask(ev);
+                }}
+                style={isCourse ? {
+                  backgroundColor: `${courseColor}18`,
+                  color: courseColor,
+                  borderColor: `${courseColor}55`,
+                } : undefined}
+                className={`text-[11px] px-1.5 py-0.5 rounded cursor-pointer truncate relative z-10 font-medium border ${
+                  isCourse
+                    ? 'hover:opacity-90'
+                    : ev.urgency === 'high'
+                    ? 'bg-rose-50 dark:bg-rose-950/70 text-rose-700 dark:text-rose-200 border-rose-200 dark:border-rose-700/50'
+                    : 'bg-emerald-50 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-200 border border-emerald-200 dark:border-emerald-700/50'
+                }`}
+              >
+                <div className="flex items-center gap-1">
+                  {isCourse && (
+                    <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: courseColor }} />
+                  )}
+                  <span className="text-[10px] opacity-75">{isCourse ? ev.startTime : '📌'}</span>
+                  {ev.isRescheduled && (
+                    <span className="text-[8px] uppercase tracking-wider px-1 rounded bg-amber-500/20 text-amber-700 dark:text-amber-200">
+                      resched
+                    </span>
+                  )}
+                </div>
+                <div className="truncate">{isCourse ? ev.name : `[TGS] ${ev.title}`}</div>
               </div>
-              <div className="truncate">{ev.type === 'course' ? ev.name : `[TGS] ${ev.title}`}</div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     );
@@ -310,6 +324,9 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
                       const height = (eh - h) * HOUR_HEIGHT + (em - m);
                       if (top < 0) return null;
 
+                      const evColor = getCourseColor(ev);
+                      const contrastColor = getContrastColor(evColor);
+
                       return (
                         <div
                           key={ev.instanceId}
@@ -317,8 +334,15 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
                             e.stopPropagation();
                             onSelectEvent(ev);
                           }}
-                          className="absolute left-1 right-1 rounded p-1.5 text-xs overflow-hidden cursor-pointer border bg-accent text-accent-contrast border-accent-hover/80 hover:opacity-95 transition-all shadow-sm"
-                          style={{ top: `${top}px`, height: `${height}px`, zIndex: 5 }}
+                          className="absolute left-1 right-1 rounded p-1.5 text-xs overflow-hidden cursor-pointer border hover:opacity-95 transition-all shadow-sm"
+                          style={{
+                            top: `${top}px`,
+                            height: `${height}px`,
+                            zIndex: 5,
+                            backgroundColor: evColor,
+                            color: contrastColor,
+                            borderColor: `${evColor}dd`,
+                          }}
                         >
                           <div className="font-semibold leading-tight flex items-center justify-between gap-1">
                             <span className="truncate">{ev.name}</span>
@@ -328,10 +352,10 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
                               </span>
                             )}
                           </div>
-                          <div className="text-[10px] opacity-80 mt-0.5 font-mono">
+                          <div className="text-[10px] opacity-85 mt-0.5 font-mono">
                             {ev.startTime} - {ev.endTime}
                           </div>
-                          <div className="text-[9px] mt-1 bg-black/20 inline-block px-1 rounded font-mono">
+                          <div className="text-[9px] mt-1 bg-black/20 text-white inline-block px-1 rounded font-mono">
                             P-{ev.meetingNum}
                           </div>
                         </div>
@@ -429,6 +453,12 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
               </div>
               <div className="flex-1 min-w-0">
                 <div className="font-semibold text-theme-text text-sm flex items-center gap-2">
+                  {ev.type === 'course' && (
+                    <span
+                      className="w-2.5 h-2.5 rounded-full shrink-0 shadow-xs"
+                      style={{ backgroundColor: getCourseColor(ev) }}
+                    />
+                  )}
                   <span className="truncate">{ev.type === 'course' ? ev.name : ev.title}</span>
                   {ev.type === 'course' && (
                     <span className="text-[10px] font-mono bg-theme-surface text-theme-muted px-1.5 py-0.5 rounded border border-theme shrink-0">

@@ -1,7 +1,8 @@
-import React from 'react';
-import { CheckSquare, Trash2, Plus, X, Pencil } from 'lucide-react';
+import React, { useState } from 'react';
+import { CheckSquare, Trash2, Plus, X, Pencil, Filter } from 'lucide-react';
 import { getDeadlineInfo } from './TaskDetailModal';
 import { renderMarkdownToHTML } from '../utils/markdown';
+import { getCourseColor } from '../utils/courseColors';
 
 const TaskView = ({
   tasks,
@@ -17,8 +18,22 @@ const TaskView = ({
   onStartEdit,
   onCancelEdit,
 }) => {
+  const [statusFilter, setStatusFilter] = useState('active'); // 'active' | 'all' | 'completed'
+  const [courseFilter, setCourseFilter] = useState('all');
+
+  const activeCount = tasks.filter((t) => !t.completed).length;
+  const completedCount = tasks.filter((t) => t.completed).length;
+  const totalCount = tasks.length;
+
+  const filteredTasks = tasks.filter((t) => {
+    if (statusFilter === 'active' && t.completed) return false;
+    if (statusFilter === 'completed' && !t.completed) return false;
+    if (courseFilter !== 'all' && Number(t.courseId) !== Number(courseFilter)) return false;
+    return true;
+  });
+
   // Sort: incomplete + urgent first, then by deadline
-  const sortedTasks = [...tasks].sort((a, b) => {
+  const sortedTasks = [...filteredTasks].sort((a, b) => {
     if (a.completed !== b.completed) return a.completed ? 1 : -1;
     if (a.urgency !== b.urgency) return a.urgency === 'high' ? -1 : 1;
     return (a.deadline || '').localeCompare(b.deadline || '');
@@ -158,6 +173,47 @@ const TaskView = ({
         </form>
       )}
 
+      {/* Filter Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-4 p-2 bg-theme-surface-subtle rounded-md border border-theme">
+        {/* Status Pills */}
+        <div className="flex items-center gap-1">
+          {[
+            { id: 'active', label: 'Aktif', count: activeCount },
+            { id: 'all', label: 'Semua', count: totalCount },
+            { id: 'completed', label: 'Selesai', count: completedCount },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setStatusFilter(tab.id)}
+              className={`px-2.5 py-1 rounded text-xs font-medium transition-colors ${
+                statusFilter === tab.id
+                  ? 'bg-accent text-accent-contrast shadow-sm'
+                  : 'text-theme-muted hover:text-theme-text'
+              }`}
+            >
+              {tab.label} <span className="opacity-75 font-mono text-[10px]">({tab.count})</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Course Selector Filter */}
+        <div className="flex items-center gap-1.5 text-xs text-theme-muted">
+          <Filter className="w-3.5 h-3.5" />
+          <select
+            value={courseFilter}
+            onChange={(e) => setCourseFilter(e.target.value)}
+            className="bg-theme-surface border border-theme rounded px-2 py-1 text-xs text-theme-text outline-none focus:border-accent"
+          >
+            <option value="all">Semua Matkul ({courses.length})</option>
+            {courses.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
       <div className="space-y-2">
         {sortedTasks.map((t) => {
           const course = courses.find((c) => c.id === t.courseId);
@@ -185,7 +241,13 @@ const TaskView = ({
                     )}
                   </div>
                   <div className="text-xs text-theme-muted mt-1 flex items-center gap-3 flex-wrap">
-                    <span>📚 {course?.name || 'Unknown'}</span>
+                    <span className="flex items-center gap-1.5 font-medium">
+                      <span
+                        className="w-2 h-2 rounded-full shrink-0 shadow-xs"
+                        style={{ backgroundColor: course ? getCourseColor(course) : '#71717a' }}
+                      />
+                      <span>{course?.name || 'Unknown'}</span>
+                    </span>
                     <span className="font-mono">📅 {datePart} {timePart !== '23:59' ? `⏰ ${timePart}` : ''}</span>
                   </div>
 
@@ -234,6 +296,14 @@ const TaskView = ({
             </div>
           );
         })}
+
+        {sortedTasks.length === 0 && (
+          <div className="text-center py-8 text-xs text-theme-muted">
+            {tasks.length === 0
+              ? 'Belum ada tugas yang dicatat.'
+              : 'Tidak ada tugas yang cocok dengan filter yang dipilih.'}
+          </div>
+        )}
 
         <button
           onClick={() => setShowTaskForm(true)}

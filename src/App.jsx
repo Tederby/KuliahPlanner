@@ -89,6 +89,7 @@ export default function App() {
           config={data.config}
           tasks={data.tasks}
           stashes={data.stashes}
+          courses={data.courses}
           onShowGuide={() => setShowOnboarding(true)}
           theme={theme}
         />
@@ -140,6 +141,9 @@ export default function App() {
               setShowCourseForm={data.setShowCourseForm}
               newCourse={data.newCourse}
               setNewCourse={data.setNewCourse}
+              editingCourseId={data.editingCourseId}
+              onStartEditCourse={data.startEditCourse}
+              onCancelEditCourse={data.cancelEditCourse}
               onUpdateConfig={data.handleUpdateConfig}
               onConfigBlur={data.handleConfigBlur}
               onAddCourse={data.handleAddCourse}
@@ -181,6 +185,11 @@ export default function App() {
         courses={data.courses}
         onClose={() => setSelectedTask(null)}
         onToggleComplete={data.toggleTaskComplete}
+        onEdit={(taskId) => {
+          setSelectedTask(null);
+          setActiveTab('tasks');
+          data.startEditTask(taskId);
+        }}
       />
 
       <OnboardingGuide

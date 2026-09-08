@@ -10,8 +10,13 @@ Demo online tersedia di: https://kuliah-planner.vercel.app/
 - **🔄 Smart Meeting Generation**: Otomatis generate semua jadwal untuk satu semester
 - **✅ Task Management**: Manage tugas dengan deadline, urgency, dan course tracking
 - **✏️ Task Editing**: Edit tugas langsung dari tab Tugas — form re-populate otomatis
+- **✏️ Course Editing**: Edit data matkul induk (nama, hari, jam, SKS, ruangan, warna) tanpa kehilangan relasi tugas atau stash
+- **🎨 Course Color Coding**: Penandaan warna unik per matkul (smart auto-assign + swatch custom) di seluruh kalender dan tugas
+- **🔍 Task Filtering**: Filter tugas instan berdasarkan status (Aktif, Semua, Selesai) serta dropdown filter per-matkul
+- **⚡ Live End Time & Clash Warning**: Estimasi jam selesai otomatis di form matkul & peringatan visual jika ada jadwal bentrok
+- **📊 Total SKS Summary**: Ringkasan beban SKS semester yang diambil di Sidebar dan header Data Matkul
 - **📝 Task Descriptions**: Deskripsi tugas dengan dukungan format **Markdown** (bold, italic, code, list, heading)
-- **🔍 Task Detail Modal**: Klik tugas di kalender untuk lihat detail lengkap + countdown deadline real-time
+- **🔍 Task Detail Modal**: Klik tugas di kalender untuk lihat detail lengkap + countdown deadline real-time + shortcut edit tugas
 - **⏰ Deadline Countdown**: Badge countdown otomatis (jam/hari tersisa, overdue, dsb.)
 - **💾 Local Storage**: Data tersimpan otomatis di browser, tidak hilang saat refresh
 - **🏗️ Course Management**: Kelola data matkul (nama, SKS, jadwal, lokasi)
@@ -88,6 +93,7 @@ KuliahPlanner/
 │   │   ├── useTheme.js           # Pengelola tema sistem, mode light/dark, dan kalkulator palet warna dinamis
 │   │   └── useToast.js           # Toast state management
 │   ├── utils/
+│   │   ├── courseColors.js       # Palet warna matkul, auto-assign, dan deteksi bentrok jadwal
 │   │   ├── dateUtils.js          # Helper format tanggal
 │   │   ├── markdown.js           # Simple Markdown-to-HTML renderer
 │   │   ├── storage.js            # localStorage read/write/export/import
@@ -200,15 +206,17 @@ Data akan bertahan meski:
 - Added: Task banners di timeline kalender (Week & Day view)
 - Added: Klik tugas di Agenda view membuka TaskDetailModal
 - Added: `startEditTask` / `cancelEditTask` di `useKuliahData`
-- Improved: ScheduleView refactored (all-day task row, breadcrumb, quick-add)
-- Fixed: Known issue "No export/import feature" → Backup & Restore sudah tersedia
-- Added: Setup Capacitor.js for native Android builds
+- Added: Course edit mode (edit nama, hari, jam, SKS, ruangan, warna tanpa hilang relasi tugas)
+- Added: Course color coding (auto-assign warna harmonis + custom picker di kalender & tugas)
+- Added: Task filtering (filter status Aktif/Semua/Selesai dan filter per-matkul)
+- Added: Live end-time calculation & schedule clash warning di form matkul
+- Added: Shortcut edit tugas langsung dari TaskDetailModal di kalender
+- Added: Total SKS counter di Sidebar dan header Data Matkul
 
 ## 🐛 Known Issues / TODO
 
 - [ ] No user authentication (semua data public per browser)
 - [ ] No push notification/reminder
-- [ ] No dark/light mode toggle (hardcoded dark)
 - [ ] Could optimize with TypeScript
 - [ ] Could add tests
 
