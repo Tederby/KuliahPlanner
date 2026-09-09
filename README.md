@@ -1,8 +1,24 @@
 # KuliahPlanner
 
-Aplikasi web untuk manage jadwal kuliah, tugas, dan deadline semester dengan UI yang modern dan fitur powerful.
+Aplikasi all-in-one untuk mahasiswa dalam mengelola jadwal kuliah satu semester penuh, tugas, deadline, presensi kelas, dan pengingat notifikasi Android.
 
-Demo online tersedia di: https://kuliah-planner.vercel.app/
+[![Release v1.0.0](https://img.shields.io/badge/Release-v1.0.0-6366f1?style=for-the-badge&logo=android&logoColor=white)](https://github.com/tederby/KuliahPlanner/releases)
+[![Demo Online](https://img.shields.io/badge/Web%20App-Live%20Demo-10b981?style=for-the-badge&logo=vercel&logoColor=white)](https://kuliah-planner.vercel.app/)
+
+---
+
+## 📱 Download APK Android (Rilis Resmi v1.0.0)
+
+File installer Android (`.apk`) versi resmi **v1.0.0** dapat diunduh langsung melalui:
+- **[Halaman GitHub Releases (Unduh .apk)](https://github.com/tederby/KuliahPlanner/releases)**
+- File: `KuliahPlanner-v1.0.0.apk`
+
+### Cara Install di HP Android:
+1. Unduh file `KuliahPlanner-v1.0.0.apk` di smartphone kamu.
+2. Buka file yang telah diunduh. Jika muncul peringatan *"Install unknown apps"* / *"Sumber tidak dikenal"*, izinkan browser atau file manager untuk menginstal.
+3. Buka aplikasi **KuliahPlanner** dan aktifkan izin notifikasi saat diminta agar pengingat kelas dan tugas dapat berdering tepat waktu secara offline.
+
+---
 
 ## Features
 
