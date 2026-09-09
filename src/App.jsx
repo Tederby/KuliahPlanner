@@ -62,7 +62,18 @@ export default function App() {
     autoSyncEnabled: cloudSync.autoSyncEnabled,
     onSync: () => handleCloudSync(false),
     onLogin: cloudSync.openAuthModal,
-    onLogout: cloudSync.signOut,
+    onLogout: () => {
+      // K1: Confirm before logout, warn about unsync'd data
+      const syncWarning = cloudSync.autoSyncEnabled && cloudSync.lastSyncTime
+        ? ''
+        : ' Data lokal yang belum di-sync tidak akan otomatis dibackup setelah logout.';
+      data.openConfirm({
+        title: 'Keluar dari Akun?',
+        message: `Kamu akan keluar dari akun Supabase Cloud.${syncWarning} Kamu bisa login kembali kapan saja.`,
+        danger: true,
+        onConfirm: cloudSync.signOut,
+      });
+    },
     onToggleAutoSync: cloudSync.setAutoSyncEnabled,
   };
 
@@ -111,6 +122,17 @@ export default function App() {
       setShowOnboarding(true);
     }
   }, []);
+
+  // S4: Reset form state when switching tabs to prevent stale edit context
+  useEffect(() => {
+    if (data.editingCourseId || data.showCourseForm) {
+      data.cancelEditCourse();
+    }
+    if (data.editingTaskId || data.showTaskForm) {
+      data.cancelEditTask();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
 
   const handleStashFromModal = (courseId, date, meetingNum, weekNum, originalTime) => {
     data.handleStash(courseId, date, meetingNum, weekNum, originalTime);
@@ -200,6 +222,7 @@ export default function App() {
               onOpenReschedule={data.openRescheduleStash}
               onCancelReschedule={data.cancelReschedule}
               onSaveReschedule={data.saveReschedule}
+              onReturnRescheduledToStash={data.returnRescheduledToStash}
             />
           )}
 
@@ -223,7 +246,15 @@ export default function App() {
               undoCount={data.undoCount}
               onUndo={data.handleUndo}
               undoHistory={data.getUndoHistory()}
-              onClearUndo={data.clearUndoHistory}
+              onClearUndo={() => {
+                // S3: Confirm before clearing undo history
+                data.openConfirm({
+                  title: 'Bersihkan Riwayat Undo?',
+                  message: 'Semua snapshot undo akan dihapus permanen dan tidak bisa dikembalikan. Lanjut?',
+                  danger: true,
+                  onConfirm: data.clearUndoHistory,
+                });
+              }}
               cloudSync={cloudSyncProps}
             />
           )}

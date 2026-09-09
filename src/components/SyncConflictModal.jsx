@@ -1,7 +1,17 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Cloud, HardDrive, AlertTriangle, ArrowRight, ShieldCheck } from 'lucide-react';
 
 const SyncConflictModal = ({ conflictData, onResolve }) => {
+  // R3: Close on Escape key
+  useEffect(() => {
+    if (!conflictData) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onResolve('cancel');
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [conflictData, onResolve]);
+
   if (!conflictData) return null;
 
   const { cloudData, localData, cloudTime, localTime } = conflictData;

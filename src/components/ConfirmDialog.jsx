@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { AlertTriangle } from 'lucide-react';
 
 /**
@@ -12,6 +12,16 @@ import { AlertTriangle } from 'lucide-react';
  *  - danger   : bool (merah vs biru)
  */
 const ConfirmDialog = ({ isOpen, title, message, onConfirm, onCancel, danger = true }) => {
+  // R3: Close on Escape key
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onCancel();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onCancel]);
+
   if (!isOpen) return null;
 
   return (

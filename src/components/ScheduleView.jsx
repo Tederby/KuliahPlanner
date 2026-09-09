@@ -484,11 +484,15 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
   };
 
   const renderAgendaView = () => {
+    const now = new Date();
+    const todayStr = formatDateStr(now);
+    const nowMinutesAgenda = now.getHours() * 60 + now.getMinutes();
+
     const upcomingEvents = allCalendarEvents
-      .filter((e) => new Date(e.date) >= new Date())
+      .filter((e) => new Date(e.date) >= new Date(todayStr))
       .sort(
         (a, b) =>
-          new Date(a.date) - new Date(b.date) || a.startTime.localeCompare(b.startTime)
+          new Date(a.date) - new Date(b.date) || (a.startTime || '').localeCompare(b.startTime || '')
       )
       .slice(0, 30);
 
@@ -536,13 +540,18 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
           }
 
           const ev = item.ev;
+          // S6: Check if event has already passed (for today's events)
+          const isEventPast = ev.date === todayStr && ev.endTime && (() => {
+            const [eh, em] = ev.endTime.split(':').map(Number);
+            return !isNaN(eh) && (eh * 60 + em) < nowMinutesAgenda;
+          })();
           return (
             <div
               key={ev.instanceId}
               onClick={() => {
                 if (ev.type === 'task' || ev.type === 'event') onSelectTask(ev);
               }}
-              className={`flex items-center gap-3 p-3 rounded-md border ${
+              className={`flex items-center gap-3 p-3 rounded-md border transition-colors ${isEventPast ? 'opacity-50' : ''} ${
                 ev.type === 'course'
                   ? 'border-theme bg-theme-surface-subtle/50 hover:bg-theme-surface-subtle'
                   : ev.type === 'event'
@@ -740,12 +749,17 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
             ))}
           </div>
           <div className="grid grid-cols-7">
-            {Array.from({ length: 35 }).map((_, i) => {
-              const d = new Date(currentDateObj.getFullYear(), currentDateObj.getMonth(), 1);
-              const startOffset = d.getDay();
-              d.setDate(d.getDate() - startOffset + i);
-              return renderCalendarCell(formatDateStr(d), d);
-            })}
+            {(() => {
+              const firstDay = new Date(currentDateObj.getFullYear(), currentDateObj.getMonth(), 1);
+              const startOffset = firstDay.getDay(); // 0 = Sunday
+              const daysInMonth = new Date(currentDateObj.getFullYear(), currentDateObj.getMonth() + 1, 0).getDate();
+              const totalCells = Math.ceil((startOffset + daysInMonth) / 7) * 7;
+              return Array.from({ length: totalCells }).map((_, i) => {
+                const d = new Date(currentDateObj.getFullYear(), currentDateObj.getMonth(), 1);
+                d.setDate(d.getDate() - startOffset + i);
+                return renderCalendarCell(formatDateStr(d), d);
+              });
+            })()}
           </div>
         </div>
       )}

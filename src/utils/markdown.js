@@ -2,7 +2,41 @@
  * Simple markdown-to-HTML renderer.
  * Supports: **bold**, *italic*, `inline code`, ## headings, - bullet lists, line breaks.
  * Safe for local-only user data (no external input).
+ *
+ * Security: After converting markdown to HTML, a post-render sanitizer strips
+ * any tags not in the allowlist and removes all attributes except `class`.
  */
+
+const ALLOWED_TAGS = new Set([
+  'h2', 'h3', 'h4', 'strong', 'em', 'code', 'ul', 'li', 'br',
+]);
+
+/**
+ * Strips HTML tags not in the allowlist and removes non-class attributes.
+ * This is the last line of defense against any escaping bypass.
+ */
+const sanitizeHTML = (html) => {
+  // Match any HTML tag (opening, closing, self-closing)
+  return html.replace(/<\/?([a-zA-Z][a-zA-Z0-9]*)\b([^>]*)?\/?>/g, (fullMatch, tagName, attrs) => {
+    const lowerTag = tagName.toLowerCase();
+
+    // Strip unknown tags entirely
+    if (!ALLOWED_TAGS.has(lowerTag)) return '';
+
+    // For allowed tags, only keep class attributes
+    const isClosing = fullMatch.startsWith('</');
+    const isSelfClosing = fullMatch.endsWith('/>');
+
+    if (isClosing) return `</${lowerTag}>`;
+
+    // Extract only class attribute if present
+    const classMatch = (attrs || '').match(/class="([^"]*)"/);
+    const classAttr = classMatch ? ` class="${classMatch[1]}"` : '';
+
+    return isSelfClosing ? `<${lowerTag}${classAttr}/>` : `<${lowerTag}${classAttr}>`;
+  });
+};
+
 export const renderMarkdownToHTML = (text) => {
   if (!text) return '';
 
@@ -10,7 +44,9 @@ export const renderMarkdownToHTML = (text) => {
   let html = text
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
 
   // Headings (must come before bold processing)
   html = html.replace(/^### (.+)$/gm, '<h4 class="font-bold text-sm mt-3 mb-1 text-theme-text">$1</h4>');
@@ -34,7 +70,8 @@ export const renderMarkdownToHTML = (text) => {
   });
 
   // Line breaks (but not after block elements)
-  html = html.replace(/(?<!<\/h[234]>|<\/ul>|<\/li>)\n/g, '<br/>');
+  html = html.replace(/(?!<\/h[234]>|<\/ul>|<\/li>)\n/g, '<br/>');
 
-  return html;
+  // Post-render sanitization: strip disallowed tags and unsafe attributes
+  return sanitizeHTML(html);
 };

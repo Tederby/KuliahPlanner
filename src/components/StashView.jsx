@@ -12,6 +12,7 @@ const StashView = ({
   onOpenReschedule,
   onCancelReschedule,
   onSaveReschedule,
+  onReturnRescheduledToStash,
 }) => {
   return (
     <div className="space-y-5">
@@ -33,8 +34,16 @@ const StashView = ({
               >
                 <div>
                   <h3 className="font-semibold text-sm text-theme-text">{course.name}</h3>
+                  <div className="text-xs text-theme-muted mt-1 flex items-center gap-2 flex-wrap">
+                    <span className="font-mono bg-theme-surface text-theme-muted border border-theme px-1.5 py-0.5 rounded text-[10px]">
+                      P-{stash.meetingNum || '?'}
+                    </span>
+                    <span className="text-[10px] text-theme-muted">
+                      Minggu #{stash.weekNum || '?'}
+                    </span>
+                  </div>
                   <div className="text-xs text-theme-muted mt-1 font-mono">
-                    <p>Jadwal asli: {stash.originalDate} | {course.startTime}</p>
+                    <p>Jadwal asli: {stash.originalDate} | {stash.originalTime || course.startTime}</p>
                     <p className="font-sans">Lokasi: {course.location || 'Belum diisi'}</p>
                   </div>
                 </div>
@@ -118,12 +127,27 @@ const StashView = ({
                   className="bg-theme-surface-subtle p-3.5 rounded-md border border-theme flex flex-col md:flex-row md:justify-between md:items-center gap-2"
                 >
                   <div>
-                    <div className="font-semibold text-sm text-theme-text">{course.name}</div>
+                    <div className="font-semibold text-sm text-theme-text flex items-center gap-2">
+                      {course.name}
+                      <span className="text-[10px] font-mono bg-theme-surface text-theme-muted border border-theme px-1.5 py-0.5 rounded">
+                        P-{rs.meetingNum || '?'}
+                      </span>
+                    </div>
                     <div className="text-xs text-theme-muted mt-0.5 font-mono">
                       Awal: {rs.originalDate} | Baru: {rs.newDate} {rs.newTime}
                     </div>
                   </div>
-                  <div className="text-[11px] text-theme-muted bg-theme-surface px-2 py-0.5 rounded border border-theme self-start md:self-auto">Terjadwal ulang</div>
+                  <div className="flex items-center gap-2 self-start md:self-auto">
+                    <span className="text-[11px] text-theme-muted bg-theme-surface px-2 py-0.5 rounded border border-theme">Terjadwal ulang</span>
+                    {onReturnRescheduledToStash && (
+                      <button
+                        onClick={() => onReturnRescheduledToStash(rs.id)}
+                        className="text-[11px] text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-800/50 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors"
+                      >
+                        Kembalikan ke Stash
+                      </button>
+                    )}
+                  </div>
                 </div>
               );
             })}

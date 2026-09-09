@@ -1,7 +1,17 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Clock, Info, Plus, Inbox, AlertTriangle, X } from 'lucide-react';
 
 const EventModal = ({ event, onClose, onStash, onReturnToStash, onOpenTask }) => {
+  // R3: Close on Escape key
+  useEffect(() => {
+    if (!event) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [event, onClose]);
+
   if (!event) return null;
 
   return (

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, User, Lock, Cloud, AlertCircle, Loader2, Eye, EyeOff } from 'lucide-react';
 
 const AuthModal = ({ isOpen, onClose, onSignIn, onSignUp, isConfigured }) => {
@@ -9,6 +9,16 @@ const AuthModal = ({ isOpen, onClose, onSignIn, onSignUp, isConfigured }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // R3: Close on Escape key
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 

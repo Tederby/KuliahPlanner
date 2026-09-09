@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   X,
   CheckCircle2,
@@ -39,6 +39,16 @@ const getDeadlineInfo = (deadline) => {
 };
 
 const TaskDetailModal = ({ task, courses, onClose, onToggleComplete, onEdit }) => {
+  // R3: Close on Escape key
+  useEffect(() => {
+    if (!task) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [task, onClose]);
+
   if (!task) return null;
 
   const isEvent = task.type === 'event';

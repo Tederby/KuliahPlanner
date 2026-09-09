@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getInitialState, saveData, exportDataAsJSON, importDataFromJSON } from '../utils/storage';
+import { getInitialState, saveData, exportDataAsJSON, importDataFromJSON, generateId } from '../utils/storage';
 import {
   pushSnapshot,
   popSnapshot,
@@ -8,7 +8,8 @@ import {
   clearUndoHistory,
 } from '../utils/undoHistory';
 import { validateCourse, validateTask, validateConfig } from '../utils/validators';
-import { getCourseColor, getNextAvailableColor } from '../utils/courseColors';
+import { getCourseColor, getNextAvailableColor, checkCourseClash, calculateCourseEndTime } from '../utils/courseColors';
+import { daysOfWeek } from '../utils/dateUtils';
 
 export const useKuliahData = ({ showToast }) => {
   const initialState = getInitialState();
@@ -172,7 +173,7 @@ export const useKuliahData = ({ showToast }) => {
         ...newCourse,
         sks: Number(newCourse.sks),
         color: courseColor,
-        id: Date.now(),
+        id: generateId(),
       }]);
       showToast('Matkul berhasil ditambahkan!', 'success');
     }
@@ -252,7 +253,7 @@ export const useKuliahData = ({ showToast }) => {
       setTasks(tasks.map((t) => (t.id === editingTaskId ? { ...t, ...taskData } : t)));
       showToast(isEvent ? 'Acara diperbarui!' : 'Tugas diperbarui!', 'success');
     } else {
-      setTasks([...tasks, { ...taskData, id: Date.now(), completed: false }]);
+      setTasks([...tasks, { ...taskData, id: generateId(), completed: false }]);
       showToast(isEvent ? 'Acara ditambahkan!' : 'Tugas ditambahkan!', 'success');
     }
     resetTaskForm();
@@ -305,11 +306,33 @@ export const useKuliahData = ({ showToast }) => {
     });
   };
 
-  const toggleTaskComplete = (id) =>
+  const toggleTaskComplete = (id) => {
+    const task = tasks.find((t) => t.id === id);
+    if (!task) return;
+    const wasCompleted = task.completed;
     setTasks(tasks.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)));
+    const label = task.type === 'event' ? 'Acara' : 'Tugas';
+    showToast(
+      wasCompleted
+        ? `${label} "${task.title}" ditandai belum selesai.`
+        : `${label} "${task.title}" ditandai selesai! ✓`,
+      wasCompleted ? 'info' : 'success',
+      4000,
+      {
+        label: 'Urungkan',
+        onClick: () => setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, completed: wasCompleted } : t))),
+      }
+    );
+  };
 
   const handleStash = (courseId, date, meetingNum, weekNum, originalTime) => {
-    setStashes([...stashes, { id: Date.now(), courseId, originalDate: date, meetingNum, weekNum, originalTime, notes: '' }]);
+    // K4: Prevent duplicate stash for the same course + date combo
+    const alreadyStashed = stashes.some((s) => s.courseId === courseId && s.originalDate === date);
+    if (alreadyStashed) {
+      showToast('Kelas ini sudah di-stash untuk tanggal tersebut.', 'info');
+      return;
+    }
+    setStashes([...stashes, { id: generateId(), courseId, originalDate: date, meetingNum, weekNum, originalTime, notes: '' }]);
     showToast('Kelas di-stash. Atur jadwal baru di tab Stash.', 'info');
   };
 
@@ -330,6 +353,29 @@ export const useKuliahData = ({ showToast }) => {
     e.preventDefault();
     if (!editingStash) return;
     if (!rescheduleForm.date || !rescheduleForm.time) { setError('Tanggal dan jam baru harus diisi'); return; }
+
+    // S1: Check for schedule clash on the new date/time
+    const newDateObj = new Date(rescheduleForm.date);
+    const newDayIndex = newDateObj.getDay() === 0 ? 6 : newDateObj.getDay() - 1;
+    const newDayName = daysOfWeek[newDayIndex];
+    const course = courses.find((c) => c.id === editingStash.courseId);
+    if (course) {
+      const candidateForClash = {
+        day: newDayName,
+        startTime: rescheduleForm.time,
+        sks: course.sks,
+      };
+      const clash = checkCourseClash(candidateForClash, courses, null, config.sksMinutes);
+      if (clash.hasClash) {
+        const clashEnd = calculateCourseEndTime(clash.clashingCourse.startTime, clash.clashingCourse.sks, config.sksMinutes);
+        showToast(
+          `⚠️ Perhatian: Jadwal baru bentrok dengan "${clash.clashingCourse.name}" (${clash.clashingCourse.startTime}-${clashEnd}). Tetap disimpan.`,
+          'warning',
+          8000
+        );
+      }
+    }
+
     setReschedules([...reschedules, { ...editingStash, newDate: rescheduleForm.date, newTime: rescheduleForm.time }]);
     setStashes(stashes.filter((s) => s.id !== editingStash.id));
     showToast('Jadwal baru disimpan!', 'success');
@@ -340,7 +386,7 @@ export const useKuliahData = ({ showToast }) => {
     const rs = reschedules.find((r) => r.id === rescheduleId);
     if (!rs) return;
     setReschedules(reschedules.filter((r) => r.id !== rescheduleId));
-    setStashes([...stashes, { id: Date.now(), courseId: rs.courseId, originalDate: rs.originalDate, meetingNum: rs.meetingNum, weekNum: rs.weekNum, originalTime: rs.originalTime, notes: '' }]);
+    setStashes([...stashes, { id: generateId(), courseId: rs.courseId, originalDate: rs.originalDate, meetingNum: rs.meetingNum, weekNum: rs.weekNum, originalTime: rs.originalTime, notes: '' }]);
     showToast('Dikembalikan ke stash.', 'info');
   };
 
@@ -374,7 +420,7 @@ export const useKuliahData = ({ showToast }) => {
     showCourseForm, setShowCourseForm, newCourse, setNewCourse,
     editingCourseId, startEditCourse, cancelEditCourse,
     editingStash, rescheduleForm, setRescheduleForm,
-    confirmDialog, handleConfirm, closeConfirm,
+    confirmDialog, handleConfirm, closeConfirm, openConfirm,
     handleUpdateConfig, handleConfigBlur,
     handleAddCourse, removeCourse,
     handleAddTask, removeTask, toggleTaskComplete,

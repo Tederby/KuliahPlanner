@@ -4,6 +4,14 @@ export const STORAGE_KEY = 'kuliahplanner_data';
 export const DEVICE_ID_KEY = 'kuliahplanner_device_id';
 
 /**
+ * generateId
+ * Collision-resistant numeric ID generator.
+ * Uses Date.now() * 1000 + random suffix to prevent duplicates even within the same millisecond.
+ */
+export const generateId = () =>
+  Date.now() * 1000 + Math.floor(Math.random() * 1000);
+
+/**
  * getDeviceId
  * Returns unique device identifier stored in localStorage, generating one if needed.
  */
@@ -103,13 +111,58 @@ export const importDataFromJSON = (file) => {
     reader.onload = (e) => {
       try {
         const parsed = JSON.parse(e.target.result);
-        // Validasi minimal
+        // Top-level key validation
         const required = ['config', 'courses', 'stashes', 'reschedules', 'tasks'];
         const missing  = required.filter((k) => !(k in parsed));
         if (missing.length) {
           resolve({ data: null, error: `File tidak valid. Field kurang: ${missing.join(', ')}` });
           return;
         }
+
+        // Deep validation: array types
+        const arrayFields = ['courses', 'stashes', 'reschedules', 'tasks'];
+        for (const field of arrayFields) {
+          if (!Array.isArray(parsed[field])) {
+            resolve({ data: null, error: `Field "${field}" harus berupa array, tapi ditemukan ${typeof parsed[field]}.` });
+            return;
+          }
+        }
+
+        // Config object validation
+        if (typeof parsed.config !== 'object' || parsed.config === null || Array.isArray(parsed.config)) {
+          resolve({ data: null, error: 'Field "config" harus berupa objek konfigurasi.' });
+          return;
+        }
+
+        const requiredConfigKeys = ['semesterStart', 'totalMeetings'];
+        const missingConfig = requiredConfigKeys.filter((k) => !(k in parsed.config));
+        if (missingConfig.length) {
+          resolve({ data: null, error: `Config tidak lengkap, field kurang: ${missingConfig.join(', ')}` });
+          return;
+        }
+
+        // Course item validation (check first item if array not empty)
+        if (parsed.courses.length > 0) {
+          const requiredCourseFields = ['id', 'name', 'sks', 'day', 'startTime'];
+          const sampleCourse = parsed.courses[0];
+          const missingCourse = requiredCourseFields.filter((k) => !(k in sampleCourse));
+          if (missingCourse.length) {
+            resolve({ data: null, error: `Data matkul tidak valid. Field kurang pada item pertama: ${missingCourse.join(', ')}` });
+            return;
+          }
+        }
+
+        // Task item validation (check first item if array not empty)
+        if (parsed.tasks.length > 0) {
+          const requiredTaskFields = ['id', 'title', 'deadline'];
+          const sampleTask = parsed.tasks[0];
+          const missingTask = requiredTaskFields.filter((k) => !(k in sampleTask));
+          if (missingTask.length) {
+            resolve({ data: null, error: `Data tugas tidak valid. Field kurang pada item pertama: ${missingTask.join(', ')}` });
+            return;
+          }
+        }
+
         resolve({ data: parsed, error: null });
       } catch {
         resolve({ data: null, error: 'File bukan JSON yang valid.' });
