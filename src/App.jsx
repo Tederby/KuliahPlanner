@@ -367,6 +367,7 @@ export default function App() {
                 });
               }}
               cloudSync={cloudSyncProps}
+              theme={theme}
             />
           )}
 

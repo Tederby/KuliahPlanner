@@ -5,7 +5,6 @@ import {
   Plus,
   X,
   Pencil,
-  Filter,
   Calendar,
   Users,
   User,
@@ -371,60 +370,64 @@ const TaskView = ({
         </form>
       )}
 
-      {/* Filter Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 p-2.5 bg-theme-surface-subtle rounded-md border border-theme">
-        {/* Status & Type Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 sm:pb-0 w-full sm:w-auto">
-          <div className="flex items-center gap-1 shrink-0 pr-2 border-r border-theme">
-            {[
-              { id: 'active', label: 'Aktif', count: activeCount },
-              { id: 'all', label: 'Semua', count: totalCount },
-              { id: 'completed', label: 'Selesai', count: completedCount },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setStatusFilter(tab.id)}
-                className={`px-2.5 py-1.5 rounded text-xs font-medium transition-colors shrink-0 ${
-                  statusFilter === tab.id
-                    ? 'bg-accent text-accent-contrast shadow-sm'
-                    : 'text-theme-muted hover:text-theme-text hover:bg-theme-surface'
-                }`}
-              >
-                {tab.label} <span className="opacity-75 font-mono text-[10px]">({tab.count})</span>
-              </button>
-            ))}
-          </div>
+      {/* 1. Status Filter (Segmented Tabs) */}
+      <div className="grid grid-cols-3 gap-1 bg-theme-surface-subtle p-1 rounded-lg border border-theme mb-3">
+        {[
+          { id: 'active', label: 'Aktif', count: activeCount },
+          { id: 'completed', label: 'Selesai', count: completedCount },
+          { id: 'all', label: 'Semua', count: totalCount },
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => setStatusFilter(tab.id)}
+            className={`py-1.5 text-xs font-medium rounded-md transition-all flex items-center justify-center gap-1.5 ${
+              statusFilter === tab.id
+                ? 'bg-accent text-accent-contrast shadow-sm font-semibold'
+                : 'text-theme-muted hover:text-theme-text hover:bg-theme-surface'
+            }`}
+          >
+            <span>{tab.label}</span>
+            <span
+              className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono ${
+                statusFilter === tab.id
+                  ? 'bg-accent-contrast/20 text-accent-contrast'
+                  : 'bg-theme-surface border border-theme text-theme-muted'
+              }`}
+            >
+              {tab.count}
+            </span>
+          </button>
+        ))}
+      </div>
 
-          {/* Type Filter */}
-          <div className="flex items-center gap-1 shrink-0">
-            {[
-              { id: 'all', label: 'Semua Tipe' },
-              { id: 'task', label: `Tugas (${taskOnlyCount})` },
-              { id: 'event', label: `Acara (${eventOnlyCount})` },
-            ].map((typeTab) => (
-              <button
-                key={typeTab.id}
-                onClick={() => setTypeFilter(typeTab.id)}
-                className={`px-2.5 py-1.5 rounded text-xs font-medium transition-colors shrink-0 ${
-                  typeFilter === typeTab.id
-                    ? 'bg-theme-surface text-theme-text border border-theme font-semibold shadow-xs'
-                    : 'text-theme-muted hover:text-theme-text'
-                }`}
-              >
-                {typeTab.label}
-              </button>
-            ))}
+      {/* 2. Secondary Filter Selectors (Type & Course) */}
+      <div className="flex items-center gap-2 mb-4">
+        {/* Type Selector */}
+        <div className="relative flex-1 sm:max-w-[200px]">
+          <select
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value)}
+            className="w-full appearance-none bg-theme-surface-subtle border border-theme rounded-md pl-3 pr-8 py-1.5 text-xs text-theme-text font-medium outline-none focus:border-accent transition-colors cursor-pointer"
+          >
+            <option value="all">Semua Tipe ({totalCount})</option>
+            <option value="task">Tugas Saja ({taskOnlyCount})</option>
+            <option value="event">Acara Saja ({eventOnlyCount})</option>
+          </select>
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-theme-muted">
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+            </svg>
           </div>
         </div>
 
-        {/* Course Selector Filter */}
+        {/* Course Selector (if relevant) */}
         {typeFilter !== 'event' && courses.length > 0 && (
-          <div className="flex items-center gap-1.5 text-xs text-theme-muted w-full sm:w-auto justify-end shrink-0">
-            <Filter className="w-3.5 h-3.5 shrink-0" />
+          <div className="relative flex-1 sm:max-w-[220px]">
             <select
               value={courseFilter}
               onChange={(e) => setCourseFilter(e.target.value)}
-              className="bg-theme-surface border border-theme rounded px-2.5 py-1.5 text-xs text-theme-text outline-none focus:border-accent flex-1 sm:flex-none"
+              className="w-full appearance-none bg-theme-surface-subtle border border-theme rounded-md pl-3 pr-8 py-1.5 text-xs text-theme-text font-medium outline-none focus:border-accent transition-colors cursor-pointer truncate"
             >
               <option value="all">Semua Matkul ({courses.length})</option>
               {courses.map((c) => (
@@ -433,6 +436,11 @@ const TaskView = ({
                 </option>
               ))}
             </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-theme-muted">
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
           </div>
         )}
       </div>

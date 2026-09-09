@@ -1,8 +1,9 @@
 import React, { useRef, useState } from 'react';
 import {
   Settings, BookOpen, Plus, X, Trash2, Download, Upload, Pencil,
-  AlertCircle, Clock, Check, Cloud, RefreshCw, Undo2, LogOut, CheckCircle2, User
+  AlertCircle, Clock, Check, Cloud, RefreshCw, Undo2, LogOut, CheckCircle2, User, Palette
 } from 'lucide-react';
+import ThemeSwitcher from './ThemeSwitcher';
 import { daysOfWeek } from '../utils/dateUtils';
 import {
   COURSE_COLOR_PALETTE,
@@ -32,6 +33,7 @@ const MatkulView = ({
   undoHistory = [],
   onClearUndo,
   cloudSync,
+  theme,
 }) => {
   const importRef = useRef(null);
   const [showUndoHistory, setShowUndoHistory] = useState(false);
@@ -42,6 +44,26 @@ const MatkulView = ({
 
   return (
     <div className="space-y-5">
+      {/* Theme & Palette Settings */}
+      {theme && (
+        <div className="bg-theme-surface p-5 rounded-lg border border-theme shadow-sm">
+          <h2 className="text-lg font-bold text-theme-text mb-3 flex items-center gap-2">
+            <Palette className="w-5 h-5 text-accent" /> Tampilan & Tema Warna
+          </h2>
+          <div className="max-w-md">
+            <ThemeSwitcher
+              themeMode={theme.themeMode}
+              setThemeMode={theme.setThemeMode}
+              accentColor={theme.accentColor}
+              setAccentColor={theme.setAccentColor}
+              isMonochrome={theme.isMonochrome}
+              setMonochrome={theme.setMonochrome}
+              COLOR_PRESETS={theme.COLOR_PRESETS}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Global Settings */}
       <div className="bg-theme-surface p-5 rounded-lg border border-theme shadow-sm">
         <h2 className="text-lg font-bold text-theme-text mb-4 flex items-center gap-2">

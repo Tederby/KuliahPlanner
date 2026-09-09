@@ -32,7 +32,7 @@ const BottomNav = ({ activeTab, setActiveTab, tasksCount = 0, stashesCount = 0 }
   return (
     <nav
       aria-label="Mobile Navigation"
-      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-theme-surface/95 backdrop-blur-md border-t border-theme px-2 pt-1.5 pb-[calc(var(--safe-area-bottom)+0.35rem)] shadow-lg select-none"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-theme-surface border-t border-theme px-2 pt-1.5 pb-[calc(var(--safe-area-bottom)+0.35rem)] shadow-lg select-none"
     >
       <div className="grid grid-cols-4 gap-1 max-w-md mx-auto">
         {tabs.map((tab) => {
