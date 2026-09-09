@@ -70,11 +70,21 @@ File yang di-build akan berada di folder `dist/`
 
 Aplikasi ini mendukung build ke mobile (Android) menggunakan Capacitor.js.
 
+### Cara 1: Otomatis via GitHub Actions (Rekomendasi — Tanpa Install Android Studio)
+Repositori ini telah dilengkapi dengan workflow CI/CD GitHub Actions di `.github/workflows/build-android.yml`.
+1. Setiap kali melakukan push ke branch `main`, atau memicu manual via tab **Actions** > **Build Android APK** > **Run workflow** di GitHub.
+2. Tunggu proses build selesai (~2–4 menit).
+3. Unduh file `.apk` siap pakai langsung dari bagian **Artifacts** (`KuliahPlanner-Debug-APK`).
+
+> **Catatan Supabase:** Jika ingin sinkronisasi Supabase aktif di APK hasil build GitHub Actions, tambahkan `VITE_SUPABASE_URL` dan `VITE_SUPABASE_ANON_KEY` ke **Settings > Secrets and variables > Actions** di repositori GitHub kamu.
+
+### Cara 2: Build Lokal (Memerlukan Android Studio / Android SDK)
 ```bash
 npm run build
 npx cap sync android
 npx cap open android
 ```
+Di Android Studio, pilih menu **Build > Build Bundle(s) / APK(s) > Build APK(s)** untuk menghasilkan file debug `.apk`.
 
 ## Project Structure
 
