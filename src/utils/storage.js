@@ -193,6 +193,15 @@ export const getInitialState = () => {
     stashes: [],
     reschedules: [],
     tasks: [],
+    attendances: {},
+    notificationSettings: {
+      enabled: true,
+      classLeadMinutes: 15,
+      dailyBriefing: true,
+      dailyBriefingTime: '07:00',
+      taskReminders: true,
+    },
+    maxAbsencePercent: 25,
   };
 
   if (!saved) return defaultState;
@@ -214,5 +223,14 @@ export const getInitialState = () => {
     stashes: Array.isArray(saved.stashes) ? saved.stashes : defaultState.stashes,
     reschedules: Array.isArray(saved.reschedules) ? saved.reschedules : defaultState.reschedules,
     tasks: Array.isArray(saved.tasks) ? saved.tasks : defaultState.tasks,
+    attendances: saved.attendances && typeof saved.attendances === 'object' ? saved.attendances : {},
+    notificationSettings: {
+      enabled: saved.notificationSettings?.enabled ?? true,
+      classLeadMinutes: saved.notificationSettings?.classLeadMinutes ?? 15,
+      dailyBriefing: saved.notificationSettings?.dailyBriefing ?? true,
+      dailyBriefingTime: saved.notificationSettings?.dailyBriefingTime || '07:00',
+      taskReminders: saved.notificationSettings?.taskReminders ?? true,
+    },
+    maxAbsencePercent: saved.maxAbsencePercent ?? 25,
   };
 };

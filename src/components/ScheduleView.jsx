@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, Plus, CalendarDays } from 'lucide-react';
 import { formatDateStr, daysOfWeek, monthNames } from '../utils/dateUtils';
 import { getCourseColor } from '../utils/courseColors';
 import { getContrastColor } from '../hooks/useTheme';
+import NextClassCard from './NextClassCard';
 
 // Display order: Sunday first
 const displayDaysOfWeek = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
@@ -714,6 +715,12 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
 
   return (
     <div className="space-y-4">
+      {/* Quick Glance: Next / In-Progress Class Card */}
+      <NextClassCard
+        allCalendarEvents={allCalendarEvents}
+        onSelectEvent={onSelectEvent}
+      />
+
       {/* View Controls */}
       <div className="flex flex-col gap-2.5 bg-theme-surface p-3 rounded-lg border border-theme shadow-sm">
         {/* Breadcrumb */}

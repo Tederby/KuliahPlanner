@@ -20,6 +20,17 @@ export const useKuliahData = ({ showToast }) => {
   const [stashes, setStashes]         = useState(initialState.stashes);
   const [reschedules, setReschedules] = useState(initialState.reschedules);
   const [tasks, setTasks]             = useState(initialState.tasks);
+  const [attendances, setAttendances] = useState(initialState.attendances || {});
+  const [notificationSettings, setNotificationSettings] = useState(
+    initialState.notificationSettings || {
+      enabled: true,
+      classLeadMinutes: 15,
+      dailyBriefing: true,
+      dailyBriefingTime: '07:00',
+      taskReminders: true,
+    }
+  );
+  const [maxAbsencePercent, setMaxAbsencePercent] = useState(initialState.maxAbsencePercent ?? 25);
   const [error, setError]             = useState(null);
   const [undoCount, setUndoCount]     = useState(getUndoCount());
   const [isDirty, setIsDirtyState]     = useState(getIsDirty);
@@ -93,6 +104,9 @@ export const useKuliahData = ({ showToast }) => {
         stashes,
         reschedules,
         tasks,
+        attendances,
+        notificationSettings,
+        maxAbsencePercent,
         _updatedAt: updatedAt,
       });
       return;
@@ -109,15 +123,18 @@ export const useKuliahData = ({ showToast }) => {
       stashes,
       reschedules,
       tasks,
+      attendances,
+      notificationSettings,
+      maxAbsencePercent,
       _updatedAt: nowIso,
     });
     if (saveError) showToast(saveError, 'error', 0);
-  }, [config, courses, stashes, reschedules, tasks]);
+  }, [config, courses, stashes, reschedules, tasks, attendances, notificationSettings, maxAbsencePercent]);
 
   const saveSnapshot = useCallback((label) => {
-    pushSnapshot(label, { config, courses, stashes, reschedules, tasks });
+    pushSnapshot(label, { config, courses, stashes, reschedules, tasks, attendances, notificationSettings, maxAbsencePercent });
     setUndoCount(getUndoCount());
-  }, [config, courses, stashes, reschedules, tasks]);
+  }, [config, courses, stashes, reschedules, tasks, attendances, notificationSettings, maxAbsencePercent]);
 
   const handleUndo = useCallback(() => {
     const snapshot = popSnapshot();
@@ -131,6 +148,9 @@ export const useKuliahData = ({ showToast }) => {
     if (Array.isArray(d.stashes)) setStashes(d.stashes);
     if (Array.isArray(d.reschedules)) setReschedules(d.reschedules);
     if (Array.isArray(d.tasks)) setTasks(d.tasks);
+    if (d.attendances && typeof d.attendances === 'object') setAttendances(d.attendances);
+    if (d.notificationSettings && typeof d.notificationSettings === 'object') setNotificationSettings(d.notificationSettings);
+    if (typeof d.maxAbsencePercent === 'number') setMaxAbsencePercent(d.maxAbsencePercent);
     setUndoCount(getUndoCount());
     showToast(`Diurungkan: ${snapshot.label}`, 'success');
     return true;
@@ -138,7 +158,7 @@ export const useKuliahData = ({ showToast }) => {
 
   const applyFullData = useCallback((newData, snapshotLabel = null, isFromCloud = false) => {
     if (snapshotLabel) {
-      pushSnapshot(snapshotLabel, { config, courses, stashes, reschedules, tasks });
+      pushSnapshot(snapshotLabel, { config, courses, stashes, reschedules, tasks, attendances, notificationSettings, maxAbsencePercent });
       setUndoCount(getUndoCount());
     }
     const incomingTime = newData._updatedAt || new Date().toISOString();
@@ -155,7 +175,10 @@ export const useKuliahData = ({ showToast }) => {
     if (Array.isArray(newData.stashes)) setStashes(newData.stashes);
     if (Array.isArray(newData.reschedules)) setReschedules(newData.reschedules);
     if (Array.isArray(newData.tasks)) setTasks(newData.tasks);
-  }, [config, courses, stashes, reschedules, tasks]);
+    if (newData.attendances && typeof newData.attendances === 'object') setAttendances(newData.attendances);
+    if (newData.notificationSettings && typeof newData.notificationSettings === 'object') setNotificationSettings(newData.notificationSettings);
+    if (typeof newData.maxAbsencePercent === 'number') setMaxAbsencePercent(newData.maxAbsencePercent);
+  }, [config, courses, stashes, reschedules, tasks, attendances, notificationSettings, maxAbsencePercent]);
 
   const handleUpdateConfig = (newConfig) => setConfig(newConfig);
   const handleConfigBlur = () => setError(validateConfig(config));
@@ -433,8 +456,64 @@ export const useKuliahData = ({ showToast }) => {
     showToast('Dikembalikan ke stash.', 'info');
   };
 
+  // ─── Attendance Helpers ───────────────────────────────────────────────────
+
+  const setAttendanceStatus = useCallback((courseId, meetingNum, status) => {
+    const key = `${courseId}_${meetingNum}`;
+    setAttendances((prev) => {
+      const next = { ...prev };
+      if (status) {
+        next[key] = status;
+      } else {
+        delete next[key];
+      }
+      return next;
+    });
+  }, []);
+
+  const getCourseAttendanceStats = useCallback((courseId, totalMeetings = config.totalMeetings || 14) => {
+    let presentCount = 0;
+    let permitCount = 0;
+    let absentCount = 0;
+
+    for (let m = 1; m <= totalMeetings; m++) {
+      const status = attendances[`${courseId}_${m}`];
+      if (status === 'present') presentCount++;
+      else if (status === 'permit') permitCount++;
+      else if (status === 'absent') absentCount++;
+    }
+
+    const totalRecorded = presentCount + permitCount + absentCount;
+    const maxAllowedAbsence = Math.floor(totalMeetings * ((maxAbsencePercent || 25) / 100));
+    const remainingAbsence = Math.max(0, maxAllowedAbsence - absentCount);
+    const attendanceRate = totalMeetings > 0 ? Math.round((presentCount / totalMeetings) * 100) : 100;
+    const isDanger = absentCount > maxAllowedAbsence;
+    const isWarning = remainingAbsence === 0 || remainingAbsence === 1;
+
+    return {
+      presentCount,
+      permitCount,
+      absentCount,
+      totalRecorded,
+      totalMeetings,
+      maxAllowedAbsence,
+      remainingAbsence,
+      attendanceRate,
+      isDanger,
+      isWarning,
+    };
+  }, [attendances, config.totalMeetings, maxAbsencePercent]);
+
+  const updateNotificationSettings = useCallback((newSettings) => {
+    setNotificationSettings((prev) => ({ ...prev, ...newSettings }));
+  }, []);
+
+  const updateMaxAbsencePercent = useCallback((percent) => {
+    setMaxAbsencePercent(percent);
+  }, []);
+
   const handleExport = () => {
-    exportDataAsJSON({ config, courses, stashes, reschedules, tasks });
+    exportDataAsJSON({ config, courses, stashes, reschedules, tasks, attendances, notificationSettings, maxAbsencePercent });
     showToast('Data berhasil di-export!', 'success');
   };
 
@@ -458,6 +537,9 @@ export const useKuliahData = ({ showToast }) => {
 
   return {
     config, courses, stashes, reschedules, tasks, error, setError,
+    attendances, setAttendanceStatus, getCourseAttendanceStats,
+    notificationSettings, updateNotificationSettings,
+    maxAbsencePercent, updateMaxAbsencePercent,
     showTaskForm, setShowTaskForm, newTask, setNewTask,
     editingTaskId,
     showCourseForm, setShowCourseForm, newCourse, setNewCourse,

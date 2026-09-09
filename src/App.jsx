@@ -24,6 +24,7 @@ import AuthModal        from './components/AuthModal';
 
 import { App as CapApp } from '@capacitor/app';
 import { Capacitor, SystemBars, SystemBarsStyle } from '@capacitor/core';
+import { syncLocalNotifications } from './utils/notificationService';
 
 export default function App() {
   const [activeTab, setActiveTab]       = useState('schedule');
@@ -46,6 +47,9 @@ export default function App() {
         stashes: data.stashes,
         reschedules: data.reschedules,
         tasks: data.tasks,
+        attendances: data.attendances,
+        notificationSettings: data.notificationSettings,
+        maxAbsencePercent: data.maxAbsencePercent,
         _updatedAt: data.updatedAt,
         _deviceId: data.deviceId,
       },
@@ -139,6 +143,20 @@ export default function App() {
     reschedules: data.reschedules,
     tasks:      data.tasks,
   });
+
+  // Automatically synchronize Capacitor local notifications
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      syncLocalNotifications({
+        calendarEvents: allCalendarEvents,
+        tasks: data.tasks,
+        courses: data.courses,
+        settings: data.notificationSettings,
+      });
+    }, 1200);
+
+    return () => clearTimeout(timer);
+  }, [allCalendarEvents, data.tasks, data.courses, data.notificationSettings]);
 
   // Show onboarding on first visit
   useEffect(() => {
@@ -354,6 +372,14 @@ export default function App() {
               }}
               cloudSync={cloudSyncProps}
               theme={theme}
+              attendances={data.attendances}
+              onSetAttendance={data.setAttendanceStatus}
+              getCourseAttendanceStats={data.getCourseAttendanceStats}
+              notificationSettings={data.notificationSettings}
+              onUpdateNotificationSettings={data.updateNotificationSettings}
+              maxAbsencePercent={data.maxAbsencePercent}
+              onUpdateMaxAbsencePercent={data.updateMaxAbsencePercent}
+              showToast={showToast}
             />
           )}
 
@@ -382,6 +408,9 @@ export default function App() {
         onStash={handleStashFromModal}
         onReturnToStash={handleReturnToStashFromModal}
         onOpenTask={openTaskForCourse}
+        attendances={data.attendances}
+        onSetAttendance={data.setAttendanceStatus}
+        getCourseAttendanceStats={data.getCourseAttendanceStats}
       />
 
       <TaskDetailModal

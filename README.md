@@ -40,6 +40,9 @@ Demo online tersedia di: https://kuliah-planner.vercel.app/
 - **Mobile Responsive & Adaptive Shell**: Tata letak otomatis beradaptasi antara desktop (Sidebar samping) dan smartphone/Android (Mobile Header ringkas + Bottom Navigation Bar ramah jempol)
 - **Native Android Experience**: Terintegrasi penuh dengan Capacitor 8, mendukung gesture/hardware Back Button Android (menutup modal/kembali), sinkronisasi tema SystemBars, safe-area insets (notch & gesture bar), serta modal bertipe Bottom Sheet
 - **Native Android Support**: Build menjadi aplikasi Android native menggunakan Capacitor.js
+- **Offline Local Notifications**: Pengingat kelas H-x menit sebelum mulai (bisa diatur), Daily Briefing jadwal & deadline tiap jam 07:00 pagi, dan pengingat deadline tugas H-3 jam via `@capacitor/local-notifications` (100% offline di Android native)
+- **Attendance Tracker & Kalkulator "Jatah Bolos"**: Pencatatan presensi per pertemuan (Hadir, Izin, Alpa) lengkap dengan kalkulator sisa jatah tidak hadir agar tidak terkena sanksi larangan UAS (standar toleransi 25% atau kustom)
+- **Quick Glance "Next Class" Card**: Kartu pintar di tab Kalender/Jadwal yang menampilkan kelas yang sedang berlangsung (dengan live timer progress) atau kelas berikutnya hari ini secara real-time
 
 
 ## Quick Start
@@ -102,6 +105,7 @@ KuliahPlanner/
 │   │   ├── EventModal.jsx        # Detail & aksi event matkul di kalender
 │   │   ├── MatkulView.jsx        # Tab Config & Data (matkul, config, backup, sync, undo)
 │   │   ├── MobileHeader.jsx      # Header ringkas atas untuk mobile / Android
+│   │   ├── NextClassCard.jsx     # Kartu kelas hari ini & live time tracker
 │   │   ├── OnboardingGuide.jsx   # Panduan interaktif untuk user baru
 │   │   ├── ScheduleView.jsx      # Kalender (Month/Week/Day/Agenda) + drill-down
 │   │   ├── Sidebar.jsx           # Navigasi tab sidebar & indikator cloud sync
@@ -121,6 +125,7 @@ KuliahPlanner/
 │   │   ├── courseColors.js       # Palet warna matkul, auto-assign, dan deteksi bentrok jadwal
 │   │   ├── dateUtils.js          # Helper format tanggal
 │   │   ├── markdown.js           # Simple Markdown-to-HTML renderer
+│   │   ├── notificationService.js# Pengelola notifikasi offline Android & web fallback
 │   │   ├── storage.js            # localStorage read/write/export/import & metadata
 │   │   ├── supabase.js           # Supabase client singleton & auth mapping helper
 │   │   ├── undoHistory.js        # Ring buffer snapshot undo lokal
@@ -140,6 +145,7 @@ KuliahPlanner/
 - **Vite 4.3** - Build tool (super fast)
 - **Tailwind CSS 3.3** - Styling
 - **Lucide React** - Icon library
+- **@capacitor/local-notifications** - Native Offline Android Reminders
 - **@supabase/supabase-js** - Backend-as-a-Service (Auth & Cloud Database)
 
 ## How to Use
@@ -250,8 +256,8 @@ Data akan bertahan meski:
 
 ## Known Issues / TODO
 
-- [ ] No user authentication (semua data public per browser)
-- [ ] No push notification/reminder
+- [x] No push notification/reminder -> Added offline Local Notifications via `@capacitor/local-notifications`
+- [ ] No multi-semester archive / history
 - [ ] Could optimize with TypeScript
 - [ ] Could add tests
 
