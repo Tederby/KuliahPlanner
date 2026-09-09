@@ -36,7 +36,7 @@ export default function App() {
 
   const data = useKuliahData({ showToast });
   const cloudSync = useSupabaseSync({ showToast });
-  const isSyncApplyingRef = useRef(false);
+  const handleCloudSyncRef = useRef(null);
 
   const handleCloudSync = (silent = false) => {
     cloudSync.syncData({
@@ -49,15 +49,15 @@ export default function App() {
         _updatedAt: data.updatedAt,
         _deviceId: data.deviceId,
       },
-      onApplyCloudData: (cloudData, label) => {
-        isSyncApplyingRef.current = true;
-        data.applyFullData(cloudData, label, true);
+      onApplyCloudData: (cloudData, label, isFromCloud) => {
+        data.applyFullData(cloudData, label, isFromCloud);
       },
       isDirty: data.isDirty,
       markClean: data.markClean,
       silent,
     });
   };
+  handleCloudSyncRef.current = handleCloudSync;
 
   const cloudSyncProps = {
     isConfigured: cloudSync.isConfigured,
@@ -90,24 +90,24 @@ export default function App() {
     if (cloudSync.user && cloudSync.autoSyncEnabled) {
       if (!prevUserRef.current || prevUserRef.current.id !== cloudSync.user.id) {
         prevUserRef.current = cloudSync.user;
-        handleCloudSync(true);
+        handleCloudSyncRef.current?.(true);
       }
     } else {
       prevUserRef.current = null;
     }
   }, [cloudSync.user, cloudSync.autoSyncEnabled]);
 
-  // Seamless auto-pull on tab focus or device switch (when local state is clean)
+  // Seamless auto-pull on tab focus or device switch
   useEffect(() => {
     if (!cloudSync.user || !cloudSync.autoSyncEnabled) return;
 
     let lastCheck = 0;
     const handleVisibilityOrFocus = () => {
-      if (document.visibilityState === 'visible' && !data.isDirty) {
+      if (document.visibilityState === 'visible') {
         const now = Date.now();
-        if (now - lastCheck > 4000) {
+        if (now - lastCheck > 5000) {
           lastCheck = now;
-          handleCloudSync(true);
+          handleCloudSyncRef.current?.(true);
         }
       }
     };
@@ -119,32 +119,18 @@ export default function App() {
       window.removeEventListener('focus', handleVisibilityOrFocus);
       document.removeEventListener('visibilitychange', handleVisibilityOrFocus);
     };
-  }, [cloudSync.user, cloudSync.autoSyncEnabled, data.isDirty]);
+  }, [cloudSync.user, cloudSync.autoSyncEnabled]);
 
-  // Background auto-sync push with debounce (2.5s) ONLY when user made modifications (dirty)
+  // Background auto-push with debounce (5s) when user makes modifications
   useEffect(() => {
     if (!cloudSync.user || !cloudSync.autoSyncEnabled || !data.isDirty) return;
 
-    if (isSyncApplyingRef.current) {
-      isSyncApplyingRef.current = false;
-      return;
-    }
-
     const timer = setTimeout(() => {
-      handleCloudSync(true);
-    }, 2500);
+      handleCloudSyncRef.current?.(true);
+    }, 5000);
 
     return () => clearTimeout(timer);
-  }, [
-    data.config,
-    data.courses,
-    data.stashes,
-    data.reschedules,
-    data.tasks,
-    data.isDirty,
-    cloudSync.user,
-    cloudSync.autoSyncEnabled,
-  ]);
+  }, [data.isDirty, data.updatedAt, cloudSync.user, cloudSync.autoSyncEnabled]);
 
   const { allCalendarEvents } = useCalendarEvents({
     courses:    data.courses,

@@ -4,7 +4,7 @@ export const LAST_SYNC_STORAGE_KEY = 'kuliahplanner_last_sync_time';
 export const AUTO_SYNC_STORAGE_KEY = 'kuliahplanner_auto_sync_enabled';
 export const SAVED_USERNAME_KEY = 'kuliahplanner_saved_username';
 export const SYNC_DIRTY_KEY = 'kuliahplanner_sync_is_dirty';
-export const SYNCED_CLOUD_TIME_KEY = 'kuliahplanner_synced_cloud_time';
+export const KNOWN_CLOUD_VERSION_KEY = 'kuliahplanner_known_cloud_version';
 
 const rawUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const rawKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
@@ -122,27 +122,31 @@ export const setIsDirty = (dirty) => {
 };
 
 /**
- * getSyncedCloudTime
- * Gets the last known cloud updated_at timestamp that this client was synced with.
+ * getKnownCloudVersion
+ * Gets the last known cloud data version that this device was synced with.
+ * Returns a number or null if never synced.
  */
-export const getSyncedCloudTime = () => {
+export const getKnownCloudVersion = () => {
   try {
-    return localStorage.getItem(SYNCED_CLOUD_TIME_KEY) || null;
+    const val = localStorage.getItem(KNOWN_CLOUD_VERSION_KEY);
+    if (val === null) return null;
+    const num = parseInt(val, 10);
+    return isNaN(num) ? null : num;
   } catch {
     return null;
   }
 };
 
 /**
- * setSyncedCloudTime
- * Updates the recorded cloud updated_at timestamp.
+ * setKnownCloudVersion
+ * Updates the recorded cloud version number.
  */
-export const setSyncedCloudTime = (timestamp) => {
+export const setKnownCloudVersion = (version) => {
   try {
-    if (timestamp) {
-      localStorage.setItem(SYNCED_CLOUD_TIME_KEY, String(timestamp));
+    if (version !== null && version !== undefined) {
+      localStorage.setItem(KNOWN_CLOUD_VERSION_KEY, String(version));
     } else {
-      localStorage.removeItem(SYNCED_CLOUD_TIME_KEY);
+      localStorage.removeItem(KNOWN_CLOUD_VERSION_KEY);
     }
   } catch {}
 };
@@ -155,6 +159,6 @@ export const clearSyncTracking = () => {
   try {
     localStorage.removeItem(LAST_SYNC_STORAGE_KEY);
     localStorage.removeItem(SYNC_DIRTY_KEY);
-    localStorage.removeItem(SYNCED_CLOUD_TIME_KEY);
+    localStorage.removeItem(KNOWN_CLOUD_VERSION_KEY);
   } catch {}
 };
