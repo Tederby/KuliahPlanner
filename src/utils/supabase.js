@@ -3,6 +3,8 @@ import { createClient } from '@supabase/supabase-js';
 export const LAST_SYNC_STORAGE_KEY = 'kuliahplanner_last_sync_time';
 export const AUTO_SYNC_STORAGE_KEY = 'kuliahplanner_auto_sync_enabled';
 export const SAVED_USERNAME_KEY = 'kuliahplanner_saved_username';
+export const SYNC_DIRTY_KEY = 'kuliahplanner_sync_is_dirty';
+export const SYNCED_CLOUD_TIME_KEY = 'kuliahplanner_synced_cloud_time';
 
 const rawUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const rawKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
@@ -93,5 +95,66 @@ export const getStoredAutoSync = () => {
 export const setStoredAutoSync = (enabled) => {
   try {
     localStorage.setItem(AUTO_SYNC_STORAGE_KEY, String(enabled));
+  } catch {}
+};
+
+/**
+ * getIsDirty
+ * Checks if local data has unsaved/unsynced mutations.
+ */
+export const getIsDirty = () => {
+  try {
+    const val = localStorage.getItem(SYNC_DIRTY_KEY);
+    return val === 'true';
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * setIsDirty
+ * Sets the dirty flag for local data.
+ */
+export const setIsDirty = (dirty) => {
+  try {
+    localStorage.setItem(SYNC_DIRTY_KEY, String(Boolean(dirty)));
+  } catch {}
+};
+
+/**
+ * getSyncedCloudTime
+ * Gets the last known cloud updated_at timestamp that this client was synced with.
+ */
+export const getSyncedCloudTime = () => {
+  try {
+    return localStorage.getItem(SYNCED_CLOUD_TIME_KEY) || null;
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * setSyncedCloudTime
+ * Updates the recorded cloud updated_at timestamp.
+ */
+export const setSyncedCloudTime = (timestamp) => {
+  try {
+    if (timestamp) {
+      localStorage.setItem(SYNCED_CLOUD_TIME_KEY, String(timestamp));
+    } else {
+      localStorage.removeItem(SYNCED_CLOUD_TIME_KEY);
+    }
+  } catch {}
+};
+
+/**
+ * clearSyncTracking
+ * Clears sync tracking keys upon logout.
+ */
+export const clearSyncTracking = () => {
+  try {
+    localStorage.removeItem(LAST_SYNC_STORAGE_KEY);
+    localStorage.removeItem(SYNC_DIRTY_KEY);
+    localStorage.removeItem(SYNCED_CLOUD_TIME_KEY);
   } catch {}
 };

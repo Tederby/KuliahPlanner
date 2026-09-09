@@ -46,8 +46,10 @@ export default function App() {
       },
       onApplyCloudData: (cloudData, label) => {
         isSyncApplyingRef.current = true;
-        data.applyFullData(cloudData, label);
+        data.applyFullData(cloudData, label, true);
       },
+      isDirty: data.isDirty,
+      markClean: data.markClean,
       silent,
     });
   };
@@ -77,17 +79,47 @@ export default function App() {
     onToggleAutoSync: cloudSync.setAutoSyncEnabled,
   };
 
-  // Background auto-sync with debounce (3s) when data changes and user is authenticated
-  const isInitialMount = useRef(true);
+  // Immediate sync when session is established or user signs in
+  const prevUserRef = useRef(null);
   useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      return;
+    if (cloudSync.user && cloudSync.autoSyncEnabled) {
+      if (!prevUserRef.current || prevUserRef.current.id !== cloudSync.user.id) {
+        prevUserRef.current = cloudSync.user;
+        handleCloudSync(true);
+      }
+    } else {
+      prevUserRef.current = null;
     }
+  }, [cloudSync.user, cloudSync.autoSyncEnabled]);
 
+  // Seamless auto-pull on tab focus or device switch (when local state is clean)
+  useEffect(() => {
     if (!cloudSync.user || !cloudSync.autoSyncEnabled) return;
 
-    // Prevent re-triggering auto-sync immediately after cloud data was applied
+    let lastCheck = 0;
+    const handleVisibilityOrFocus = () => {
+      if (document.visibilityState === 'visible' && !data.isDirty) {
+        const now = Date.now();
+        if (now - lastCheck > 4000) {
+          lastCheck = now;
+          handleCloudSync(true);
+        }
+      }
+    };
+
+    window.addEventListener('focus', handleVisibilityOrFocus);
+    document.addEventListener('visibilitychange', handleVisibilityOrFocus);
+
+    return () => {
+      window.removeEventListener('focus', handleVisibilityOrFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityOrFocus);
+    };
+  }, [cloudSync.user, cloudSync.autoSyncEnabled, data.isDirty]);
+
+  // Background auto-sync push with debounce (2.5s) ONLY when user made modifications (dirty)
+  useEffect(() => {
+    if (!cloudSync.user || !cloudSync.autoSyncEnabled || !data.isDirty) return;
+
     if (isSyncApplyingRef.current) {
       isSyncApplyingRef.current = false;
       return;
@@ -95,7 +127,7 @@ export default function App() {
 
     const timer = setTimeout(() => {
       handleCloudSync(true);
-    }, 3000);
+    }, 2500);
 
     return () => clearTimeout(timer);
   }, [
@@ -104,6 +136,7 @@ export default function App() {
     data.stashes,
     data.reschedules,
     data.tasks,
+    data.isDirty,
     cloudSync.user,
     cloudSync.autoSyncEnabled,
   ]);

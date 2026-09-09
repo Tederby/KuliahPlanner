@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { getInitialState, saveData, exportDataAsJSON, importDataFromJSON, generateId } from '../utils/storage';
+import { getIsDirty, setIsDirty } from '../utils/supabase';
 import {
   pushSnapshot,
   popSnapshot,
@@ -21,6 +22,10 @@ export const useKuliahData = ({ showToast }) => {
   const [tasks, setTasks]             = useState(initialState.tasks);
   const [error, setError]             = useState(null);
   const [undoCount, setUndoCount]     = useState(getUndoCount());
+  const [isDirty, setIsDirtyState]     = useState(getIsDirty);
+
+  const isFirstRender = useRef(true);
+  const isApplyingCloudDataRef = useRef(false);
 
   const [showTaskForm, setShowTaskForm]     = useState(false);
   const [editingTaskId, setEditingTaskId]   = useState(null);
@@ -64,9 +69,40 @@ export const useKuliahData = ({ showToast }) => {
     closeConfirm();
   };
 
+  const markClean = useCallback(() => {
+    setIsDirty(false);
+    setIsDirtyState(false);
+  }, []);
+
+  const markDirty = useCallback(() => {
+    setIsDirty(true);
+    setIsDirtyState(true);
+  }, []);
+
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
+    if (isApplyingCloudDataRef.current) {
+      isApplyingCloudDataRef.current = false;
+      saveData({
+        config,
+        courses,
+        stashes,
+        reschedules,
+        tasks,
+        _updatedAt: updatedAt,
+      });
+      return;
+    }
+
     const nowIso = new Date().toISOString();
     setUpdatedAt(nowIso);
+    setIsDirty(true);
+    setIsDirtyState(true);
+
     const { error: saveError } = saveData({
       config,
       courses,
@@ -100,13 +136,20 @@ export const useKuliahData = ({ showToast }) => {
     return true;
   }, [showToast]);
 
-  const applyFullData = useCallback((newData, snapshotLabel = null) => {
+  const applyFullData = useCallback((newData, snapshotLabel = null, isFromCloud = false) => {
     if (snapshotLabel) {
       pushSnapshot(snapshotLabel, { config, courses, stashes, reschedules, tasks });
       setUndoCount(getUndoCount());
     }
     const incomingTime = newData._updatedAt || new Date().toISOString();
     setUpdatedAt(incomingTime);
+
+    if (isFromCloud) {
+      isApplyingCloudDataRef.current = true;
+      setIsDirty(false);
+      setIsDirtyState(false);
+    }
+
     if (newData.config) setConfig(newData.config);
     if (Array.isArray(newData.courses)) setCourses(newData.courses);
     if (Array.isArray(newData.stashes)) setStashes(newData.stashes);
@@ -430,5 +473,6 @@ export const useKuliahData = ({ showToast }) => {
     handleExport, handleImport,
     undoCount, handleUndo, saveSnapshot, applyFullData, getUndoHistory, clearUndoHistory,
     updatedAt, deviceId: initialState._deviceId || 'browser-unknown',
+    isDirty, markClean, markDirty,
   };
 };

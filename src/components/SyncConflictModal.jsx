@@ -37,9 +37,9 @@ const SyncConflictModal = ({ conflictData, onResolve }) => {
             <AlertTriangle className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-theme-text">Konflik Sinkronisasi Terdeteksi</h3>
+            <h3 className="text-base font-bold text-theme-text">{conflictData.title || 'Konflik Sinkronisasi Terdeteksi'}</h3>
             <p className="text-xs text-theme-muted mt-0.5">
-              Data di Supabase Cloud lebih baru dari data di perangkat ini. Pilih data mana yang ingin kamu gunakan.
+              {conflictData.description || 'Data di Supabase Cloud berbeda dengan data di perangkat ini. Pilih data mana yang ingin kamu gunakan.'}
             </p>
           </div>
         </div>
@@ -49,9 +49,11 @@ const SyncConflictModal = ({ conflictData, onResolve }) => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             {/* Cloud Version Card */}
             <div className="p-4 rounded-lg border-2 border-accent/60 bg-accent/5 relative flex flex-col justify-between">
-              <div className="absolute -top-2.5 right-3 bg-accent text-accent-contrast text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
-                Lebih Baru
-              </div>
+              {cloudTime > localTime && (
+                <div className="absolute -top-2.5 right-3 bg-accent text-accent-contrast text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                  Lebih Baru
+                </div>
+              )}
               <div>
                 <div className="flex items-center gap-2 text-accent font-semibold text-xs mb-2">
                   <Cloud className="w-4 h-4" /> Supabase Cloud
