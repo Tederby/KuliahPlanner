@@ -46,6 +46,8 @@ export const useKuliahData = ({ showToast }) => {
   const [editingStash, setEditingStash]     = useState(null);
   const [rescheduleForm, setRescheduleForm] = useState({ date: '', time: '' });
 
+  const [updatedAt, setUpdatedAt] = useState(initialState._updatedAt || new Date().toISOString());
+
   const [confirmDialog, setConfirmDialog] = useState({
     isOpen: false, title: '', message: '', onConfirm: null, danger: true,
   });
@@ -62,7 +64,16 @@ export const useKuliahData = ({ showToast }) => {
   };
 
   useEffect(() => {
-    const { error: saveError } = saveData({ config, courses, stashes, reschedules, tasks });
+    const nowIso = new Date().toISOString();
+    setUpdatedAt(nowIso);
+    const { error: saveError } = saveData({
+      config,
+      courses,
+      stashes,
+      reschedules,
+      tasks,
+      _updatedAt: nowIso,
+    });
     if (saveError) showToast(saveError, 'error', 0);
   }, [config, courses, stashes, reschedules, tasks]);
 
@@ -93,6 +104,8 @@ export const useKuliahData = ({ showToast }) => {
       pushSnapshot(snapshotLabel, { config, courses, stashes, reschedules, tasks });
       setUndoCount(getUndoCount());
     }
+    const incomingTime = newData._updatedAt || new Date().toISOString();
+    setUpdatedAt(incomingTime);
     if (newData.config) setConfig(newData.config);
     if (Array.isArray(newData.courses)) setCourses(newData.courses);
     if (Array.isArray(newData.stashes)) setStashes(newData.stashes);
@@ -370,5 +383,6 @@ export const useKuliahData = ({ showToast }) => {
     returnRescheduledToStash,
     handleExport, handleImport,
     undoCount, handleUndo, saveSnapshot, applyFullData, getUndoHistory, clearUndoHistory,
+    updatedAt, deviceId: initialState._deviceId || 'browser-unknown',
   };
 };

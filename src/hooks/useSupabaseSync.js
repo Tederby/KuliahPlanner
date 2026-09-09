@@ -254,11 +254,73 @@ export const useSupabaseSync = ({ showToast }) => {
           return true;
         }
 
+        // Helper to compare actual data content (ignoring timestamps & device IDs)
+        const areContentsEqual = (a, b) => {
+          if (!a || !b) return false;
+          try {
+            const cleanA = {
+              config: a.config,
+              courses: a.courses || [],
+              stashes: a.stashes || [],
+              reschedules: a.reschedules || [],
+              tasks: a.tasks || [],
+            };
+            const cleanB = {
+              config: b.config,
+              courses: b.courses || [],
+              stashes: b.stashes || [],
+              reschedules: b.reschedules || [],
+              tasks: b.tasks || [],
+            };
+            return JSON.stringify(cleanA) === JSON.stringify(cleanB);
+          } catch {
+            return false;
+          }
+        };
+
         const cloudTime = new Date(cloudRow.updated_at || cloudData._updatedAt || 0).getTime();
         const localTime = new Date(localData._updatedAt || 0).getTime();
+        const lastSync = getLastSyncTime() || 0;
 
-        // 4. Conflict detection: cloud is significantly newer (>2000ms) and from another device
-        if (cloudTime > localTime + 2000 && cloudRow.device_id !== deviceId) {
+        // 4. Content Equality Check: If data contents are already identical, no sync needed
+        if (areContentsEqual(localData, cloudData)) {
+          const syncMs = Math.max(cloudTime, localTime, Date.now());
+          setLastSyncTime(syncMs);
+          setLastSyncState(syncMs);
+          return true;
+        }
+
+        // 5. Fresh / Empty Local Device Check:
+        // If this device has no courses/tasks and Cloud has data, auto-pull without asking
+        const isLocalEmpty =
+          (!localData.courses || localData.courses.length === 0) &&
+          (!localData.tasks || localData.tasks.length === 0) &&
+          (!localData.stashes || localData.stashes.length === 0);
+
+        const isCloudHasData =
+          (cloudData.courses && cloudData.courses.length > 0) ||
+          (cloudData.tasks && cloudData.tasks.length > 0) ||
+          (cloudData.stashes && cloudData.stashes.length > 0);
+
+        if (isLocalEmpty && isCloudHasData) {
+          if (typeof onApplyCloudData === 'function') {
+            onApplyCloudData(cloudData, 'Dari Supabase Cloud');
+          }
+          setLastSyncTime(cloudTime);
+          setLastSyncState(cloudTime);
+          if (!silent) {
+            showToast('Data jadwal berhasil dimuat dari Supabase Cloud!', 'success');
+          }
+          return true;
+        }
+
+        // 6. Conflict Detection:
+        // A genuine conflict ONLY occurs if BOTH local AND cloud were independently modified
+        // since the last sync time and on different devices
+        const localModifiedSinceSync = lastSync ? localTime > lastSync + 2000 : !isLocalEmpty;
+        const cloudModifiedSinceSync = lastSync ? cloudTime > lastSync + 2000 : true;
+
+        if (cloudRow.device_id !== deviceId && localModifiedSinceSync && cloudModifiedSinceSync) {
           setConflictData({
             cloudData,
             localData,
@@ -269,7 +331,20 @@ export const useSupabaseSync = ({ showToast }) => {
           return true;
         }
 
-        // 5. Local is newer or identical: update cloud
+        // 7. If Cloud is newer and local was NOT modified since last sync -> auto-pull
+        if (cloudTime > localTime + 2000 && !localModifiedSinceSync) {
+          if (typeof onApplyCloudData === 'function') {
+            onApplyCloudData(cloudData, 'Dari Supabase Cloud');
+          }
+          setLastSyncTime(cloudTime);
+          setLastSyncState(cloudTime);
+          if (!silent) {
+            showToast('Data diperbarui dari Supabase Cloud.', 'success');
+          }
+          return true;
+        }
+
+        // 8. Local is newer or user edited locally -> update cloud
         const nowIso = new Date().toISOString();
         const payload = {
           ...localData,
@@ -316,16 +391,16 @@ export const useSupabaseSync = ({ showToast }) => {
     async (action) => {
       if (!conflictData) return;
 
-      const { cloudData, localData, onApplyCloudData } = conflictData;
+      const { cloudData, localData, onApplyCloudData, cloudTime } = conflictData;
       setConflictData(null);
 
       if (action === 'use_cloud') {
         if (typeof onApplyCloudData === 'function') {
           onApplyCloudData(cloudData, 'Dari Supabase Cloud');
         }
-        const nowMs = Date.now();
-        setLastSyncTime(nowMs);
-        setLastSyncState(nowMs);
+        const syncMs = Math.max(cloudTime || 0, Date.now());
+        setLastSyncTime(syncMs);
+        setLastSyncState(syncMs);
         showToast('Data dari Supabase Cloud berhasil dimuat!', 'success');
       } else if (action === 'use_local') {
         if (!user || !supabase) return;

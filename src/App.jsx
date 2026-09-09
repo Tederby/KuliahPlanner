@@ -31,6 +31,7 @@ export default function App() {
 
   const data = useKuliahData({ showToast });
   const cloudSync = useSupabaseSync({ showToast });
+  const isSyncApplyingRef = useRef(false);
 
   const handleCloudSync = (silent = false) => {
     cloudSync.syncData({
@@ -40,8 +41,13 @@ export default function App() {
         stashes: data.stashes,
         reschedules: data.reschedules,
         tasks: data.tasks,
+        _updatedAt: data.updatedAt,
+        _deviceId: data.deviceId,
       },
-      onApplyCloudData: data.applyFullData,
+      onApplyCloudData: (cloudData, label) => {
+        isSyncApplyingRef.current = true;
+        data.applyFullData(cloudData, label);
+      },
       silent,
     });
   };
@@ -69,6 +75,12 @@ export default function App() {
     }
 
     if (!cloudSync.user || !cloudSync.autoSyncEnabled) return;
+
+    // Prevent re-triggering auto-sync immediately after cloud data was applied
+    if (isSyncApplyingRef.current) {
+      isSyncApplyingRef.current = false;
+      return;
+    }
 
     const timer = setTimeout(() => {
       handleCloudSync(true);
