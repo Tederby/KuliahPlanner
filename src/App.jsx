@@ -5,7 +5,7 @@ import { useToast }          from './hooks/useToast';
 import { useTheme }          from './hooks/useTheme';
 import { useKuliahData }     from './hooks/useKuliahData';
 import { useCalendarEvents } from './hooks/useCalendarEvents';
-import { useGoogleDriveSync } from './hooks/useGoogleDriveSync';
+import { useSupabaseSync }   from './hooks/useSupabaseSync';
 
 import Sidebar          from './components/Sidebar';
 import EventModal       from './components/EventModal';
@@ -18,6 +18,7 @@ import ConfirmDialog    from './components/ConfirmDialog';
 import TaskDetailModal  from './components/TaskDetailModal';
 import OnboardingGuide, { ONBOARDING_KEY } from './components/OnboardingGuide';
 import SyncConflictModal from './components/SyncConflictModal';
+import AuthModal        from './components/AuthModal';
 
 export default function App() {
   const [activeTab, setActiveTab]       = useState('schedule');
@@ -29,10 +30,10 @@ export default function App() {
   const { toasts, showToast, dismissToast } = useToast();
 
   const data = useKuliahData({ showToast });
-  const driveSync = useGoogleDriveSync({ showToast });
+  const cloudSync = useSupabaseSync({ showToast });
 
-  const handleDriveSync = (silent = false) => {
-    driveSync.syncData({
+  const handleCloudSync = (silent = false) => {
+    cloudSync.syncData({
       localData: {
         config: data.config,
         courses: data.courses,
@@ -45,30 +46,18 @@ export default function App() {
     });
   };
 
-  const handleDriveLogin = () => {
-    driveSync.login({
-      localData: {
-        config: data.config,
-        courses: data.courses,
-        stashes: data.stashes,
-        reschedules: data.reschedules,
-        tasks: data.tasks,
-      },
-      onApplyCloudData: data.applyFullData,
-    });
-  };
-
-  const driveSyncProps = {
-    clientId: driveSync.clientId,
-    userProfile: driveSync.userProfile,
-    isSyncing: driveSync.isSyncing,
-    lastSyncTime: driveSync.lastSyncTime,
-    autoSyncEnabled: driveSync.autoSyncEnabled,
-    onSaveClientId: driveSync.saveClientId,
-    onSync: () => handleDriveSync(false),
-    onLogin: handleDriveLogin,
-    onLogout: driveSync.logout,
-    onToggleAutoSync: driveSync.setAutoSyncEnabled,
+  const cloudSyncProps = {
+    isConfigured: cloudSync.isConfigured,
+    user: cloudSync.user,
+    username: cloudSync.username,
+    userProfile: cloudSync.userProfile,
+    isSyncing: cloudSync.isSyncing,
+    lastSyncTime: cloudSync.lastSyncTime,
+    autoSyncEnabled: cloudSync.autoSyncEnabled,
+    onSync: () => handleCloudSync(false),
+    onLogin: cloudSync.openAuthModal,
+    onLogout: cloudSync.signOut,
+    onToggleAutoSync: cloudSync.setAutoSyncEnabled,
   };
 
   // Background auto-sync with debounce (3s) when data changes and user is authenticated
@@ -79,10 +68,10 @@ export default function App() {
       return;
     }
 
-    if (!driveSync.userProfile || !driveSync.autoSyncEnabled) return;
+    if (!cloudSync.user || !cloudSync.autoSyncEnabled) return;
 
     const timer = setTimeout(() => {
-      handleDriveSync(true);
+      handleCloudSync(true);
     }, 3000);
 
     return () => clearTimeout(timer);
@@ -92,8 +81,8 @@ export default function App() {
     data.stashes,
     data.reschedules,
     data.tasks,
-    driveSync.userProfile,
-    driveSync.autoSyncEnabled,
+    cloudSync.user,
+    cloudSync.autoSyncEnabled,
   ]);
 
   const { allCalendarEvents } = useCalendarEvents({
@@ -160,7 +149,7 @@ export default function App() {
           courses={data.courses}
           onShowGuide={() => setShowOnboarding(true)}
           theme={theme}
-          driveSync={driveSyncProps}
+          cloudSync={cloudSyncProps}
         />
 
         <div className="flex-1 min-w-0">
@@ -223,7 +212,7 @@ export default function App() {
               onUndo={data.handleUndo}
               undoHistory={data.getUndoHistory()}
               onClearUndo={data.clearUndoHistory}
-              driveSync={driveSyncProps}
+              cloudSync={cloudSyncProps}
             />
           )}
 
@@ -284,8 +273,16 @@ export default function App() {
       />
 
       <SyncConflictModal
-        conflictData={driveSync.conflictData}
-        onResolve={driveSync.resolveConflict}
+        conflictData={cloudSync.conflictData}
+        onResolve={cloudSync.resolveConflict}
+      />
+
+      <AuthModal
+        isOpen={cloudSync.isAuthModalOpen}
+        onClose={cloudSync.closeAuthModal}
+        onSignIn={cloudSync.signIn}
+        onSignUp={cloudSync.signUp}
+        isConfigured={cloudSync.isConfigured}
       />
 
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />

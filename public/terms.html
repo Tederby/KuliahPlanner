@@ -173,23 +173,23 @@
     <p>
       KuliahPlanner is an open and client-side academic schedule and task management tool.
       It helps university students and educators organize courses, plan semester timelines, manage task deadlines,
-      and optionally synchronize backup data to their personal Google Drive storage.
+      and optionally synchronize backup data to their secure cloud database via Supabase.
     </p>
 
     <h2>2. User Responsibilities</h2>
     <ul>
       <li>You are responsible for the accuracy of any academic data, course details, and deadlines entered into the application.</li>
-      <li>You are responsible for maintaining your own data backups (either via the JSON export utility or via the optional Google Drive sync).</li>
+      <li>You are responsible for maintaining your account credentials and your data backups (either via the JSON export utility or via the optional Supabase cloud sync).</li>
       <li>You agree not to attempt reverse engineering, abuse, or unauthorized exploitation of the APIs connected to the application.</li>
     </ul>
 
-    <h2>3. Third-Party Integrations</h2>
+    <h2>3. Cloud Synchronization and Third-Party Services</h2>
     <p>
-      KuliahPlanner integrates with Google Identity Services and Google Drive APIs. When you connect your Google Account:
+      KuliahPlanner offers optional cloud synchronization powered by Supabase. When you use cloud synchronization:
     </p>
     <ul>
-      <li>Your use of Google services is subject to the <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer">Google Terms of Service</a> and <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Google Privacy Policy</a>.</li>
-      <li>KuliahPlanner only accesses the application's dedicated backup file and does not modify any of your other Google Drive files.</li>
+      <li>Your data is encrypted in transit and stored in a private database table protected by PostgreSQL Row Level Security.</li>
+      <li>Your use of cloud backend services is subject to Supabase security and service availability standards.</li>
     </ul>
 
     <h2>4. Disclaimer of Warranties</h2>

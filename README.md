@@ -23,7 +23,7 @@ Demo online tersedia di: https://kuliah-planner.vercel.app/
 - **Deadline Countdown**: Badge countdown otomatis (jam/hari tersisa, overdue, dsb.)
 - **Local Storage**: Data tersimpan otomatis di browser, tidak hilang saat refresh
 - **Local Undo System**: Ring buffer snapshot lokal (hingga 10 riwayat) dengan tombol "Urungkan" interaktif pada toast saat hapus matkul/tugas dan menu riwayat snapshot
-- **Google Drive Cloud Sync**: Sinkronisasi data multi-device (laptop & HP) gratis ke Google Drive pribadi tanpa backend server, dilengkapi deteksi & penyelesaian konflik
+- **Supabase Cloud Sync**: Sinkronisasi data multi-device (laptop & HP) ke cloud Supabase dengan autentikasi Username & Password (tanpa perlu verifikasi email), dilengkapi deteksi & penyelesaian konflik
 - **Course Management**: Kelola data matkul (nama, SKS, jadwal, lokasi)
 - **Stash System**: "Ghosting" dosen? Stash kelas, restore, atau reschedule ketika jadwal berubah
 - **Calendar Drill-Down**: Klik area kosong di Month view untuk masuk Week view; klik kolom hari di Week view untuk masuk Day view
@@ -80,11 +80,12 @@ npx cap open android
 ```
 KuliahPlanner/
 ├── public/
-│   ├── privacy.html              # Kebijakan Privasi (Google OAuth Limited Use compliance)
+│   ├── privacy.html              # Kebijakan Privasi
 │   └── terms.html                # Syarat & Ketentuan Layanan
 ├── src/
 │   ├── App.jsx                   # Main component
 │   ├── components/
+│   │   ├── AuthModal.jsx         # Modal autentikasi Username & Password Supabase
 │   │   ├── ConfirmDialog.jsx     # Reusable confirm dialog
 │   │   ├── EventModal.jsx        # Detail & aksi event matkul di kalender
 │   │   ├── MatkulView.jsx        # Tab Config & Data (matkul, config, backup, sync, undo)
@@ -99,16 +100,16 @@ KuliahPlanner/
 │   │   └── ToastContainer.jsx    # Toast notification dengan dukungan action button
 │   ├── hooks/
 │   │   ├── useCalendarEvents.js  # Derive calendar events dari data
-│   │   ├── useGoogleDriveSync.js # OAuth2 GIS & siklus hidup sinkronisasi Google Drive
 │   │   ├── useKuliahData.js      # State & logic utama (CRUD matkul, tugas, stash, undo)
+│   │   ├── useSupabaseSync.js    # State autentikasi & siklus hidup sinkronisasi Supabase
 │   │   ├── useTheme.js           # Pengelola tema sistem, mode light/dark, dan kalkulator palet warna dinamis
 │   │   └── useToast.js           # Toast state management dengan dukungan tombol aksi
 │   ├── utils/
 │   │   ├── courseColors.js       # Palet warna matkul, auto-assign, dan deteksi bentrok jadwal
 │   │   ├── dateUtils.js          # Helper format tanggal
-│   │   ├── googleDrive.js        # Google Drive v3 REST API & GIS integration
 │   │   ├── markdown.js           # Simple Markdown-to-HTML renderer
 │   │   ├── storage.js            # localStorage read/write/export/import & metadata
+│   │   ├── supabase.js           # Supabase client singleton & auth mapping helper
 │   │   ├── undoHistory.js        # Ring buffer snapshot undo lokal
 │   │   └── validators.js         # Form validation
 │   ├── main.jsx                  # React entry point
@@ -126,6 +127,7 @@ KuliahPlanner/
 - **Vite 4.3** - Build tool (super fast)
 - **Tailwind CSS 3.3** - Styling
 - **Lucide React** - Icon library
+- **@supabase/supabase-js** - Backend-as-a-Service (Auth & Cloud Database)
 
 ## How to Use
 

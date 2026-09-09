@@ -29,7 +29,7 @@ const SyncConflictModal = ({ conflictData, onResolve }) => {
           <div>
             <h3 className="text-base font-bold text-theme-text">Konflik Sinkronisasi Terdeteksi</h3>
             <p className="text-xs text-theme-muted mt-0.5">
-              Data di Google Drive lebih baru dari data di perangkat ini. Pilih data mana yang ingin kamu gunakan.
+              Data di Supabase Cloud lebih baru dari data di perangkat ini. Pilih data mana yang ingin kamu gunakan.
             </p>
           </div>
         </div>
@@ -44,7 +44,7 @@ const SyncConflictModal = ({ conflictData, onResolve }) => {
               </div>
               <div>
                 <div className="flex items-center gap-2 text-accent font-semibold text-xs mb-2">
-                  <Cloud className="w-4 h-4" /> Google Drive (Cloud)
+                  <Cloud className="w-4 h-4" /> Supabase Cloud
                 </div>
                 <div className="text-xs text-theme-muted space-y-1 mb-3">
                   <p>

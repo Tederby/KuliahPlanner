@@ -188,45 +188,41 @@
       <li>Your data remains under your direct control at all times.</li>
     </ul>
 
-    <h2>2. Google User Data and OAuth Integration</h2>
+    <h2>2. Cloud Synchronization and Supabase Integration</h2>
     <p>
-      KuliahPlanner offers an optional cloud synchronization feature powered by Google Identity and the Google Drive API.
-      If you choose to sign in with your Google account, here is exactly how your data is handled:
+      KuliahPlanner offers an optional cloud synchronization feature powered by Supabase.
+      If you choose to create an account and sign in, here is exactly how your data is handled:
     </p>
 
     <ul>
-      <li><strong>Google Identity (Sign-In):</strong> We receive basic profile information (your email address, full name, and avatar image URL) to display your account status inside the application.</li>
-      <li><strong>Requested Google Scope:</strong> We request access to <code>https://www.googleapis.com/auth/drive.file</code>.</li>
-      <li><strong>Limited Scope Usage:</strong> This permission grants the application access <em>only</em> to the files that are specifically created or opened by KuliahPlanner. We <strong>cannot</strong> read, modify, view, or delete any other files or folders in your personal Google Drive.</li>
-      <li><strong>Dedicated Backup File:</strong> The application uses this permission solely to create, read, and synchronize a single backup file named <code>kuliahplanner_backup.json</code> in your personal Google Drive.</li>
+      <li><strong>Username & Authentication:</strong> We store your username and credentials securely via Supabase Auth. Email verification is not required.</li>
+      <li><strong>Encrypted Academic Records:</strong> Your course schedules, tasks, configurations, and notes are synchronized to a private <code>user_backups</code> table.</li>
+      <li><strong>Row Level Security (RLS):</strong> Access to your cloud data is strictly isolated using PostgreSQL Row Level Security (RLS). Only your authenticated user ID (<code>auth.uid()</code>) can read, insert, or modify your records.</li>
     </ul>
 
     <div class="highlight-box">
-      <strong>Google API Services User Data Policy Disclosure:</strong><br />
-      KuliahPlanner's use and transfer to any other app of information received from Google APIs will adhere to the
-      <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer">Google API Services User Data Policy</a>,
-      including the <strong>Limited Use</strong> requirements.
+      <strong>Data Privacy Guarantee:</strong><br />
+      KuliahPlanner is built with a local-first philosophy. Your data lives on your device and is only synchronized to your private cloud storage when you choose to connect an account.
     </div>
 
     <h2>3. Sharing and Third-Party Disclosure</h2>
     <p>
-      We do <strong>not</strong> sell, lease, rent, monetize, or transmit your Google user data or academic records to third parties.
-      All API communication occurs directly between your client browser and Google's official API endpoints. No intermediary servers or trackers are involved.
+      We do <strong>not</strong> sell, lease, rent, monetize, or transmit your user data or academic records to advertisers or third parties.
+      All API communication occurs directly between your client application and the secure Supabase API endpoints over HTTPS.
     </p>
 
     <h2>4. Data Retention and Account Disconnection</h2>
     <p>
-      You maintain complete control over your synchronization and authorization:
+      You maintain complete control over your synchronization and account:
     </p>
     <ul>
-      <li><strong>Log Out:</strong> You can disconnect your Google account from KuliahPlanner at any time by clicking the "Logout" button in the application sidebar or settings panel.</li>
-      <li><strong>Revoke Permission:</strong> You can revoke KuliahPlanner's authorization at any time directly through your <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener noreferrer">Google Account Security Settings</a>.</li>
+      <li><strong>Log Out:</strong> You can disconnect your account from KuliahPlanner at any time by clicking the "Logout" button in the application sidebar or settings panel.</li>
       <li><strong>Deleting Local Data:</strong> You can delete all locally stored data at any time by resetting the data in the application settings or clearing your web browser's cache and local storage.</li>
     </ul>
 
     <h2>5. Security</h2>
     <p>
-      Because KuliahPlanner runs entirely client-side in your browser, security relies on standard secure HTTPS communication with Google APIs and standard web browser sandboxing. No OAuth access tokens are stored in plain text on remote external servers.
+      Security is maintained via modern industry standards: TLS/HTTPS encryption in transit, JWT token session storage, and database-level Row Level Security (RLS) ensuring strict multi-tenant isolation.
     </p>
 
     <h2>6. Changes to This Privacy Policy</h2>
