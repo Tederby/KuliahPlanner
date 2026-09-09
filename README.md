@@ -37,7 +37,8 @@ Demo online tersedia di: https://kuliah-planner.vercel.app/
 - **Form Validation**: Input validation untuk mencegah data error
 - **Light & Dark Theme**: Deteksi otomatis tema sistem OS (`Auto`), opsi paksa mode Terang atau Gelap, serta proteksi anti-FOUC
 - **Dynamic Full-Color Palette & Presets**: Mengubah seluruh palet warna aplikasi secara dinamis (background, card, border, text, dan tombol) menyesuaikan warna pilihan (Oranye, Hijau, Merah, Indigo, Cyan, Violet, Monochrome) atau warna custom bebas via Color Picker (HEX)
-- **Clean & Functional UI**: Desain minimalis presisi tanpa sudut membulat berlebih ("less AI")
+- **Mobile Responsive & Adaptive Shell**: Tata letak otomatis beradaptasi antara desktop (Sidebar samping) dan smartphone/Android (Mobile Header ringkas + Bottom Navigation Bar ramah jempol)
+- **Native Android Experience**: Terintegrasi penuh dengan Capacitor 8, mendukung gesture/hardware Back Button Android (menutup modal/kembali), sinkronisasi tema SystemBars, safe-area insets (notch & gesture bar), serta modal bertipe Bottom Sheet
 - **Native Android Support**: Build menjadi aplikasi Android native menggunakan Capacitor.js
 
 
@@ -86,9 +87,11 @@ KuliahPlanner/
 │   ├── App.jsx                   # Main component
 │   ├── components/
 │   │   ├── AuthModal.jsx         # Modal autentikasi Username & Password Supabase
+│   │   ├── BottomNav.jsx         # Bilah navigasi bawah untuk mobile / Android
 │   │   ├── ConfirmDialog.jsx     # Reusable confirm dialog
 │   │   ├── EventModal.jsx        # Detail & aksi event matkul di kalender
 │   │   ├── MatkulView.jsx        # Tab Config & Data (matkul, config, backup, sync, undo)
+│   │   ├── MobileHeader.jsx      # Header ringkas atas untuk mobile / Android
 │   │   ├── OnboardingGuide.jsx   # Panduan interaktif untuk user baru
 │   │   ├── ScheduleView.jsx      # Kalender (Month/Week/Day/Agenda) + drill-down
 │   │   ├── Sidebar.jsx           # Navigasi tab sidebar & indikator cloud sync

@@ -29,10 +29,13 @@ const SyncConflictModal = ({ conflictData, onResolve }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-[fadeIn_0.15s_ease-out]">
-      <div className="bg-theme-surface border border-theme w-full max-w-xl rounded-xl shadow-2xl overflow-hidden animate-[scaleUp_0.15s_ease-out]">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-[fadeIn_0.15s_ease-out]">
+      <div className="bg-theme-surface border-t sm:border border-theme w-full max-w-xl rounded-t-2xl sm:rounded-xl shadow-2xl max-h-[90vh] flex flex-col overflow-hidden animate-[scaleUp_0.15s_ease-out]">
+        {/* Mobile Drag Handle */}
+        <div className="w-10 h-1 bg-theme-muted/30 rounded-full mx-auto my-2 sm:hidden shrink-0" />
+
         {/* Header */}
-        <div className="p-5 border-b border-theme flex items-start gap-3 bg-amber-500/10">
+        <div className="p-5 border-b border-theme flex items-start gap-3 bg-amber-500/10 shrink-0">
           <div className="p-2 rounded-lg bg-amber-500/20 text-amber-600 dark:text-amber-400">
             <AlertTriangle className="w-5 h-5" />
           </div>
@@ -45,7 +48,7 @@ const SyncConflictModal = ({ conflictData, onResolve }) => {
         </div>
 
         {/* Content Comparison */}
-        <div className="p-5 space-y-4">
+        <div className="p-5 space-y-4 overflow-y-auto pb-[calc(var(--safe-area-bottom)+1.25rem)] sm:pb-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             {/* Cloud Version Card */}
             <div className="p-4 rounded-lg border-2 border-accent/60 bg-accent/5 relative flex flex-col justify-between">

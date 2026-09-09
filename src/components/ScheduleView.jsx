@@ -8,10 +8,20 @@ import { getContrastColor } from '../hooks/useTheme';
 const displayDaysOfWeek = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 
 const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickAddTask }) => {
-  const [viewMode, setViewMode] = useState('week');
+  const [isMobile, setIsMobile] = useState(() => (typeof window !== 'undefined' ? window.innerWidth < 768 : false));
+  const [viewMode, setViewMode] = useState(() => (typeof window !== 'undefined' && window.innerWidth < 768 ? 'agenda' : 'week'));
   const [currentDateObj, setCurrentDateObj] = useState(new Date());
+  const [mobileSelectedDayOffset, setMobileSelectedDayOffset] = useState(() => (new Date()).getDay());
   const [viewHistory, setViewHistory] = useState([]); // for breadcrumb back-nav
   const scrollBodyRef = useRef(null);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const navDate = (dir) => {
     const d = new Date(currentDateObj);
@@ -22,7 +32,9 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
   };
 
   const goToToday = () => {
-    setCurrentDateObj(new Date());
+    const now = new Date();
+    setCurrentDateObj(now);
+    setMobileSelectedDayOffset(now.getDay());
   };
 
   const getStartOfWeek = (dateObj) => {
@@ -62,7 +74,8 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
   const handleMonthCellClick = (dateObj) => {
     pushHistory();
     setCurrentDateObj(dateObj);
-    setViewMode('week');
+    setMobileSelectedDayOffset(dateObj.getDay());
+    setViewMode(isMobile ? 'day' : 'week');
   };
 
   const handleWeekDayClick = (dateObj) => {
@@ -90,7 +103,7 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
       <div
         key={dateStr}
         onClick={() => handleMonthCellClick(cellDateObj)}
-        className={`min-h-[100px] p-1 border-r border-b border-theme cursor-pointer transition-colors group ${
+        className={`min-h-[60px] sm:min-h-[85px] md:min-h-[100px] p-1 border-r border-b border-theme cursor-pointer transition-colors group ${
           !isCurrentMonth
             ? 'bg-theme-surface-subtle/50 hover:bg-theme-surface-subtle/80'
             : isToday
@@ -98,29 +111,51 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
             : 'bg-theme-surface hover:bg-theme-surface-subtle/60'
         }`}
       >
-        <div className="text-xs font-medium p-1 flex items-center justify-between gap-1">
+        <div className="text-xs font-medium p-0.5 sm:p-1 flex items-center justify-between gap-1">
           {isToday ? (
-            <span className="text-[9px] font-bold text-accent px-1.5 py-0.2 bg-accent/15 rounded border border-accent/30">
-              Hari ini
+            <span className="text-[9px] font-bold text-accent px-1 sm:px-1.5 py-0.2 bg-accent/15 rounded border border-accent/30 leading-none">
+              <span className="hidden sm:inline">Hari ini</span>
+              <span className="sm:hidden">•</span>
             </span>
           ) : (
-            <span className="text-[9px] text-theme-muted opacity-0 group-hover:opacity-100 transition-opacity">
+            <span className="text-[9px] text-theme-muted opacity-0 group-hover:opacity-100 transition-opacity hidden sm:inline">
               Minggu →
             </span>
           )}
 
           {isToday ? (
-            <span className="w-5 h-5 rounded-full bg-accent text-accent-contrast flex items-center justify-center font-bold text-xs shadow-xs">
+            <span className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-accent text-accent-contrast flex items-center justify-center font-bold text-[10px] sm:text-xs shadow-xs">
               {cellDateObj.getDate()}
             </span>
           ) : (
-            <span className={!isCurrentMonth ? 'text-theme-muted/60' : 'text-theme-muted'}>
+            <span className={`text-[11px] sm:text-xs ${!isCurrentMonth ? 'text-theme-muted/60' : 'text-theme-muted'}`}>
               {cellDateObj.getDate()}
             </span>
           )}
         </div>
 
-        <div className="space-y-1">
+        {/* Mobile indicators (dots): visible on screens < sm */}
+        <div className="flex sm:hidden items-center justify-center gap-1 mt-0.5 flex-wrap">
+          {dayEvents.slice(0, 3).map((ev) => {
+            const isCourse = ev.type === 'course';
+            const color = isCourse ? getCourseColor(ev) : ev.type === 'event' ? '#a855f7' : '#10b981';
+            return (
+              <span
+                key={ev.instanceId}
+                className="w-1.5 h-1.5 rounded-full shrink-0 shadow-2xs"
+                style={{ backgroundColor: color }}
+              />
+            );
+          })}
+          {dayEvents.length > 3 && (
+            <span className="text-[8px] text-theme-muted font-bold font-mono leading-none">
+              +{dayEvents.length - 3}
+            </span>
+          )}
+        </div>
+
+        {/* Desktop detailed chips: visible on screens sm and up */}
+        <div className="hidden sm:block space-y-1 mt-1">
           {dayEvents.map((ev) => {
             const isCourse = ev.type === 'course';
             const isEvent = ev.type === 'event';
@@ -202,7 +237,9 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
       return d;
     };
 
-    const hasBanners = daysOffsetArray.some((offset) => {
+    const activeDaysOffsetArray = (isWeekMode && isMobile) ? [mobileSelectedDayOffset] : daysOffsetArray;
+
+    const hasBanners = activeDaysOffsetArray.some((offset) => {
       const dateStr = formatDateStr(getDayDate(offset));
       return allCalendarEvents.some(
         (e) => e.date === dateStr && (e.type === 'task' || (e.type === 'event' && (!e.startTime || !e.endTime)))
@@ -215,54 +252,91 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
     const todayStr = formatDateStr(now);
 
     return (
-      <div className="bg-theme-surface rounded-lg border border-theme overflow-hidden flex flex-col h-[600px] shadow-sm">
-        {/* Header Days */}
-        <div className="flex border-b border-theme bg-theme-surface-subtle shrink-0">
-          <div className="w-16 shrink-0 border-r border-theme"></div>
-          {daysOffsetArray.map((offset) => {
-            const d = getDayDate(offset);
-            const dateStr = formatDateStr(d);
-            const isToday = dateStr === todayStr;
-            return (
-              <div
-                key={offset}
-                onClick={() => isWeekMode && handleWeekDayClick(d)}
-                className={`flex-1 text-center py-2 text-xs font-semibold border-r border-theme transition-colors ${
-                  isWeekMode ? 'cursor-pointer' : ''
-                } ${
-                  isToday
-                    ? 'bg-accent/10'
-                    : isWeekMode ? 'hover:bg-theme-surface' : ''
-                }`}
-              >
-                <div className={`leading-tight ${isToday ? 'text-accent font-bold' : 'text-theme-muted'}`}>
-                  {displayDaysOfWeek[d.getDay()]}
-                </div>
-                <div className="mt-0.5 flex items-center justify-center">
-                  {isToday ? (
-                    <span className="px-1.5 py-0.5 rounded-full bg-accent text-accent-contrast font-bold text-[10px] shadow-xs">
-                      {d.getDate()}/{d.getMonth() + 1}
+      <div className="bg-theme-surface rounded-lg border border-theme overflow-hidden flex flex-col h-[calc(100vh-270px)] min-h-[480px] max-h-[750px] md:h-[600px] shadow-sm">
+        {/* Mobile Week Day-Strip Selector */}
+        {isWeekMode && isMobile && (
+          <div className="flex border-b border-theme bg-theme-surface-subtle p-1.5 gap-1 overflow-x-auto no-scrollbar shrink-0">
+            {daysOffsetArray.map((offset) => {
+              const d = getDayDate(offset);
+              const isSelected = mobileSelectedDayOffset === offset;
+              const isToday = formatDateStr(d) === todayStr;
+              const dayHasEvents = allCalendarEvents.some((e) => e.date === formatDateStr(d));
+
+              return (
+                <button
+                  key={offset}
+                  type="button"
+                  onClick={() => setMobileSelectedDayOffset(offset)}
+                  className={`flex-1 min-w-[42px] py-1.5 px-1 rounded-md text-center transition-all ${
+                    isSelected
+                      ? 'bg-accent text-accent-contrast shadow-sm font-bold'
+                      : 'hover:bg-theme-surface text-theme-muted hover:text-theme-text'
+                  }`}
+                >
+                  <div className="text-[10px] uppercase font-semibold">
+                    {displayDaysOfWeek[d.getDay()].slice(0, 3)}
+                  </div>
+                  <div className="text-xs font-mono mt-0.5">{d.getDate()}</div>
+                  <div className="h-1.5 flex items-center justify-center mt-0.5">
+                    {dayHasEvents && (
+                      <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-accent-contrast' : 'bg-accent'}`} />
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Header Days for Desktop / Single Day */}
+        {(!isWeekMode || !isMobile) && (
+          <div className="flex border-b border-theme bg-theme-surface-subtle shrink-0">
+            <div className="w-16 shrink-0 border-r border-theme"></div>
+            {activeDaysOffsetArray.map((offset) => {
+              const d = getDayDate(offset);
+              const dateStr = formatDateStr(d);
+              const isToday = dateStr === todayStr;
+              return (
+                <div
+                  key={offset}
+                  onClick={() => isWeekMode && handleWeekDayClick(d)}
+                  className={`flex-1 text-center py-2 text-xs font-semibold border-r border-theme transition-colors ${
+                    isWeekMode ? 'cursor-pointer' : ''
+                  } ${
+                    isToday
+                      ? 'bg-accent/10'
+                      : isWeekMode ? 'hover:bg-theme-surface' : ''
+                  }`}
+                >
+                  <div className={`leading-tight ${isToday ? 'text-accent font-bold' : 'text-theme-muted'}`}>
+                    {displayDaysOfWeek[d.getDay()]}
+                  </div>
+                  <div className="mt-0.5 flex items-center justify-center">
+                    {isToday ? (
+                      <span className="px-1.5 py-0.5 rounded-full bg-accent text-accent-contrast font-bold text-[10px] shadow-xs">
+                        {d.getDate()}/{d.getMonth() + 1}
+                      </span>
+                    ) : (
+                      <span className="text-[11px] font-normal text-theme-muted opacity-80">
+                        {d.getDate()}/{d.getMonth() + 1}
+                      </span>
+                    )}
+                  </div>
+                  {isToday && (
+                    <span className="inline-block text-[9px] font-bold text-accent bg-accent/15 px-1.5 py-0.2 rounded mt-0.5 border border-accent/30">
+                      Hari ini
                     </span>
-                  ) : (
-                    <span className="text-[11px] font-normal text-theme-muted opacity-80">
-                      {d.getDate()}/{d.getMonth() + 1}
+                  )}
+                  {isWeekMode && !isToday && (
+                    <span className="block text-[9px] text-theme-muted opacity-0 hover:opacity-100 transition-opacity">
+                      Lihat hari
                     </span>
                   )}
                 </div>
-                {isToday && (
-                  <span className="inline-block text-[9px] font-bold text-accent bg-accent/15 px-1.5 py-0.2 rounded mt-0.5 border border-accent/30">
-                    Hari ini
-                  </span>
-                )}
-                {isWeekMode && !isToday && (
-                  <span className="block text-[9px] text-theme-muted opacity-0 hover:opacity-100 transition-opacity">
-                    Lihat hari
-                  </span>
-                )}
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
 
         {/* All-day task & event banners */}
         {hasBanners && (
@@ -270,7 +344,7 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
             <div className="w-16 shrink-0 border-r border-theme flex items-center justify-end pr-2">
               <span className="text-[10px] text-theme-muted uppercase tracking-wider font-mono">Agenda</span>
             </div>
-            {daysOffsetArray.map((offset) => {
+            {activeDaysOffsetArray.map((offset) => {
               const d = getDayDate(offset);
               const dateStr = formatDateStr(d);
               const dayBanners = allCalendarEvents.filter(
@@ -348,7 +422,7 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
             ))}
 
             {/* Current time line */}
-            {daysOffsetArray.some((offset) => formatDateStr(getDayDate(offset)) === todayStr) && (
+            {activeDaysOffsetArray.some((offset) => formatDateStr(getDayDate(offset)) === todayStr) && (
               <div
                 className="absolute left-16 right-0 z-20 pointer-events-none flex items-center"
                 style={{ top: `${nowMinutes}px` }}
@@ -360,7 +434,7 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
 
             {/* Day columns */}
             <div className="absolute top-0 bottom-0 left-16 right-0 flex">
-              {daysOffsetArray.map((offset) => {
+              {activeDaysOffsetArray.map((offset) => {
                 const d = getDayDate(offset);
                 const dateStr = formatDateStr(d);
                 const isToday = dateStr === todayStr;
@@ -387,10 +461,10 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
                           e.stopPropagation();
                           onQuickAddTask(dateStr);
                         }}
-                        className="absolute top-1 right-1 z-30 w-5 h-5 rounded bg-theme-surface-subtle hover:bg-accent text-theme-muted hover:text-accent-contrast flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity border border-theme shadow-sm"
+                        className="absolute top-1 right-1 z-30 w-6 h-6 rounded bg-theme-surface-subtle hover:bg-accent text-theme-muted hover:text-accent-contrast flex items-center justify-center opacity-70 md:opacity-0 group-hover:opacity-100 transition-opacity border border-theme shadow-sm"
                         title="Tambah tugas / acara di hari ini"
                       >
-                        <Plus className="w-3 h-3" />
+                        <Plus className="w-3.5 h-3.5" />
                       </button>
                     )}
 
@@ -681,61 +755,63 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
           </div>
         )}
 
-        <div className="flex flex-wrap justify-between items-center gap-3">
-          <div className="flex items-center gap-2">
-            <div className="flex items-center bg-theme-surface-subtle border border-theme rounded-md p-0.5">
-              <button onClick={() => navDate(-1)} className="p-1.5 hover:bg-theme-surface rounded text-theme-muted hover:text-theme-text transition-colors">
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <div className="px-3 py-1 font-semibold text-xs text-theme-text min-w-[180px] text-center">
-                {viewMode === 'month'
-                  ? `${monthNames[currentDateObj.getMonth()]} ${currentDateObj.getFullYear()}`
-                  : viewMode === 'week'
-                  ? getWeekHeaderText()
-                  : `${currentDateObj.getDate()} ${monthNames[currentDateObj.getMonth()]}`}
-              </div>
-              <button onClick={() => navDate(1)} className="p-1.5 hover:bg-theme-surface rounded text-theme-muted hover:text-theme-text transition-colors">
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Today button */}
-            <button
-              onClick={goToToday}
-              className="px-2.5 py-1.5 bg-theme-surface-subtle hover:bg-theme-surface text-theme-text rounded-md text-xs font-medium transition-colors flex items-center gap-1.5 border border-theme"
-            >
-              <CalendarDays className="w-3.5 h-3.5 text-theme-muted" />
-              Hari Ini
+      {/* Header controls */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-4">
+        {/* Navigation buttons */}
+        <div className="flex items-center justify-between sm:justify-start gap-2 w-full sm:w-auto flex-wrap">
+          <div className="flex items-center bg-theme-surface-subtle border border-theme rounded-md p-0.5 flex-1 sm:flex-none justify-between">
+            <button onClick={() => navDate(-1)} className="p-1.5 hover:bg-theme-surface rounded text-theme-muted hover:text-theme-text transition-colors">
+              <ChevronLeft className="w-4 h-4" />
             </button>
-
-            {/* Back button */}
-            {viewHistory.length > 0 && (
-              <button
-                onClick={goBack}
-                className="px-2.5 py-1.5 bg-theme-surface-subtle hover:bg-theme-surface text-theme-text rounded-md text-xs font-medium transition-colors border border-theme"
-              >
-                ← Kembali
-              </button>
-            )}
+            <div className="px-2 sm:px-3 py-1 font-semibold text-xs text-theme-text flex-1 sm:min-w-[170px] text-center truncate">
+              {viewMode === 'month'
+                ? `${monthNames[currentDateObj.getMonth()]} ${currentDateObj.getFullYear()}`
+                : viewMode === 'week'
+                ? getWeekHeaderText()
+                : `${currentDateObj.getDate()} ${monthNames[currentDateObj.getMonth()]}`}
+            </div>
+            <button onClick={() => navDate(1)} className="p-1.5 hover:bg-theme-surface rounded text-theme-muted hover:text-theme-text transition-colors">
+              <ChevronRight className="w-4 h-4" />
+            </button>
           </div>
 
-          <div className="flex bg-theme-surface-subtle border border-theme rounded-md p-0.5">
-            {['month', 'week', 'day', 'agenda'].map((mode) => (
-              <button
-                key={mode}
-                onClick={() => {
-                  setViewHistory([]);
-                  setViewMode(mode);
-                }}
-                className={`px-3 py-1 rounded text-xs font-medium transition-colors capitalize ${
-                  viewMode === mode ? 'bg-accent text-accent-contrast shadow-sm' : 'text-theme-muted hover:text-theme-text'
-                }`}
-              >
-                {mode}
-              </button>
-            ))}
-          </div>
+          {/* Today button */}
+          <button
+            onClick={goToToday}
+            className="px-2.5 py-1.5 bg-theme-surface-subtle hover:bg-theme-surface text-theme-text rounded-md text-xs font-medium transition-colors flex items-center gap-1.5 border border-theme"
+          >
+            <CalendarDays className="w-3.5 h-3.5 text-theme-muted" />
+            <span className="hidden xs:inline">Hari Ini</span>
+          </button>
+
+          {/* Back button */}
+          {viewHistory.length > 0 && (
+            <button
+              onClick={goBack}
+              className="px-2.5 py-1.5 bg-theme-surface-subtle hover:bg-theme-surface text-theme-text rounded-md text-xs font-medium transition-colors border border-theme"
+            >
+              ← Kembali
+            </button>
+          )}
         </div>
+
+        <div className="flex bg-theme-surface-subtle border border-theme rounded-md p-0.5 w-full sm:w-auto justify-between">
+          {['month', 'week', 'day', 'agenda'].map((mode) => (
+            <button
+              key={mode}
+              onClick={() => {
+                setViewHistory([]);
+                setViewMode(mode);
+              }}
+              className={`flex-1 sm:flex-none px-2.5 sm:px-3 py-1 rounded text-xs font-medium transition-colors capitalize text-center ${
+                viewMode === mode ? 'bg-accent text-accent-contrast shadow-sm' : 'text-theme-muted hover:text-theme-text'
+              }`}
+            >
+              {mode}
+            </button>
+          ))}
+        </div>
+      </div>
       </div>
 
       {/* Calendar Renderers */}
@@ -743,8 +819,9 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
         <div className="bg-theme-surface rounded-lg border border-theme overflow-hidden shadow-sm">
           <div className="grid grid-cols-7 bg-theme-surface-subtle border-b border-theme">
             {displayDaysOfWeek.map((d) => (
-              <div key={d} className="py-2 text-center text-xs font-semibold text-theme-muted">
-                {d}
+              <div key={d} className="py-2 text-center text-[11px] sm:text-xs font-semibold text-theme-muted">
+                <span className="hidden sm:inline">{d}</span>
+                <span className="sm:hidden">{d.slice(0, 3)}</span>
               </div>
             ))}
           </div>

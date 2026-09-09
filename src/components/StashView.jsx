@@ -47,16 +47,16 @@ const StashView = ({
                     <p className="font-sans">Lokasi: {course.location || 'Belum diisi'}</p>
                   </div>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 w-full md:w-auto">
                   <button
                     onClick={() => onOpenReschedule(stash)}
-                    className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md text-xs font-medium transition-colors shadow-sm"
+                    className="flex-1 md:flex-none px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md text-xs font-medium transition-colors shadow-sm text-center"
                   >
                     Atur Jadwal Baru
                   </button>
                   <button
                     onClick={() => onRestoreStash(stash.id)}
-                    className="px-3 py-1.5 bg-theme-surface-subtle hover:bg-theme-surface text-theme-text border border-theme rounded-md text-xs font-medium transition-colors"
+                    className="flex-1 md:flex-none px-3 py-2 bg-theme-surface-subtle hover:bg-theme-surface text-theme-text border border-theme rounded-md text-xs font-medium transition-colors text-center"
                   >
                     Batalkan Stash
                   </button>

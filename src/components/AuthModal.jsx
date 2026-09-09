@@ -84,13 +84,16 @@ const AuthModal = ({ isOpen, onClose, onSignIn, onSignUp, isConfigured }) => {
 
   return (
     <div
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-[fadeIn_0.15s_ease-out]"
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-0 sm:p-4 animate-[fadeIn_0.15s_ease-out]"
       onClick={onClose}
     >
       <div
-        className="bg-theme-surface rounded-xl border border-theme shadow-2xl w-full max-w-md overflow-hidden animate-[scaleUp_0.15s_ease-out]"
+        className="bg-theme-surface rounded-t-2xl sm:rounded-xl border-t sm:border border-theme shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden animate-[scaleUp_0.15s_ease-out]"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Mobile Drag Handle */}
+        <div className="w-10 h-1 bg-theme-muted/30 rounded-full mx-auto my-2 sm:hidden shrink-0" />
+
         {/* Header */}
         <div className="bg-theme-surface-subtle border-b border-theme p-4 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
@@ -151,7 +154,7 @@ const AuthModal = ({ isOpen, onClose, onSignIn, onSignUp, isConfigured }) => {
         )}
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-5 space-y-4">
+        <form onSubmit={handleSubmit} className="p-5 space-y-4 overflow-y-auto pb-[calc(var(--safe-area-bottom)+1.25rem)] sm:pb-5">
           {error && (
             <div className="p-3 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 text-xs text-rose-700 dark:text-rose-300 flex items-start gap-2 animate-[fadeIn_0.15s_ease-out]">
               <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />

@@ -8,6 +8,8 @@ import { useCalendarEvents } from './hooks/useCalendarEvents';
 import { useSupabaseSync }   from './hooks/useSupabaseSync';
 
 import Sidebar          from './components/Sidebar';
+import MobileHeader    from './components/MobileHeader';
+import BottomNav       from './components/BottomNav';
 import EventModal       from './components/EventModal';
 import ScheduleView     from './components/ScheduleView';
 import StashView        from './components/StashView';
@@ -19,6 +21,9 @@ import TaskDetailModal  from './components/TaskDetailModal';
 import OnboardingGuide, { ONBOARDING_KEY } from './components/OnboardingGuide';
 import SyncConflictModal from './components/SyncConflictModal';
 import AuthModal        from './components/AuthModal';
+
+import { App as CapApp } from '@capacitor/app';
+import { Capacitor, SystemBars, SystemBarsStyle } from '@capacitor/core';
 
 export default function App() {
   const [activeTab, setActiveTab]       = useState('schedule');
@@ -204,20 +209,93 @@ export default function App() {
     }
   };
 
+  // Keep refs for hardware back button listener
+  const activeTabRef = useRef(activeTab);
+  const selectedEventRef = useRef(selectedEvent);
+  const selectedTaskRef = useRef(selectedTask);
+  const showOnboardingRef = useRef(showOnboarding);
+  const dataRef = useRef(data);
+  const cloudSyncRef = useRef(cloudSync);
+
+  useEffect(() => { activeTabRef.current = activeTab; }, [activeTab]);
+  useEffect(() => { selectedEventRef.current = selectedEvent; }, [selectedEvent]);
+  useEffect(() => { selectedTaskRef.current = selectedTask; }, [selectedTask]);
+  useEffect(() => { showOnboardingRef.current = showOnboarding; }, [showOnboarding]);
+  useEffect(() => { dataRef.current = data; }, [data]);
+  useEffect(() => { cloudSyncRef.current = cloudSync; }, [cloudSync]);
+
+  // Hardware Back Button handling on Android native
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+
+    let backListener = null;
+    const setupListener = async () => {
+      backListener = await CapApp.addListener('backButton', () => {
+        if (selectedEventRef.current) {
+          setSelectedEvent(null);
+        } else if (selectedTaskRef.current) {
+          setSelectedTask(null);
+        } else if (showOnboardingRef.current) {
+          setShowOnboarding(false);
+        } else if (cloudSyncRef.current?.isAuthModalOpen) {
+          cloudSyncRef.current.closeAuthModal();
+        } else if (dataRef.current?.confirmDialog?.isOpen) {
+          dataRef.current.closeConfirm();
+        } else if (dataRef.current?.showTaskForm) {
+          dataRef.current.cancelEditTask();
+        } else if (dataRef.current?.showCourseForm) {
+          dataRef.current.cancelEditCourse();
+        } else if (dataRef.current?.editingStash) {
+          dataRef.current.cancelReschedule();
+        } else if (activeTabRef.current !== 'schedule') {
+          setActiveTab('schedule');
+        } else {
+          CapApp.exitApp();
+        }
+      });
+    };
+
+    setupListener();
+
+    return () => {
+      if (backListener) {
+        backListener.remove();
+      }
+    };
+  }, []);
+
+  // Sync SystemBars (status bar) theme with dark/light mode
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+    try {
+      SystemBars.setStyle({
+        style: theme.isDark ? SystemBarsStyle.Dark : SystemBarsStyle.Light,
+      }).catch(() => {});
+    } catch (e) {}
+  }, [theme.isDark]);
+
   return (
-    <div className="min-h-screen bg-theme-bg text-theme-text p-4 md:p-6 lg:p-8 font-sans antialiased transition-colors duration-200">
-      <div className="max-w-[1400px] mx-auto flex flex-col md:flex-row gap-6 lg:gap-8">
-        <Sidebar
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          config={data.config}
-          tasks={data.tasks}
-          stashes={data.stashes}
-          courses={data.courses}
-          onShowGuide={() => setShowOnboarding(true)}
-          theme={theme}
-          cloudSync={cloudSyncProps}
-        />
+    <div className="min-h-screen bg-theme-bg text-theme-text flex flex-col font-sans antialiased transition-colors duration-200">
+      <MobileHeader
+        theme={theme}
+        cloudSync={cloudSyncProps}
+        onShowGuide={() => setShowOnboarding(true)}
+      />
+
+      <main className="flex-1 max-w-[1400px] w-full mx-auto p-3.5 sm:p-4 md:p-6 lg:p-8 pb-24 md:pb-8 flex flex-col md:flex-row gap-6 lg:gap-8">
+        <div className="hidden md:block shrink-0">
+          <Sidebar
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            config={data.config}
+            tasks={data.tasks}
+            stashes={data.stashes}
+            courses={data.courses}
+            onShowGuide={() => setShowOnboarding(true)}
+            theme={theme}
+            cloudSync={cloudSyncProps}
+          />
+        </div>
 
         <div className="flex-1 min-w-0">
           {/* Error Alert */}
@@ -309,7 +387,7 @@ export default function App() {
             />
           )}
         </div>
-      </div>
+      </main>
 
       <EventModal
         event={selectedEvent}
@@ -362,6 +440,13 @@ export default function App() {
       />
 
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
+
+      <BottomNav
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        tasksCount={data.tasks.filter((t) => !t.completed).length}
+        stashesCount={data.stashes.length}
+      />
     </div>
   );
 }

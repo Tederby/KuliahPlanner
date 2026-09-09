@@ -59,13 +59,16 @@ const TaskDetailModal = ({ task, courses, onClose, onToggleComplete, onEdit }) =
 
   return (
     <div
-      className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center z-50 p-0 sm:p-4 animate-[fadeIn_0.15s_ease-out]"
       onClick={onClose}
     >
       <div
-        className="bg-theme-surface rounded-lg border border-theme shadow-xl w-full max-w-md overflow-hidden"
+        className="bg-theme-surface rounded-t-2xl sm:rounded-xl border-t sm:border border-theme shadow-2xl w-full max-w-md max-h-[85vh] flex flex-col overflow-hidden animate-[slideUp_0.2s_ease-out_sm:animate-none]"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Mobile Drag Handle */}
+        <div className="w-10 h-1 bg-theme-muted/30 rounded-full mx-auto my-2 sm:hidden shrink-0" />
+
         {/* Header */}
         <div className="bg-theme-surface-subtle border-b border-theme p-5">
           <div className="flex justify-between items-center mb-2">
@@ -121,7 +124,7 @@ const TaskDetailModal = ({ task, courses, onClose, onToggleComplete, onEdit }) =
         </div>
 
         {/* Body */}
-        <div className="p-5 space-y-3.5">
+        <div className="p-5 space-y-3.5 overflow-y-auto pb-[calc(var(--safe-area-bottom)+1.25rem)] sm:pb-5">
           {/* Time & Countdown */}
           <div className="flex items-start gap-3 bg-theme-surface-subtle p-3.5 rounded-md border border-theme">
             <Clock className="w-4 h-4 text-theme-muted shrink-0 mt-0.5" />

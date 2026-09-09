@@ -3,6 +3,11 @@
 @tailwind utilities;
 
 :root {
+  --safe-area-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
+  --safe-area-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
+  --safe-area-left: var(--safe-area-inset-left, env(safe-area-inset-left, 0px));
+  --safe-area-right: var(--safe-area-inset-right, env(safe-area-inset-right, 0px));
+
   --theme-bg: hsl(222, 25%, 96%);
   --theme-surface: hsl(222, 20%, 99%);
   --theme-surface-subtle: hsl(222, 22%, 92%);
@@ -40,6 +45,17 @@ html, body, #root {
   background-color: var(--theme-bg);
   color: var(--theme-text);
   min-height: 100%;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 .border-theme {

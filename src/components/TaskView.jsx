@@ -372,10 +372,10 @@ const TaskView = ({
       )}
 
       {/* Filter Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-4 p-2.5 bg-theme-surface-subtle rounded-md border border-theme">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 p-2.5 bg-theme-surface-subtle rounded-md border border-theme">
         {/* Status & Type Pills */}
-        <div className="flex items-center gap-1 flex-wrap">
-          <div className="flex items-center gap-1 pr-2 border-r border-theme">
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 sm:pb-0 w-full sm:w-auto">
+          <div className="flex items-center gap-1 shrink-0 pr-2 border-r border-theme">
             {[
               { id: 'active', label: 'Aktif', count: activeCount },
               { id: 'all', label: 'Semua', count: totalCount },
@@ -384,10 +384,10 @@ const TaskView = ({
               <button
                 key={tab.id}
                 onClick={() => setStatusFilter(tab.id)}
-                className={`px-2.5 py-1 rounded text-xs font-medium transition-colors ${
+                className={`px-2.5 py-1.5 rounded text-xs font-medium transition-colors shrink-0 ${
                   statusFilter === tab.id
                     ? 'bg-accent text-accent-contrast shadow-sm'
-                    : 'text-theme-muted hover:text-theme-text'
+                    : 'text-theme-muted hover:text-theme-text hover:bg-theme-surface'
                 }`}
               >
                 {tab.label} <span className="opacity-75 font-mono text-[10px]">({tab.count})</span>
@@ -396,7 +396,7 @@ const TaskView = ({
           </div>
 
           {/* Type Filter */}
-          <div className="flex items-center gap-1 pl-1">
+          <div className="flex items-center gap-1 shrink-0">
             {[
               { id: 'all', label: 'Semua Tipe' },
               { id: 'task', label: `Tugas (${taskOnlyCount})` },
@@ -405,7 +405,7 @@ const TaskView = ({
               <button
                 key={typeTab.id}
                 onClick={() => setTypeFilter(typeTab.id)}
-                className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
+                className={`px-2.5 py-1.5 rounded text-xs font-medium transition-colors shrink-0 ${
                   typeFilter === typeTab.id
                     ? 'bg-theme-surface text-theme-text border border-theme font-semibold shadow-xs'
                     : 'text-theme-muted hover:text-theme-text'
@@ -419,12 +419,12 @@ const TaskView = ({
 
         {/* Course Selector Filter */}
         {typeFilter !== 'event' && courses.length > 0 && (
-          <div className="flex items-center gap-1.5 text-xs text-theme-muted">
-            <Filter className="w-3.5 h-3.5" />
+          <div className="flex items-center gap-1.5 text-xs text-theme-muted w-full sm:w-auto justify-end shrink-0">
+            <Filter className="w-3.5 h-3.5 shrink-0" />
             <select
               value={courseFilter}
               onChange={(e) => setCourseFilter(e.target.value)}
-              className="bg-theme-surface border border-theme rounded px-2 py-1 text-xs text-theme-text outline-none focus:border-accent"
+              className="bg-theme-surface border border-theme rounded px-2.5 py-1.5 text-xs text-theme-text outline-none focus:border-accent flex-1 sm:flex-none"
             >
               <option value="all">Semua Matkul ({courses.length})</option>
               {courses.map((c) => (
