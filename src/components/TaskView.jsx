@@ -504,7 +504,7 @@ const TaskView = ({
                     {!itemIsEvent && course && (
                       <span className="flex items-center gap-1.5 font-medium">
                         <span
-                          className="w-2 h-2 rounded-full shrink-0 shadow-xs"
+                          className="w-2 h-2 rounded-full shrink-0"
                           style={{ backgroundColor: getCourseColor(course) }}
                         />
                         <span>{course.name}</span>

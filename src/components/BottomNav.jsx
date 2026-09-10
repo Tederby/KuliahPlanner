@@ -52,7 +52,7 @@ const BottomNav = ({ activeTab, setActiveTab, tasksCount = 0, stashesCount = 0 }
               <div className="relative">
                 <Icon className={`w-5 h-5 transition-transform ${isActive ? 'scale-110' : ''}`} />
                 {tab.badge > 0 && (
-                  <span className="absolute -top-1 -right-2.5 min-w-[16px] h-4 px-1 rounded-full text-[9px] font-bold bg-accent text-accent-contrast flex items-center justify-center shadow-xs">
+                  <span className="absolute -top-1 -right-2.5 min-w-[16px] h-4 px-1 rounded-full text-[9px] font-bold bg-accent text-accent-contrast flex items-center justify-center">
                     {tab.badge > 99 ? '99+' : tab.badge}
                   </span>
                 )}

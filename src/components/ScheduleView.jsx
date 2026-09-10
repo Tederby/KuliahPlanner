@@ -114,7 +114,7 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
       >
         <div className="text-xs font-medium p-0.5 sm:p-1 flex items-center justify-between gap-1">
           {isToday ? (
-            <span className="text-[9px] font-bold text-accent px-1 sm:px-1.5 py-0.2 bg-accent/15 rounded border border-accent/30 leading-none">
+            <span className="text-[9px] font-bold text-accent px-1 sm:px-1.5 py-px bg-accent/15 rounded border border-accent/30 leading-none">
               <span className="hidden sm:inline">Hari ini</span>
               <span className="sm:hidden">•</span>
             </span>
@@ -125,7 +125,7 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
           )}
 
           {isToday ? (
-            <span className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-accent text-accent-contrast flex items-center justify-center font-bold text-[10px] sm:text-xs shadow-xs">
+            <span className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-accent text-accent-contrast flex items-center justify-center font-bold text-[10px] sm:text-xs">
               {cellDateObj.getDate()}
             </span>
           ) : (
@@ -143,7 +143,7 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
             return (
               <span
                 key={ev.instanceId}
-                className="w-1.5 h-1.5 rounded-full shrink-0 shadow-2xs"
+                className="w-1.5 h-1.5 rounded-full shrink-0"
                 style={{ backgroundColor: color }}
               />
             );
@@ -314,7 +314,7 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
                   </div>
                   <div className="mt-0.5 flex items-center justify-center">
                     {isToday ? (
-                      <span className="px-1.5 py-0.5 rounded-full bg-accent text-accent-contrast font-bold text-[10px] shadow-xs">
+                      <span className="px-1.5 py-0.5 rounded-full bg-accent text-accent-contrast font-bold text-[10px]">
                         {d.getDate()}/{d.getMonth() + 1}
                       </span>
                     ) : (
@@ -324,7 +324,7 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
                     )}
                   </div>
                   {isToday && (
-                    <span className="inline-block text-[9px] font-bold text-accent bg-accent/15 px-1.5 py-0.2 rounded mt-0.5 border border-accent/30">
+                    <span className="inline-block text-[9px] font-bold text-accent bg-accent/15 px-1.5 py-px rounded mt-0.5 border border-accent/30">
                       Hari ini
                     </span>
                   )}
@@ -656,7 +656,7 @@ const ScheduleView = ({ allCalendarEvents, onSelectEvent, onSelectTask, onQuickA
                 <div className="font-semibold text-theme-text text-sm flex items-center gap-2">
                   {ev.type === 'course' && (
                     <span
-                      className="w-2.5 h-2.5 rounded-full shrink-0 shadow-xs"
+                      className="w-2.5 h-2.5 rounded-full shrink-0"
                       style={{ backgroundColor: getCourseColor(ev) }}
                     />
                   )}

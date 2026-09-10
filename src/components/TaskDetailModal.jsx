@@ -59,7 +59,7 @@ const TaskDetailModal = ({ task, courses, onClose, onToggleComplete, onEdit }) =
 
   return (
     <div
-      className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center z-50 p-0 sm:p-4 animate-[fadeIn_0.15s_ease-out]"
+      className="fixed inset-0 bg-black/60 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4 animate-[fadeIn_0.15s_ease-out]"
       onClick={onClose}
     >
       <div
@@ -114,7 +114,7 @@ const TaskDetailModal = ({ task, courses, onClose, onToggleComplete, onEdit }) =
           {!isEvent && course && (
             <div className="text-xs text-theme-muted mt-1.5 flex items-center gap-1.5 font-medium">
               <span
-                className="w-2 h-2 rounded-full shrink-0 shadow-xs"
+                className="w-2 h-2 rounded-full shrink-0"
                 style={{ backgroundColor: getCourseColor(course) }}
               />
               <BookOpen className="w-3.5 h-3.5 text-theme-muted" />

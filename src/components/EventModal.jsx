@@ -31,7 +31,7 @@ const EventModal = ({
 
   return (
     <div
-      className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center z-50 p-0 sm:p-4 animate-[fadeIn_0.15s_ease-out]"
+      className="fixed inset-0 bg-black/60 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4 animate-[fadeIn_0.15s_ease-out]"
       onClick={onClose}
     >
       <div
@@ -97,7 +97,7 @@ const EventModal = ({
                   onClick={() => onSetAttendance?.(courseIdKey, event.meetingNum, currentAttendance === 'present' ? null : 'present')}
                   className={`py-1.5 px-2 rounded-md text-xs font-medium border flex items-center justify-center gap-1.5 transition-all ${
                     currentAttendance === 'present'
-                      ? 'bg-emerald-500 text-white border-emerald-600 shadow-xs'
+                      ? 'bg-emerald-500 text-white border-emerald-600'
                       : 'bg-theme-surface hover:bg-emerald-50 dark:hover:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800/60'
                   }`}
                 >
@@ -109,7 +109,7 @@ const EventModal = ({
                   onClick={() => onSetAttendance?.(courseIdKey, event.meetingNum, currentAttendance === 'permit' ? null : 'permit')}
                   className={`py-1.5 px-2 rounded-md text-xs font-medium border flex items-center justify-center gap-1.5 transition-all ${
                     currentAttendance === 'permit'
-                      ? 'bg-amber-500 text-white border-amber-600 shadow-xs'
+                      ? 'bg-amber-500 text-white border-amber-600'
                       : 'bg-theme-surface hover:bg-amber-50 dark:hover:bg-amber-950/30 text-amber-700 dark:text-amber-300 border-amber-300 dark:border-amber-800/60'
                   }`}
                 >
@@ -121,7 +121,7 @@ const EventModal = ({
                   onClick={() => onSetAttendance?.(courseIdKey, event.meetingNum, currentAttendance === 'absent' ? null : 'absent')}
                   className={`py-1.5 px-2 rounded-md text-xs font-medium border flex items-center justify-center gap-1.5 transition-all ${
                     currentAttendance === 'absent'
-                      ? 'bg-rose-500 text-white border-rose-600 shadow-xs'
+                      ? 'bg-rose-500 text-white border-rose-600'
                       : 'bg-theme-surface hover:bg-rose-50 dark:hover:bg-rose-950/30 text-rose-700 dark:text-rose-300 border-rose-300 dark:border-rose-800/60'
                   }`}
                 >

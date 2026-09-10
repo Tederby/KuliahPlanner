@@ -75,7 +75,7 @@ export default function NextClassCard({ allCalendarEvents = [], onSelectEvent })
   // If no classes today
   if (statusType === 'no_class') {
     return (
-      <div className="mb-5 bg-theme-surface bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-cyan-500/10 dark:from-emerald-950/30 dark:via-teal-950/20 dark:to-cyan-950/30 border border-emerald-200 dark:border-emerald-800/50 rounded-xl p-3.5 sm:p-4 flex items-center justify-between shadow-xs">
+      <div className="mb-5 bg-theme-surface bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-cyan-500/10 dark:from-emerald-950/30 dark:via-teal-950/20 dark:to-cyan-950/30 border border-emerald-200 dark:border-emerald-800/50 rounded-xl p-3.5 sm:p-4 flex items-center justify-between">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-300 flex items-center justify-center shrink-0">
             <Coffee className="w-5 h-5" />
@@ -96,7 +96,7 @@ export default function NextClassCard({ allCalendarEvents = [], onSelectEvent })
   // If all classes finished
   if (statusType === 'all_finished') {
     return (
-      <div className="mb-5 bg-theme-surface bg-gradient-to-r from-sky-500/10 via-blue-500/5 to-indigo-500/10 dark:from-sky-950/30 dark:via-blue-950/20 dark:to-indigo-950/30 border border-sky-200 dark:border-sky-800/50 rounded-xl p-3.5 sm:p-4 flex items-center justify-between shadow-xs">
+      <div className="mb-5 bg-theme-surface bg-gradient-to-r from-sky-500/10 via-blue-500/5 to-indigo-500/10 dark:from-sky-950/30 dark:via-blue-950/20 dark:to-indigo-950/30 border border-sky-200 dark:border-sky-800/50 rounded-xl p-3.5 sm:p-4 flex items-center justify-between">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-10 h-10 rounded-lg bg-sky-100 dark:bg-sky-900/50 text-sky-600 dark:text-sky-300 flex items-center justify-center shrink-0">
             <CheckCircle2 className="w-5 h-5" />
@@ -126,7 +126,7 @@ export default function NextClassCard({ allCalendarEvents = [], onSelectEvent })
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-start gap-3 min-w-0">
             <div
-              className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 shadow-xs"
+              className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
               style={{ backgroundColor: courseColor, color: contrastColor }}
             >
               <BookOpen className="w-5 h-5" />
@@ -190,12 +190,12 @@ export default function NextClassCard({ allCalendarEvents = [], onSelectEvent })
     return (
       <div
         onClick={() => onSelectEvent?.(nextClass)}
-        className="mb-5 bg-theme-surface border border-amber-300 dark:border-amber-700/60 rounded-xl p-3.5 sm:p-4 shadow-xs hover:shadow-md transition-all cursor-pointer group"
+        className="mb-5 bg-theme-surface border border-amber-300 dark:border-amber-700/60 rounded-xl p-3.5 sm:p-4 hover:shadow-md transition-all cursor-pointer group"
       >
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-start gap-3 min-w-0">
             <div
-              className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 shadow-xs"
+              className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
               style={{ backgroundColor: courseColor, color: contrastColor }}
             >
               <Clock className="w-5 h-5" />

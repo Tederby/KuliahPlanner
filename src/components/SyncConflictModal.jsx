@@ -29,7 +29,7 @@ const SyncConflictModal = ({ conflictData, onResolve }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-[fadeIn_0.15s_ease-out]">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 animate-[fadeIn_0.15s_ease-out]">
       <div className="bg-theme-surface border-t sm:border border-theme w-full max-w-xl rounded-t-2xl sm:rounded-xl shadow-2xl max-h-[90vh] flex flex-col overflow-hidden animate-[scaleUp_0.15s_ease-out]">
         {/* Mobile Drag Handle */}
         <div className="w-10 h-1 bg-theme-muted/30 rounded-full mx-auto my-2 sm:hidden shrink-0" />

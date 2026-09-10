@@ -71,6 +71,23 @@ html, body, #root {
 .border-l-theme { border-left-color: var(--theme-border) !important; }
 .border-r-theme { border-right-color: var(--theme-border) !important; }
 
+/* Modal animation keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
 /* Sleek subtle scrollbars */
 ::-webkit-scrollbar {
   width: 6px;

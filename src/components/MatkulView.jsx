@@ -148,7 +148,7 @@ const MatkulView = ({
             type="button"
             onClick={handleTestNotification}
             disabled={isTestingNotification}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-theme-surface-subtle hover:bg-theme-surface text-theme-text border border-theme text-xs font-semibold shadow-xs transition-all active:scale-95"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-theme-surface-subtle hover:bg-theme-surface text-theme-text border border-theme text-xs font-semibold transition-all active:scale-95"
           >
             <Bell className={`w-3.5 h-3.5 text-accent ${isTestingNotification ? 'animate-bounce' : ''}`} />
             <span>{isTestingNotification ? 'Mengirim...' : 'Uji Coba Notifikasi'}</span>
@@ -633,7 +633,7 @@ const MatkulView = ({
               >
                 <div className="flex items-start gap-3 min-w-0">
                   <span
-                    className="w-3 h-3 rounded-full shrink-0 mt-1 shadow-xs"
+                    className="w-3 h-3 rounded-full shrink-0 mt-1"
                     style={{ backgroundColor: courseColor }}
                     title={`Label warna: ${courseColor}`}
                   />
@@ -675,7 +675,7 @@ const MatkulView = ({
                   <button
                     type="button"
                     onClick={() => setActiveAttendanceCourse(course)}
-                    className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-md bg-theme-surface hover:bg-theme-surface-subtle text-theme-text border border-theme font-medium transition-colors shadow-2xs"
+                    className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-md bg-theme-surface hover:bg-theme-surface-subtle text-theme-text border border-theme font-medium transition-colors"
                     title="Buka presensi pertemuan mata kuliah"
                   >
                     <UserCheck className="w-3.5 h-3.5 text-accent" />
@@ -708,7 +708,7 @@ const MatkulView = ({
       {/* Modal Presensi 14 Pertemuan */}
       {activeAttendanceCourse && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center z-50 p-0 sm:p-4 animate-[fadeIn_0.15s_ease-out]"
+          className="fixed inset-0 bg-black/60 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4 animate-[fadeIn_0.15s_ease-out]"
           onClick={() => setActiveAttendanceCourse(null)}
         >
           <div
@@ -804,7 +804,7 @@ const MatkulView = ({
                         onClick={() => onSetAttendance?.(activeAttendanceCourse.id, mNum, currentStatus === 'present' ? null : 'present')}
                         className={`px-2 py-1 rounded text-[11px] font-semibold transition-all ${
                           currentStatus === 'present'
-                            ? 'bg-emerald-500 text-white shadow-xs'
+                            ? 'bg-emerald-500 text-white'
                             : 'bg-theme-surface text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800/60 hover:bg-emerald-50 dark:hover:bg-emerald-950/40'
                         }`}
                       >
@@ -815,7 +815,7 @@ const MatkulView = ({
                         onClick={() => onSetAttendance?.(activeAttendanceCourse.id, mNum, currentStatus === 'permit' ? null : 'permit')}
                         className={`px-2 py-1 rounded text-[11px] font-semibold transition-all ${
                           currentStatus === 'permit'
-                            ? 'bg-amber-500 text-white shadow-xs'
+                            ? 'bg-amber-500 text-white'
                             : 'bg-theme-surface text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-800/60 hover:bg-amber-50 dark:hover:bg-amber-950/40'
                         }`}
                       >
@@ -826,7 +826,7 @@ const MatkulView = ({
                         onClick={() => onSetAttendance?.(activeAttendanceCourse.id, mNum, currentStatus === 'absent' ? null : 'absent')}
                         className={`px-2 py-1 rounded text-[11px] font-semibold transition-all ${
                           currentStatus === 'absent'
-                            ? 'bg-rose-500 text-white shadow-xs'
+                            ? 'bg-rose-500 text-white'
                             : 'bg-theme-surface text-rose-700 dark:text-rose-300 border border-rose-300 dark:border-rose-800/60 hover:bg-rose-50 dark:hover:bg-rose-950/40'
                         }`}
                       >
@@ -841,7 +841,7 @@ const MatkulView = ({
             <div className="p-4 bg-theme-surface-subtle border-t border-theme flex justify-end pb-[calc(var(--safe-area-bottom)+1rem)] sm:pb-4">
               <button
                 onClick={() => setActiveAttendanceCourse(null)}
-                className="px-4 py-2 bg-theme-surface hover:bg-theme-surface-subtle text-theme-text border border-theme text-xs font-semibold rounded-md shadow-xs transition-colors"
+                className="px-4 py-2 bg-theme-surface hover:bg-theme-surface-subtle text-theme-text border border-theme text-xs font-semibold rounded-md transition-colors"
               >
                 Selesai
               </button>

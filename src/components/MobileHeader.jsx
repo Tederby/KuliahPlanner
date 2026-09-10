@@ -7,7 +7,7 @@ const MobileHeader = ({ theme, cloudSync, onShowGuide }) => {
 
   return (
     <>
-      <header className="md:hidden sticky top-0 z-30 bg-theme-surface border-b border-theme px-3.5 pt-[calc(var(--safe-area-top)+0.5rem)] pb-2.5 shadow-xs select-none">
+      <header className="md:hidden sticky top-0 z-30 bg-theme-surface border-b border-theme px-3.5 pt-[calc(var(--safe-area-top)+0.5rem)] pb-2.5 select-none">
         <div className="flex items-center justify-between gap-2 max-w-md mx-auto">
           {/* Brand */}
           <div className="flex items-center gap-2 min-w-0">
@@ -76,7 +76,7 @@ const MobileHeader = ({ theme, cloudSync, onShowGuide }) => {
                 title="Ganti Tema & Warna Tampilan"
               >
                 <div
-                  className="w-3.5 h-3.5 rounded-full border border-theme shadow-xs"
+                  className="w-3.5 h-3.5 rounded-full border border-theme"
                   style={{ backgroundColor: theme.isMonochrome ? '#27272a' : theme.accentColor }}
                 />
                 <Palette className="w-3.5 h-3.5 text-theme-muted" />

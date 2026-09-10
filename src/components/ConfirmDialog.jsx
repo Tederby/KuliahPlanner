@@ -26,7 +26,7 @@ const ConfirmDialog = ({ isOpen, title, message, onConfirm, onCancel, danger = t
 
   return (
     <div
-      className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center z-[60] p-0 sm:p-4 animate-[fadeIn_0.15s_ease-out]"
+      className="fixed inset-0 bg-black/60 flex items-end sm:items-center justify-center z-[60] p-0 sm:p-4 animate-[fadeIn_0.15s_ease-out]"
       onClick={onCancel}
     >
       <div
