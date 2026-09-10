@@ -104,6 +104,120 @@ export const sendTestNotification = async () => {
 };
 
 /**
+ * Format a Date object as YYYY-MM-DD string.
+ */
+const toDateStr = (d) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+const BRIEF_DAY_NAMES = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+const BRIEF_MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+
+/**
+ * Build smart briefing content for a specific date.
+ * Returns { title, body, largeBody, summaryText } for an expandable notification.
+ *
+ * @param {string} dateStr - Target date in YYYY-MM-DD format
+ * @param {Array} calendarEvents - All calendar event instances
+ * @param {Array} tasks - All tasks (raw, not calendar events)
+ * @param {Array} courses - All courses
+ */
+const buildBriefingContent = (dateStr, calendarEvents, tasks, courses) => {
+  const dateObj = new Date(dateStr + 'T00:00:00');
+  const dayName = BRIEF_DAY_NAMES[dateObj.getDay()];
+  const dateLabel = `${dayName}, ${dateObj.getDate()} ${BRIEF_MONTH_NAMES[dateObj.getMonth()]}`;
+
+  // ── Collect classes for this day ──────────────────────────────────
+  const dayClasses = calendarEvents
+    .filter((ev) => ev.type === 'course' && ev.date === dateStr && ev.startTime)
+    .sort((a, b) => a.startTime.localeCompare(b.startTime));
+
+  // ── Collect upcoming deadlines within 7 days from this date ──────
+  const targetMs = dateObj.getTime();
+  const weekLaterMs = targetMs + 7 * 24 * 60 * 60 * 1000;
+
+  const upcomingTasks = tasks
+    .filter((t) => !t.completed && t.deadline)
+    .map((t) => {
+      const dlDate = new Date(t.deadline);
+      const dlMs = dlDate.getTime();
+      if (isNaN(dlMs)) return null;
+      // Calculate day difference from the briefing date (midnight)
+      const diffDays = Math.ceil((dlMs - targetMs) / (24 * 60 * 60 * 1000));
+      return { ...t, dlMs, diffDays };
+    })
+    .filter((t) => t && t.dlMs >= targetMs && t.dlMs <= weekLaterMs)
+    .sort((a, b) => a.dlMs - b.dlMs);
+
+  // ── Build class section ──────────────────────────────────────────
+  let classSection = '';
+  if (dayClasses.length > 0) {
+    const classLines = dayClasses.map((c) => {
+      const room = c.location || '';
+      const roomText = room ? ` (${room})` : '';
+      return `• ${c.startTime} — ${c.name}${roomText}`;
+    });
+    classSection = `📚 ${dayClasses.length} Kelas Hari Ini:\n${classLines.join('\n')}`;
+  } else {
+    classSection = '☕ Tidak ada kelas hari ini.';
+  }
+
+  // ── Build deadline section ───────────────────────────────────────
+  let deadlineSection = '';
+  if (upcomingTasks.length > 0) {
+    const maxShow = 5;
+    const deadlineLines = upcomingTasks.slice(0, maxShow).map((t) => {
+      const course = t.courseId ? courses.find((c) => c.id === t.courseId) : null;
+      const courseLabel = course ? ` [${course.name}]` : '';
+      let timeLabel = '';
+      if (t.diffDays <= 0) {
+        const timePart = t.deadline.split('T')[1] || '';
+        timeLabel = `HARI INI${timePart ? ` ${timePart}` : ''} ⏰`;
+      } else if (t.diffDays === 1) {
+        const timePart = t.deadline.split('T')[1] || '';
+        timeLabel = `BESOK${timePart && timePart !== '23:59' ? ` ${timePart}` : ''}`;
+      } else {
+        timeLabel = `${t.diffDays} hari lagi`;
+      }
+      return `• ${t.title}${courseLabel} — ${timeLabel}`;
+    });
+    deadlineSection = `⚠️ Deadline Terdekat:\n${deadlineLines.join('\n')}`;
+    if (upcomingTasks.length > maxShow) {
+      deadlineSection += `\n  ...dan ${upcomingTasks.length - maxShow} tugas lainnya`;
+    }
+  }
+
+  // ── Assemble notification fields ─────────────────────────────────
+  const hasClasses = dayClasses.length > 0;
+
+  const title = hasClasses
+    ? `🌅 ${dateLabel} — ${dayClasses.length} Kelas Hari Ini`
+    : `🌅 ${dateLabel} — Hari Bebas!`;
+
+  // Short body (collapsed notification — 1 line summary)
+  const bodyParts = [];
+  if (hasClasses) {
+    const lastEnd = dayClasses[dayClasses.length - 1].endTime || '';
+    bodyParts.push(`${dayClasses.length} kelas (${dayClasses[0].startTime}${lastEnd ? `–${lastEnd}` : ''})`);
+  }
+  if (upcomingTasks.length > 0) {
+    bodyParts.push(`${upcomingTasks.length} deadline minggu ini`);
+  }
+  const body = bodyParts.join(' · ') || 'Tidak ada jadwal & deadline minggu ini ✓';
+
+  // Large body (expanded notification — BigTextStyle on Android)
+  const sections = [classSection];
+  if (deadlineSection) sections.push(deadlineSection);
+  const largeBody = sections.join('\n\n');
+
+  // Summary text (footer)
+  const summaryText = upcomingTasks.length > 0
+    ? `📊 ${upcomingTasks.length} tugas aktif minggu ini`
+    : 'Tidak ada deadline minggu ini ✓';
+
+  return { title, body, largeBody, summaryText };
+};
+
+/**
  * Reschedule all upcoming local notifications based on current data and settings.
  *
  * @param {Object} options
@@ -205,22 +319,40 @@ export const syncLocalNotifications = async ({ calendarEvents = [], tasks = [], 
       }
     }
 
-    // 3. Schedule Daily Morning Briefing (07:00 AM)
+    // 3. Schedule Smart Daily Briefings (7 days ahead, per-day with dynamic content)
     if (settings.dailyBriefing !== false) {
       const [briefHour, briefMin] = (settings.dailyBriefingTime || '07:00')
         .split(':')
         .map((n) => Number(n) || 0);
 
-      notificationsToSchedule.push({
-        id: toNotificationId('daily_morning_briefing'),
-        title: '🌅 Rencana Kuliah & Tugas Hari Ini',
-        body: 'Buka KuliahPlanner untuk melihat jadwal kelas dan deadline tugas hari ini.',
-        channelId: CHANNEL_ID,
-        schedule: {
-          on: { hour: briefHour, minute: briefMin },
-          allowWhileIdle: true,
-        },
-      });
+      for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
+        const briefDate = new Date();
+        briefDate.setDate(briefDate.getDate() + dayOffset);
+        const briefDateStr = toDateStr(briefDate);
+
+        const briefTime = new Date(
+          briefDate.getFullYear(), briefDate.getMonth(), briefDate.getDate(),
+          briefHour, briefMin, 0, 0
+        );
+
+        // Only schedule if the notification time is in the future
+        if (briefTime.getTime() > now + 10000) {
+          const content = buildBriefingContent(briefDateStr, calendarEvents, tasks, courses);
+
+          notificationsToSchedule.push({
+            id: toNotificationId(`daily_briefing_${briefDateStr}`),
+            title: content.title,
+            body: content.body,
+            largeBody: content.largeBody,
+            summaryText: content.summaryText,
+            channelId: CHANNEL_ID,
+            schedule: {
+              at: briefTime,
+              allowWhileIdle: true,
+            },
+          });
+        }
+      }
     }
 
     // Cap notifications at 60 to avoid OS limits
