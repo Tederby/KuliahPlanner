@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { Clock, MapPin, ChevronRight, CheckCircle2, Coffee, Sparkles, BookOpen, AlertCircle } from 'lucide-react';
 import { formatDateStr } from '../utils/dateUtils';
 import { getCourseColor } from '../utils/courseColors';
+import { getContrastColor } from '../hooks/useTheme';
 
 export default function NextClassCard({ allCalendarEvents = [], onSelectEvent }) {
   const todayStr = useMemo(() => formatDateStr(new Date()), []);
@@ -74,7 +75,7 @@ export default function NextClassCard({ allCalendarEvents = [], onSelectEvent })
   // If no classes today
   if (statusType === 'no_class') {
     return (
-      <div className="mb-5 bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-cyan-500/10 dark:from-emerald-950/30 dark:via-teal-950/20 dark:to-cyan-950/30 border border-emerald-200 dark:border-emerald-800/50 rounded-xl p-3.5 sm:p-4 flex items-center justify-between shadow-xs">
+      <div className="mb-5 bg-theme-surface bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-cyan-500/10 dark:from-emerald-950/30 dark:via-teal-950/20 dark:to-cyan-950/30 border border-emerald-200 dark:border-emerald-800/50 rounded-xl p-3.5 sm:p-4 flex items-center justify-between shadow-xs">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-300 flex items-center justify-center shrink-0">
             <Coffee className="w-5 h-5" />
@@ -95,7 +96,7 @@ export default function NextClassCard({ allCalendarEvents = [], onSelectEvent })
   // If all classes finished
   if (statusType === 'all_finished') {
     return (
-      <div className="mb-5 bg-gradient-to-r from-sky-500/10 via-blue-500/5 to-indigo-500/10 dark:from-sky-950/30 dark:via-blue-950/20 dark:to-indigo-950/30 border border-sky-200 dark:border-sky-800/50 rounded-xl p-3.5 sm:p-4 flex items-center justify-between shadow-xs">
+      <div className="mb-5 bg-theme-surface bg-gradient-to-r from-sky-500/10 via-blue-500/5 to-indigo-500/10 dark:from-sky-950/30 dark:via-blue-950/20 dark:to-indigo-950/30 border border-sky-200 dark:border-sky-800/50 rounded-xl p-3.5 sm:p-4 flex items-center justify-between shadow-xs">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-10 h-10 rounded-lg bg-sky-100 dark:bg-sky-900/50 text-sky-600 dark:text-sky-300 flex items-center justify-center shrink-0">
             <CheckCircle2 className="w-5 h-5" />
@@ -116,16 +117,17 @@ export default function NextClassCard({ allCalendarEvents = [], onSelectEvent })
   // In progress
   if (statusType === 'in_progress' && activeClass) {
     const courseColor = getCourseColor(activeClass);
+    const contrastColor = getContrastColor(courseColor);
     return (
       <div
         onClick={() => onSelectEvent?.(activeClass)}
-        className="mb-5 relative overflow-hidden bg-white dark:bg-theme-card border-2 border-emerald-500 dark:border-emerald-500/80 rounded-xl p-3.5 sm:p-4 shadow-sm hover:shadow-md transition-all cursor-pointer group"
+        className="mb-5 relative overflow-hidden bg-theme-surface border-2 border-emerald-500 dark:border-emerald-500/80 rounded-xl p-3.5 sm:p-4 shadow-sm hover:shadow-md transition-all cursor-pointer group"
       >
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-start gap-3 min-w-0">
             <div
-              className="w-10 h-10 rounded-lg flex items-center justify-center text-white shrink-0 shadow-xs"
-              style={{ backgroundColor: courseColor }}
+              className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 shadow-xs"
+              style={{ backgroundColor: courseColor, color: contrastColor }}
             >
               <BookOpen className="w-5 h-5" />
             </div>
@@ -144,7 +146,7 @@ export default function NextClassCard({ allCalendarEvents = [], onSelectEvent })
                   • {remainingTimeText}
                 </span>
               </div>
-              <h4 className="font-bold text-sm sm:text-base text-theme-text truncate group-hover:text-theme-primary transition-colors">
+              <h4 className="font-bold text-sm sm:text-base text-theme-text truncate group-hover:text-accent transition-colors">
                 {activeClass.name}
               </h4>
               <div className="flex items-center gap-3 text-xs text-theme-muted mt-1 flex-wrap">
@@ -164,7 +166,7 @@ export default function NextClassCard({ allCalendarEvents = [], onSelectEvent })
           </div>
 
           <div className="flex items-center justify-end sm:self-center">
-            <button className="flex items-center gap-1 text-xs font-semibold text-theme-primary group-hover:translate-x-0.5 transition-transform">
+            <button className="flex items-center gap-1 text-xs font-semibold text-accent group-hover:translate-x-0.5 transition-transform">
               Detail Kelas <ChevronRight className="w-4 h-4" />
             </button>
           </div>
@@ -184,16 +186,17 @@ export default function NextClassCard({ allCalendarEvents = [], onSelectEvent })
   // Upcoming
   if (statusType === 'upcoming' && nextClass) {
     const courseColor = getCourseColor(nextClass);
+    const contrastColor = getContrastColor(courseColor);
     return (
       <div
         onClick={() => onSelectEvent?.(nextClass)}
-        className="mb-5 bg-white dark:bg-theme-card border border-amber-300 dark:border-amber-700/60 rounded-xl p-3.5 sm:p-4 shadow-xs hover:shadow-md transition-all cursor-pointer group"
+        className="mb-5 bg-theme-surface border border-amber-300 dark:border-amber-700/60 rounded-xl p-3.5 sm:p-4 shadow-xs hover:shadow-md transition-all cursor-pointer group"
       >
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-start gap-3 min-w-0">
             <div
-              className="w-10 h-10 rounded-lg flex items-center justify-center text-white shrink-0 shadow-xs"
-              style={{ backgroundColor: courseColor }}
+              className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 shadow-xs"
+              style={{ backgroundColor: courseColor, color: contrastColor }}
             >
               <Clock className="w-5 h-5" />
             </div>
@@ -211,7 +214,7 @@ export default function NextClassCard({ allCalendarEvents = [], onSelectEvent })
                   </span>
                 )}
               </div>
-              <h4 className="font-bold text-sm sm:text-base text-theme-text truncate group-hover:text-theme-primary transition-colors">
+              <h4 className="font-bold text-sm sm:text-base text-theme-text truncate group-hover:text-accent transition-colors">
                 {nextClass.name}
               </h4>
               <div className="flex items-center gap-3 text-xs text-theme-muted mt-1 flex-wrap">
@@ -231,7 +234,7 @@ export default function NextClassCard({ allCalendarEvents = [], onSelectEvent })
           </div>
 
           <div className="flex items-center justify-end sm:self-center">
-            <button className="flex items-center gap-1 text-xs font-semibold text-theme-primary group-hover:translate-x-0.5 transition-transform">
+            <button className="flex items-center gap-1 text-xs font-semibold text-accent group-hover:translate-x-0.5 transition-transform">
               Lihat Jadwal <ChevronRight className="w-4 h-4" />
             </button>
           </div>

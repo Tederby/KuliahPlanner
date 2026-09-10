@@ -131,7 +131,7 @@ const EventModal = ({
 
               {/* Jatah Bolos Counter */}
               {attendanceStats && (
-                <div className="pt-2 border-t border-theme/60 text-[11px] space-y-1">
+                <div className="pt-2 border-t border-theme-subtle text-[11px] space-y-1">
                   <div className="flex justify-between items-center text-theme-muted">
                     <span>Kehadiran Total: <strong className="text-theme-text">{attendanceStats.presentCount}/{attendanceStats.totalMeetings}</strong> ({attendanceStats.attendanceRate}%)</span>
                     <span>Alpa: <strong className={attendanceStats.absentCount > 0 ? 'text-rose-500' : 'text-theme-text'}>{attendanceStats.absentCount}x</strong></span>
